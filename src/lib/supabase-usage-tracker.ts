@@ -17,7 +17,7 @@ export interface UsageData {
   monthYear: string;
 }
 
-const MAX_FREE_TRIES = 2;
+const MAX_FREE_TRIES = 1;
 
 // Get current month in YYYY-MM format
 function getCurrentMonth(): string {

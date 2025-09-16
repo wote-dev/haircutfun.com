@@ -14,14 +14,14 @@ const pricingTiers = [
     period: "forever",
     description: "Perfect for trying out our AI haircut technology",
     features: [
-      "2 free virtual haircut tries",
+      "1 free virtual haircut try",
       "Basic hairstyle gallery",
       "Standard photo upload",
       "Basic hair analysis",
       "Community support"
     ],
     limitations: [
-      "Limited to 2 tries total",
+      "Limited to 1 try total",
       "No premium hairstyles",
       "Standard processing speed"
     ],
@@ -75,7 +75,7 @@ const pricingTiers = [
 const faqs = [
   {
     question: "How does the free trial work?",
-    answer: "You get 2 completely free virtual haircut tries with no credit card required. After that, you'll need to upgrade to continue using our service."
+    answer: "You get 1 completely free virtual haircut try with no credit card required. After that, you'll need to upgrade to continue using our service."
   },
   {
     question: "Can I cancel my subscription anytime?",
@@ -158,14 +158,14 @@ export default function PricingPage() {
             Choose Your Perfect Plan
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Start with 2 free tries, then choose from 25 or 75 monthly generations with premium features
+            Start with 1 free try, then choose from 25 or 75 monthly generations with premium features
           </p>
           
           {/* Free Trial Highlight */}
           <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-6 py-3 mb-8">
             <Zap className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium text-foreground">
-              🎉 2 Free Tries - No Credit Card Required
+              🎉 1 Free Try - No Credit Card Required
             </span>
           </div>
         </div>
@@ -315,7 +315,7 @@ export default function PricingPage() {
               Ready to Transform Your Look?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Start with 2 free tries and discover your perfect hairstyle today!
+              Start with 1 free try and discover your perfect hairstyle today!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

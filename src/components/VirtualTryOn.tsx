@@ -172,10 +172,11 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       
       // Use a free try if not premium
       if (!hasPremium) {
-        if (!isAuthenticated) {
-          throw new Error('Please sign in to generate hairstyles');
+        // TEMPORARY: For testing, allow non-authenticated users to generate unlimited hairstyles
+        if (isAuthenticated) {
+          await useFreeTry();
         }
-        await useFreeTry();
+        // Non-authenticated users can proceed without tracking usage
       }
       
       const response = await fetch('/api/generate-haircut', {

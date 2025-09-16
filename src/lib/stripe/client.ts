@@ -28,9 +28,9 @@ export const PLAN_CONFIGS = {
   free: {
     name: 'Free Trial',
     price: 0,
-    generationsLimit: 2,
+    generationsLimit: 1,
     features: [
-      '2 free virtual haircut tries',
+      '1 free virtual haircut try',
       'Basic hairstyle gallery',
       'Standard photo upload',
       'Basic hair analysis',

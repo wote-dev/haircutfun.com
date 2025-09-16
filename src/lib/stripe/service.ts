@@ -184,7 +184,7 @@ export async function updateUsageLimits(userId: string, planType: PlanType) {
   const supabase = createClient();
   
   const limits = {
-    free: 2,
+    free: 1,
     pro: 25,
     premium: 75,
   };

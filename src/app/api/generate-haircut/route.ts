@@ -45,8 +45,34 @@ export async function POST(request: NextRequest) {
       inlineData: { data: base64Data, mimeType: "image/jpeg" }
     };
 
-    console.log(`Calling Gemini 1.5 Pro API for: ${haircutStyle}`);
-    const result = await model.generateContent([prompt, imagePart]);
+    const MAX_RETRIES = 3;
+    let result;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`Calling Gemini API (Attempt ${attempt}/${MAX_RETRIES}) for: ${haircutStyle}`);
+        result = await model.generateContent([prompt, imagePart]);
+        break; // Success, exit loop
+      } catch (error) {
+        console.error(`Attempt ${attempt} failed:`, error);
+        // Only retry on 5xx errors, which indicate a server-side problem.
+        // Do not retry on 4xx errors, as they are client-side issues (e.g., bad input).
+        if (attempt < MAX_RETRIES && error instanceof Error && /\[5\d{2}/.test(error.message)) {
+          const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s
+          console.log(`Server error detected. Retrying in ${delay / 1000}s...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          // For the last attempt or for non-5xx errors, re-throw the error.
+          throw error;
+        }
+      }
+    }
+
+    if (!result) {
+      // This should not be reached if the loop logic is correct, but it's a safeguard.
+      throw new Error("AI model did not produce a result after multiple attempts.");
+    }
+    
     const response = await result.response;
 
     const candidate = response.candidates?.[0];
@@ -74,6 +100,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Critical Error in generate-haircut API route:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown internal error occurred.';
+    // Provide a more user-friendly message for common API errors
+    if (errorMessage.includes('500') || errorMessage.includes('Internal error')) {
+      return NextResponse.json({ details: 'The AI service is currently experiencing issues. Please try again in a few moments.' }, { status: 503 });
+    }
     return NextResponse.json({ details: errorMessage }, { status: 500 });
   }
 }

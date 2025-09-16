@@ -98,10 +98,11 @@ export function useUsageTracker() {
     isAuthenticated: !!user,
     
     // Computed values (sync versions based on current data)
-    canUseFree: usageData ? usageData.freeTriesUsed < usageData.maxFreeTries : false,
+    // TEMPORARY: For testing, allow unlimited usage for non-signed-in users
+    canUseFree: usageData ? usageData.freeTriesUsed < usageData.maxFreeTries : true, // Allow unlimited for non-authenticated
     hasPremium: usageData ? usageData.isPremium : false,
-    remainingTries: usageData ? Math.max(0, usageData.maxFreeTries - usageData.freeTriesUsed) : 0,
-    needsUpgrade: usageData ? !usageData.isPremium && usageData.freeTriesUsed >= usageData.maxFreeTries : false,
+    remainingTries: usageData ? Math.max(0, usageData.maxFreeTries - usageData.freeTriesUsed) : 999, // Show 999 for non-authenticated
+    needsUpgrade: usageData ? !usageData.isPremium && usageData.freeTriesUsed >= usageData.maxFreeTries : false, // Never need upgrade when not authenticated
     
     // Actions
     useFreeTry,
