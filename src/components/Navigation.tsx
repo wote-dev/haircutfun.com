@@ -33,7 +33,7 @@ export function Navigation() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-7xl"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[98%] max-w-7xl"
     >
       <motion.div 
         animate={{
@@ -42,10 +42,10 @@ export function Navigation() {
         }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className={`
-          relative overflow-hidden rounded-3xl border 
+          relative overflow-hidden rounded-[28px] border 
           ${scrolled 
-            ? 'border-white/20 bg-white/70 shadow-lg shadow-black/[0.04]' 
-            : 'border-white/10 bg-white/60 shadow-xl shadow-black/[0.02]'
+            ? 'border-white/20 bg-white/80 shadow-md shadow-black/[0.05]' 
+            : 'border-transparent bg-white/50 shadow-lg shadow-black/[0.03]'
           }
           backdrop-blur-xl transition-all duration-500
         `}
@@ -64,18 +64,16 @@ export function Navigation() {
                 whileHover={{ scale: 1.08, rotate: 3 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="relative h-11 w-11 rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-primary via-primary to-accent p-[1.5px]"
+                className="relative h-11 w-11 rounded-2xl bg-white flex items-center justify-center shadow-md"
               >
-                <div className="h-full w-full rounded-2xl bg-white flex items-center justify-center">
-                  <Image
-                    src="/haircuttr.png"
-                    alt="HaircutFun Logo"
-                    width={28}
-                    height={28}
-                    className="object-contain"
-                    priority
-                  />
-                </div>
+                <Image
+                  src="/haircuttr.png"
+                  alt="HaircutFun Logo"
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                  priority
+                />
               </motion.div>
               <motion.span 
                 whileHover={{ scale: 1.02 }}
@@ -111,7 +109,7 @@ export function Navigation() {
                       {isActive && (
                         <motion.div
                           layoutId="activeTab"
-                          className="absolute inset-0 bg-gradient-to-r from-primary/8 to-primary/12 rounded-2xl border border-primary/15"
+                          className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/15 rounded-2xl border border-primary/20"
                           transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
                         />
                       )}
