@@ -59,7 +59,7 @@ export default function TermsOfUse() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Data and Privacy</h2>
               <p className="text-gray-700 mb-4">
-                We do not collect, store, or retain any of your personal data or images. However, your images are processed by Google Gemini Flash 2.5, which is subject to Google's own privacy policies and terms of service.
+                We do not collect, store, or retain any of your personal data or images. However, your images are processed by Google Gemini Flash 2.5 Preview, which is subject to Google's own privacy policies and terms of service.
               </p>
               <p className="text-gray-700 mb-4">
                 For complete information about data handling, please review our <a href="/privacy" className="text-blue-600 hover:text-blue-800 underline">Privacy Policy</a> and Google's relevant policies.
