@@ -226,7 +226,7 @@ export async function getUsageStats(userId: string): Promise<{
     }
 
     const currentMonth = await getUsageData(userId);
-    const totalGenerations = allUsage?.reduce((sum, record) => sum + record.generations_used, 0) || 0;
+    const totalGenerations = allUsage?.reduce((sum: number, record: UsageTracking) => sum + record.generations_used, 0) || 0;
 
     return {
       currentMonth,

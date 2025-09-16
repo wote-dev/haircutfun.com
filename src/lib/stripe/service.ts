@@ -1,5 +1,5 @@
 import { stripe, getStripePriceId, STRIPE_PRICE_IDS, PlanType } from './client';
-import { createClient } from '../supabase/client';
+import { createClient } from '../supabase/server';
 import { Database } from '../types/database';
 import Stripe from 'stripe';
 
@@ -43,7 +43,7 @@ export async function createCheckoutSession({
   successUrl: string;
   cancelUrl: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Get or create customer
   let customerId: string;
@@ -148,7 +148,7 @@ export async function updateSubscriptionFromStripe({
   stripeSubscription: Stripe.Subscription;
   customerId: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   const priceId = stripeSubscription.items.data[0]?.price?.id;
   if (!priceId) {
@@ -184,7 +184,7 @@ export async function updateSubscriptionFromStripe({
  * Update usage limits based on plan type
  */
 export async function updateUsageLimits(userId: string, planType: PlanType) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   const limits = {
     free: 1,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { verifyWebhookSignature, updateSubscriptionFromStripe } from '../../../../lib/stripe/service';
-import { createClient } from '../../../../lib/supabase/client';
+import { createClient } from '../../../../lib/supabase/server';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         const customerId = subscription.customer as string;
         
         // Find user by customer ID
-        const supabase = createClient();
+        const supabase = await createClient();
         const { data: userSubscription } = await supabase
           .from('subscriptions')
           .select('user_id')
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         const customerId = subscription.customer as string;
         
         // Find user by customer ID
-        const supabase = createClient();
+        const supabase = await createClient();
         const { data: userSubscription } = await supabase
           .from('subscriptions')
           .select('user_id')
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         const customerId = invoice.customer as string;
         
         // Find user by customer ID
-        const supabase = createClient();
+        const supabase = await createClient();
         const { data: userSubscription } = await supabase
           .from('subscriptions')
           .select('user_id')

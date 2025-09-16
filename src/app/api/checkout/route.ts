@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createCheckoutSession } from '../../../lib/stripe/service';
-import { createClient } from '../../../lib/supabase/client';
+import { createClient } from '../../../lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get authenticated user
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
