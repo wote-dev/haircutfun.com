@@ -2,8 +2,8 @@
 name = "haircutfun-com"
 compatibility_date = "2024-01-01"
 
+# Disable telemetry for cleaner build output
+send_metrics = false
+
 # Pages configuration
 pages_build_output_dir = "out"
-
-[env.production]
-name = "haircutfun-com"
