@@ -1,27 +1,65 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+let stripeInstance: Stripe | null = null;
+
+// Lazy initialization of Stripe instance
+export function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+    }
+    
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-08-27.basil',
+      typescript: true,
+    });
+  }
+  
+  return stripeInstance;
 }
 
-if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-  throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set in environment variables');
-}
-
-// Server-side Stripe instance
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-08-27.basil',
-  typescript: true,
+// Legacy export for backward compatibility - now uses lazy loading
+export const stripe = new Proxy({} as Stripe, {
+  get(target, prop) {
+    return getStripe()[prop as keyof Stripe];
+  }
 });
 
-// Client-side publishable key
-export const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+// Client-side publishable key with runtime validation
+export function getStripePublishableKey(): string {
+  if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+    throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set in environment variables');
+  }
+  return process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+}
+
+// Legacy export for backward compatibility
+export const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
 
 // Stripe price IDs (these should be set in your environment variables)
 export const STRIPE_PRICE_IDS = {
   pro: process.env.STRIPE_PRO_PRICE_ID || '',
   premium: process.env.STRIPE_PREMIUM_PRICE_ID || '',
 } as const;
+
+// Runtime validation for Stripe price IDs
+export function validateStripePriceIds(): void {
+  if (!process.env.STRIPE_PRO_PRICE_ID) {
+    throw new Error('STRIPE_PRO_PRICE_ID is not set in environment variables');
+  }
+  if (!process.env.STRIPE_PREMIUM_PRICE_ID) {
+    throw new Error('STRIPE_PREMIUM_PRICE_ID is not set in environment variables');
+  }
+}
+
+// Get validated price ID for a plan
+export function getStripePriceId(planType: 'pro' | 'premium'): string {
+  const priceId = STRIPE_PRICE_IDS[planType];
+  if (!priceId) {
+    throw new Error(`STRIPE_${planType.toUpperCase()}_PRICE_ID is not set in environment variables`);
+  }
+  return priceId;
+}
 
 // Plan configurations
 export const PLAN_CONFIGS = {

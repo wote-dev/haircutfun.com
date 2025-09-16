@@ -1,4 +1,4 @@
-import { stripe, STRIPE_PRICE_IDS, PlanType } from './client';
+import { stripe, getStripePriceId, STRIPE_PRICE_IDS, PlanType } from './client';
 import { createClient } from '../supabase/client';
 import { Database } from '../types/database';
 import Stripe from 'stripe';
@@ -79,10 +79,7 @@ export async function createCheckoutSession({
       .eq('user_id', userId);
   }
 
-  const priceId = STRIPE_PRICE_IDS[planType];
-  if (!priceId) {
-    throw new Error(`Price ID not configured for plan: ${planType}`);
-  }
+  const priceId = getStripePriceId(planType);
 
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
