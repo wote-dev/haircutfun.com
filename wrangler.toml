@@ -1,5 +1,5 @@
 # Configuration for Cloudflare Pages
-name = "haircutfun-com"
+name = "haircutfun"
 compatibility_date = "2024-01-01"
 
 # Disable telemetry for cleaner build output
