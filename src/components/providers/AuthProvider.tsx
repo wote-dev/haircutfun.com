@@ -118,6 +118,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setProfile(null);
       setSubscription(null);
       setUsage(null);
+      
+      // Redirect to home page after successful sign out
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
