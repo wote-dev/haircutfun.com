@@ -62,7 +62,7 @@ export default function TermsOfUse() {
                 We do not collect, store, or retain any of your personal data or images. However, your images are processed by Google Gemini Flash 2.5, which is subject to Google's own privacy policies and terms of service.
               </p>
               <p className="text-gray-700 mb-4">
-                For complete information about data handling, please review our  <a href="/privacy" className="text-blue-600 hover:text-blue-800 underline">Privacy Policy</a> and Google's relevant policies.
+                For complete information about data handling, please review our <a href="/privacy" className="text-blue-600 hover:text-blue-800 underline">Privacy Policy</a> and Google's relevant policies.
               </p>
             </section>
 
