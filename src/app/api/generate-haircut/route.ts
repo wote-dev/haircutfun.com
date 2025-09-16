@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 
+console.log("GEMINI_API_KEY check:", process.env.GEMINI_API_KEY ? `Loaded, starting with ${process.env.GEMINI_API_KEY.substring(0, 8)}...` : "!!!!!!!! NOT LOADED !!!!!!!");
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const safetySettings = [
@@ -20,9 +22,6 @@ export async function POST(request: NextRequest) {
 
     const base64Data = userPhoto.includes(',') ? userPhoto.split(',')[1] : userPhoto;
     
-    // --- THE SOLUTION: SWITCHING TO A MORE POWERFUL MODEL ---
-    // We are changing from "gemini-1.5-flash" to "gemini-1.5-pro-latest".
-    // This model is more capable and less likely to refuse the image editing task.
     const model = genAI.getGenerativeModel({ 
       model: "gemini-2.5-flash-image-preview", 
       safetySettings 
