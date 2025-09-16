@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
 console.log("GEMINI_API_KEY check:", process.env.GEMINI_API_KEY ? `Loaded, starting with ${process.env.GEMINI_API_KEY.substring(0, 8)}...` : "!!!!!!!! NOT LOADED !!!!!!!");
 
@@ -12,8 +13,69 @@ const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
+const MAX_FREE_TRIES = 1;
+
+function getCurrentMonth(): string {
+  return new Date().toISOString().slice(0, 7);
+}
+
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ details: 'Authentication required. Please log in.' }, { status: 401 });
+    }
+
+    // Check usage quota
+    const currentMonth = getCurrentMonth();
+    const { data: usageData, error: usageError } = await supabase
+      .from('usage_tracking')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('month_year', currentMonth)
+      .single();
+
+    const { data: subscriptionData } = await supabase
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const isPremium = subscriptionData?.status === 'active';
+    const maxGenerations = isPremium ? 999999 : MAX_FREE_TRIES;
+
+    let currentUsage = usageData;
+
+    if (usageError && usageError.code === 'PGRST116') { // "No rows found"
+      const { data: newUsage, error: createError } = await supabase
+        .from('usage_tracking')
+        .insert({
+          user_id: user.id,
+          month_year: currentMonth,
+          generations_used: 0,
+          plan_limit: MAX_FREE_TRIES,
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating usage record:', createError);
+        return NextResponse.json({ details: 'Failed to initialize user usage data.' }, { status: 500 });
+      }
+      currentUsage = newUsage;
+    } else if (usageError) {
+      console.error('Error fetching usage data:', usageError);
+      return NextResponse.json({ details: 'Failed to retrieve usage data.' }, { status: 500 });
+    }
+
+    if (currentUsage && currentUsage.generations_used >= maxGenerations) {
+      return NextResponse.json({ details: 'You have reached your generation limit. Please upgrade for more.' }, { status: 402 });
+    }
+
     const { userPhoto, haircutStyle, haircutDescription } = await request.json();
 
     if (!userPhoto || !haircutStyle) {
@@ -81,6 +143,18 @@ export async function POST(request: NextRequest) {
       const safetyMessage = `Image generation was blocked. Reason: ${finishReason}.`;
       console.error('Gemini API Blocked:', { finishReason, safetyRatings: candidate?.safetyRatings });
       return NextResponse.json({ details: safetyMessage }, { status: 500 });
+    }
+
+    // Increment usage counter on success
+    const { error: updateError } = await supabase
+      .from('usage_tracking')
+      .update({ generations_used: (currentUsage?.generations_used || 0) + 1 })
+      .eq('user_id', user.id)
+      .eq('month_year', currentMonth);
+
+    if (updateError) {
+      console.error('CRITICAL: Failed to update usage count for user:', user.id, updateError);
+      // Decide if we should still return the image. For now, we will.
     }
 
     const imagePartResponse = candidate.content?.parts.find(part => part.inlineData);
