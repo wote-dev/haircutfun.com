@@ -3,6 +3,16 @@
 import { createClient } from './supabase/client';
 import { Database } from './types/database';
 
+// Lazy Supabase client initialization
+let supabaseClient: ReturnType<typeof createClient> | null = null;
+
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    supabaseClient = createClient();
+  }
+  return supabaseClient;
+}
+
 type UsageTracking = Database['public']['Tables']['usage_tracking']['Row'];
 type UsageTrackingInsert = Database['public']['Tables']['usage_tracking']['Insert'];
 type UsageTrackingUpdate = Database['public']['Tables']['usage_tracking']['Update'];
@@ -26,7 +36,7 @@ function getCurrentMonth(): string {
 
 // Get usage data for authenticated user
 export async function getUsageData(userId: string): Promise<UsageData> {
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   const currentMonth = getCurrentMonth();
 
   try {
@@ -113,7 +123,7 @@ export async function updateUsageData(
   userId: string, 
   updates: Partial<UsageTrackingUpdate>
 ): Promise<UsageData> {
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   const currentMonth = getCurrentMonth();
 
   try {
@@ -174,7 +184,7 @@ export async function consumePremiumFeature(userId: string): Promise<UsageData> 
     throw new Error('User does not have premium access');
   }
 
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   const currentMonth = getCurrentMonth();
 
   // For premium users, just increment generations_used
@@ -210,7 +220,7 @@ export async function getUsageStats(userId: string): Promise<{
   totalFreeUses: number;
   totalPremiumUses: number;
 }> {
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   
   try {
     // Get all usage records for user

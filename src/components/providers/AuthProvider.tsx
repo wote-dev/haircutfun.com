@@ -43,10 +43,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [usage, setUsage] = useState<UsageTracking | null>(null);
   const [loading, setLoading] = useState(true);
   
-  const supabase = createClient();
+  // Lazy Supabase client initialization
+  const getSupabase = () => createClient();
 
   const fetchUserData = async (userId: string) => {
     try {
+      const supabase = getSupabase();
+      
       // Fetch user profile
       const { data: profileData } = await supabase
         .from('user_profiles')
@@ -88,6 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGoogle = async () => {
     try {
+      const supabase = getSupabase();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -103,6 +107,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = async () => {
     try {
+      const supabase = getSupabase();
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -121,6 +126,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
+      const supabase = getSupabase();
       const { data: { session: initialSession } } = await supabase.auth.getSession();
       
       if (initialSession) {
@@ -135,6 +141,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     getInitialSession();
 
     // Listen for auth changes
+    const supabase = getSupabase();
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
