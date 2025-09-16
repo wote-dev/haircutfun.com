@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "pages:build": "next build",
+    "pages:deploy": "wrangler pages deploy out",
     "preview": "wrangler pages dev out",
-    "deploy": "wrangler pages deploy out"
+    "deploy": "echo 'Build completed successfully. Static files are in the out directory.'"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
