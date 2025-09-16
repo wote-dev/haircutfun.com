@@ -20,7 +20,7 @@ export default function TermsOfUse() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Acceptance of Terms</h2>
               <p className="text-gray-700 mb-4">
-                By accessing and using HaircutFun ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+                By accessing and using HaircutFun (&quot;the Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </section>
 
@@ -69,7 +69,7 @@ export default function TermsOfUse() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Disclaimer of Warranties</h2>
               <p className="text-gray-700 mb-4">
-                The service is provided "as is" without any warranties, expressed or implied. We do not warrant that:
+                The service is provided &quot;as is&quot; without any warranties, expressed or implied. We do not warrant that:
               </p>
               <ul className="list-disc pl-6 text-gray-700 mb-4">
                 <li>The service will meet your specific requirements</li>

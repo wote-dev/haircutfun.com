@@ -68,7 +68,7 @@ export default function AboutPage() {
             About HaircutFun
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            We're revolutionizing how people discover their perfect hairstyle using cutting-edge AI technology and professional styling expertise.
+            We&apos;re revolutionizing how people discover their perfect hairstyle using cutting-edge AI technology and professional styling expertise.
           </p>
         </div>
       </section>
@@ -81,7 +81,7 @@ export default function AboutPage() {
               Our Mission
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Finding the perfect hairstyle shouldn't be a guessing game. We believe everyone deserves to feel confident and beautiful, which is why we created HaircutFun - the world's most advanced virtual hairstyle try-on platform.
+              Finding the perfect hairstyle shouldn&apos;t be a guessing game. We believe everyone deserves to feel confident and beautiful, which is why we created HaircutFun - the world&apos;s most advanced virtual hairstyle try-on platform.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
               By combining artificial intelligence with professional styling expertise, we help you discover hairstyles that complement your unique features, lifestyle, and personality - all before you step foot in a salon.
@@ -116,7 +116,7 @@ export default function AboutPage() {
               Why HaircutFun Hits Different
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              We're not just another app - we're your hair transformation sidekick, minus the judgment and awkward small talk.
+              We&apos;re not just another app - we&apos;re your hair transformation sidekick, minus the judgment and awkward small talk.
             </p>
           </div>
           

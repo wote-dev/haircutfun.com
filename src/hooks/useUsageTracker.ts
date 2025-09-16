@@ -6,7 +6,7 @@ import {
   getUsageData,
   canUseFreebie,
   hasPremiumAccess,
-  useFreebie,
+  useFreebie as consumeFreeTry,
   getRemainingFreeTries,
   needsUpgrade,
   migrateLocalStorageData
@@ -71,23 +71,28 @@ export function useUsageTracker() {
   };
 
   // Use a free try and update state
-  const useFreeTry = async () => {
-    if (!user || !usageData) {
-      throw new Error('User not authenticated');
-    }
-    
-    if (!canUseFreebie(usageData)) {
-      throw new Error('No free tries remaining');
-    }
-    
-    try {
-      const updatedData = await useFreebie(user.id);
-      setUsageData(updatedData);
-      return updatedData;
-    } catch (err) {
-      console.error('Error using free try:', err);
-      throw err;
-    }
+  const useFreeTry = (): Promise<UsageData> => {
+    return new Promise(async (resolve, reject) => {
+      if (!user || !usageData) {
+        reject(new Error('User not authenticated'));
+        return;
+      }
+      
+      const canUse = await canUseFreebie(user.id);
+      if (!canUse) {
+        reject(new Error('No free tries remaining'));
+        return;
+      }
+      
+      try {
+        const updatedData = await consumeFreeTry(user.id);
+        setUsageData(updatedData);
+        resolve(updatedData);
+      } catch (err) {
+        console.error('Error using free try:', err);
+        reject(err);
+      }
+    });
   };
 
   return {

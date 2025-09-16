@@ -1,6 +1,7 @@
 import { stripe, STRIPE_PRICE_IDS, PlanType } from './client';
 import { createClient } from '../supabase/client';
 import { Database } from '../types/database';
+import Stripe from 'stripe';
 
 type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 type SubscriptionUpdate = Database['public']['Tables']['subscriptions']['Update'];
@@ -147,20 +148,25 @@ export async function updateSubscriptionFromStripe({
   customerId,
 }: {
   userId: string;
-  stripeSubscription: any;
+  stripeSubscription: Stripe.Subscription;
   customerId: string;
 }) {
   const supabase = createClient();
   
-  const planType = getPlanTypeFromPriceId(stripeSubscription.items.data[0]?.price?.id);
+  const priceId = stripeSubscription.items.data[0]?.price?.id;
+  if (!priceId) {
+    throw new Error('No price ID found in subscription');
+  }
+  
+  const planType = getPlanTypeFromPriceId(priceId);
   
   const subscriptionUpdate: SubscriptionUpdate = {
     stripe_customer_id: customerId,
     stripe_subscription_id: stripeSubscription.id,
-    status: stripeSubscription.status as any,
+    status: stripeSubscription.status as 'active' | 'canceled' | 'incomplete' | 'past_due' | 'trialing',
     plan_type: planType,
-    current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+    current_period_start: new Date((stripeSubscription as any).current_period_start * 1000).toISOString(),
+    current_period_end: new Date((stripeSubscription as any).current_period_end * 1000).toISOString(),
     updated_at: new Date().toISOString(),
   };
 

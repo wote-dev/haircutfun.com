@@ -154,7 +154,7 @@ export async function hasPremiumAccess(userId: string): Promise<boolean> {
 }
 
 // Use a free try (increment counter)
-export async function useFreebie(userId: string): Promise<UsageData> {
+export async function consumeFreebie(userId: string): Promise<UsageData> {
   const currentData = await getUsageData(userId);
   
   if (currentData.freeTriesUsed >= currentData.maxFreeTries) {
@@ -167,7 +167,7 @@ export async function useFreebie(userId: string): Promise<UsageData> {
 }
 
 // Record premium usage
-export async function usePremiumFeature(userId: string): Promise<UsageData> {
+export async function consumePremiumFeature(userId: string): Promise<UsageData> {
   const currentData = await getUsageData(userId);
   
   if (!currentData.isPremium) {

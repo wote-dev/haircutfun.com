@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { verifyWebhookSignature, updateSubscriptionFromStripe } from '../../../../lib/stripe/service';
 import { createClient } from '../../../../lib/supabase/client';
+import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
-        const subscription = event.data.object;
+        const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
         
         // Find user by customer ID

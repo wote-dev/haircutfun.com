@@ -34,7 +34,7 @@ export default function PrivacyPolicy() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Data Collection and Storage</h2>
               <p className="text-gray-700 mb-4">
-                <strong>We do not collect, store, or retain any of your personal data or images.</strong> Here's what happens when you use our service:
+                <strong>We do not collect, store, or retain any of your personal data or images.</strong> Here&apos;s what happens when you use our service:
               </p>
               <ul className="list-disc pl-6 text-gray-700 mb-4">
                 <li>Images you upload are processed in real-time</li>
@@ -47,7 +47,7 @@ export default function PrivacyPolicy() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Third-Party AI Processing</h2>
               <p className="text-gray-700 mb-4">
-                When you use our service, your images are processed by Google's Gemini Flash 2.5 model. While we don't store your data, Google may process your images according to their own privacy policies and terms of service.
+                When you use our service, your images are processed by Google&apos;s Gemini Flash 2.5 model. While we don&apos;t store your data, Google may process your images according to their own privacy policies and terms of service.
               </p>
               <p className="text-gray-700 mb-4">
                 <strong>For detailed information about how Google handles your data, please review:</strong>
@@ -74,7 +74,7 @@ export default function PrivacyPolicy() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your Rights and Choices</h2>
               <p className="text-gray-700 mb-4">
-                Since we don't collect or store your personal data:
+                Since we don&apos;t collect or store your personal data:
               </p>
               <ul className="list-disc pl-6 text-gray-700 mb-4">
                 <li>There is no personal data to access, modify, or delete</li>
@@ -100,7 +100,7 @@ export default function PrivacyPolicy() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Changes to This Privacy Policy</h2>
               <p className="text-gray-700 mb-4">
-                We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated "Last updated" date.
+                We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated &quot;Last updated&quot; date.
               </p>
             </section>
 

@@ -205,7 +205,7 @@ export default function PricingPage() {
                 
                 {/* Features */}
                 <div className="mb-8">
-                  <h4 className="font-semibold text-foreground mb-4">What's included:</h4>
+                  <h4 className="font-semibold text-foreground mb-4">What&apos;s included:</h4>
                   <ul className="space-y-3">
                     {tier.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start space-x-3">

@@ -86,7 +86,7 @@ export default function GalleryPage() {
               Trending Now
             </h2>
             <p className="text-lg text-muted-foreground">
-              The hottest hairstyles everyone's talking about
+              The hottest hairstyles everyone&apos;s talking about
             </p>
           </div>
           

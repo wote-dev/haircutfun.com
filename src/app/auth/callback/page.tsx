@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation';
 export default async function AuthCallbackPage({
   searchParams,
 }: {
-  searchParams: { code?: string; error?: string };
+  searchParams: Promise<{ code?: string; error?: string }>;
 }) {
-  const { code, error } = searchParams;
+  const { code, error } = await searchParams;
 
   if (error) {
     console.error('Auth error:', error);

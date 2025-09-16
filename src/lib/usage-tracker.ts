@@ -5,8 +5,8 @@ export {
   getUsageData,
   canUseFreebie,
   hasPremiumAccess,
-  useFreebie,
-  usePremiumFeature,
+  consumeFreebie as useFreebie,
+  consumePremiumFeature as usePremiumFeature,
   resetUsage,
   getRemainingFreeTries,
   needsUpgrade,
@@ -15,7 +15,7 @@ export {
 } from './supabase-usage-tracker';
 
 // Legacy function names for backward compatibility
-export async function saveUsageData(data: any): Promise<void> {
+export async function saveUsageData(data: unknown): Promise<void> {
   // This is now handled automatically by the Supabase functions
   console.warn('saveUsageData is deprecated. Use the specific functions like useFreebie() instead.');
 }
