@@ -1,10 +1,9 @@
-name = "haircutfun"
+# Configuration for Cloudflare Pages
+name = "haircutfun-com"
 compatibility_date = "2024-01-01"
-compatibility_flags = ["nodejs_compat"]
+
+# Pages configuration
+pages_build_output_dir = "out"
 
 [env.production]
-name = "haircutfun"
-
-[[env.production.routes]]
-pattern = "*"
-zone_name = "your-domain.com"
+name = "haircutfun-com"
