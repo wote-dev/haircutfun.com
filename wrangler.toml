@@ -7,3 +7,7 @@ send_metrics = false
 
 # Pages configuration
 pages_build_output_dir = "out"
+
+# Disable any deploy commands - this is a Pages project, not Workers
+[vars]
+SKIP_DEPLOY = "true"
