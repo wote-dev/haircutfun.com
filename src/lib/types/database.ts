@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      generated_images: {
+        Row: {
+          id: string
+          user_id: string
+          image_url: string
+          original_image_url: string | null
+          haircut_style: string
+          gender: string | null
+          prompt_used: string | null
+          processing_time_ms: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          image_url: string
+          original_image_url?: string | null
+          haircut_style: string
+          gender?: string | null
+          prompt_used?: string | null
+          processing_time_ms?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          image_url?: string
+          original_image_url?: string | null
+          haircut_style?: string
+          gender?: string | null
+          prompt_used?: string | null
+          processing_time_ms?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_images_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       subscriptions: {
         Row: {
           id: string

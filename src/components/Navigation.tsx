@@ -10,7 +10,6 @@ import { UserProfile } from "./auth/UserProfile";
 
 const navigation = [
   { name: "Home", href: "/" },
-  { name: "Try Haircuts", href: "/try-on" },
   { name: "Gallery", href: "/gallery" },
   { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },

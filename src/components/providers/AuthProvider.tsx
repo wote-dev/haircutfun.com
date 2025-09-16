@@ -96,6 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'openid email profile',
         },
       });
       if (error) throw error;
@@ -126,16 +127,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const supabase = getSupabase();
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      
-      if (initialSession) {
-        setSession(initialSession);
-        setUser(initialSession.user);
-        await fetchUserData(initialSession.user.id);
+      try {
+        console.log('AuthProvider: Getting initial session...');
+        const supabase = getSupabase();
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('AuthProvider: Error getting session:', error);
+          setLoading(false);
+          return;
+        }
+        
+        console.log('AuthProvider: Initial session:', initialSession ? 'Found' : 'None');
+        
+        if (initialSession) {
+          setSession(initialSession);
+          setUser(initialSession.user);
+          await fetchUserData(initialSession.user.id);
+        }
+        
+        setLoading(false);
+        console.log('AuthProvider: Initial session check complete');
+      } catch (error) {
+        console.error('AuthProvider: Exception during initial session:', error);
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     getInitialSession();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useUsageTracker } from "@/hooks/useUsageTracker";
@@ -143,6 +143,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
   const [premiumFeatureName, setPremiumFeatureName] = useState('');
   
   const { canUseFree, hasPremium, remainingTries, needsUpgrade, useFreeTry, isAuthenticated, isLoading: usageLoading } = useUsageTracker();
+  const resultSectionRef = useRef<HTMLDivElement>(null);
 
   const selectedStyle = haircutData[selectedHaircut];
 
@@ -204,6 +205,14 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       if (data.success && data.imageData) {
         setGeneratedImage(`data:image/jpeg;base64,${data.imageData}`);
         setDescription(''); // Clear any previous description
+        
+        // Scroll to the result section after a brief delay to ensure the image is rendered
+        setTimeout(() => {
+          resultSectionRef.current?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }, 100);
       } else {
         setError('Failed to get image data from the API response.');
       }
@@ -382,7 +391,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       </div>
 
       {/* Main Result */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div ref={resultSectionRef} className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Before/After Toggle */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
