@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configuration for Cloudflare Pages
+  // Configuration for Cloudflare Pages with OpenNext
   images: {
     unoptimized: true
   },
@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    // Required for OpenNext Cloudflare
+    serverComponentsExternalPackages: ['@opennextjs/cloudflare']
+  }
 };
 
 export default nextConfig;
