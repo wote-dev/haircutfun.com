@@ -4,13 +4,37 @@ import { Navigation } from "@/components/Navigation";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "HaircutFun - Virtual Haircut Try-On",
-  description: "Try on different haircuts virtually with AI-powered technology. Find your perfect hairstyle before you cut!",
-  keywords: "haircut, virtual try-on, hairstyle, AI, beauty, salon",
+  metadataBase: new URL('https://haircutfun.com'),
+  title: "HaircutFun - Virtual Haircut Try-On with AI",
+  description: "Ever wonder what you'd look like with a new hairstyle? Stop wondering and start seeing! With HaircutFun, you can try on hundreds of haircuts virtually using the power of AI. Upload your photo and find your perfect look in seconds. It's fun, fast, and free to try!",
+  keywords: "haircut, virtual try-on, hairstyle, AI, beauty, salon, haircut simulator, style finder",
   icons: {
     icon: "/haircuttr.png",
     shortcut: "/haircuttr.png",
     apple: "/haircuttr.png",
+  },
+  openGraph: {
+    title: "HaircutFun - See Your New Look Before the Cut!",
+    description: "Don't risk a bad haircut! Use our AI to try on different hairstyles with your own photo. Discover the perfect you.",
+    url: "https://haircutfun.com",
+    siteName: "HaircutFun",
+    images: [
+      {
+        url: "/haircuttr.png",
+        width: 256,
+        height: 256,
+        alt: "HaircutFun Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "HaircutFun - AI-Powered Virtual Haircut Try-On",
+    description: "Upload a photo and see yourself in any hairstyle. Your next great haircut is just a click away. #AI #VirtualHairstyle",
+    creator: "@wote_dev",
+    images: ["/haircuttr.png"],
   },
 };
 
