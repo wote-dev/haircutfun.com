@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { createClient, clearClientCache } from '../../lib/supabase/client';
 import { Database } from '../../lib/types/database';
@@ -37,7 +36,6 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -145,17 +143,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = async () => {
     console.log('AuthProvider: Starting sign out process');
     
-    // Clear local state immediately for instant UI feedback
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setSubscription(null);
-    setUsage(null);
-    
     try {
       const supabase = getSupabase();
       
-      // Sign out from Supabase
+      // Sign out from Supabase FIRST
       console.log('AuthProvider: Calling Supabase signOut');
       await supabase.auth.signOut({ scope: 'global' });
       console.log('AuthProvider: Supabase signOut completed');
@@ -165,27 +156,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Continue with cleanup even if Supabase fails
     }
     
-    // Clear all storage regardless of Supabase result
+    // Clear all storage aggressively
     if (typeof window !== 'undefined') {
       console.log('AuthProvider: Clearing all storage');
       
       // Clear our custom keys
       localStorage.removeItem('auth_redirect_to');
+      localStorage.removeItem('auth_callback_in_progress');
       
-      // Clear all Supabase-related keys
-      const allKeys = Object.keys(localStorage);
-      allKeys.forEach(key => {
-        if (key.startsWith('sb-') || key.includes('supabase')) {
+      // Get all storage keys before clearing
+      const localKeys = Object.keys(localStorage);
+      const sessionKeys = Object.keys(sessionStorage);
+      
+      // Clear ALL Supabase-related keys more aggressively
+      localKeys.forEach(key => {
+        if (key.startsWith('sb-') || 
+            key.includes('supabase') || 
+            key.includes('auth') ||
+            key.includes('session') ||
+            key.includes('token')) {
+          console.log('AuthProvider: Removing localStorage key:', key);
           localStorage.removeItem(key);
         }
       });
       
       // Clear sessionStorage too
-      const sessionKeys = Object.keys(sessionStorage);
       sessionKeys.forEach(key => {
-        if (key.startsWith('sb-') || key.includes('supabase')) {
+        if (key.startsWith('sb-') || 
+            key.includes('supabase') || 
+            key.includes('auth') ||
+            key.includes('session') ||
+            key.includes('token')) {
+          console.log('AuthProvider: Removing sessionStorage key:', key);
           sessionStorage.removeItem(key);
         }
+      });
+      
+      // Also clear any cookies that might be set
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
       });
     }
     
@@ -193,8 +202,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('AuthProvider: Clearing Supabase client cache');
     clearClientCache();
     
-    console.log('AuthProvider: Sign out process completed, refreshing router to clear cache');
-    router.refresh();
+    // Clear local state AFTER Supabase operations
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setSubscription(null);
+    setUsage(null);
+    
+    console.log('AuthProvider: Sign out process completed');
   };
 
   useEffect(() => {

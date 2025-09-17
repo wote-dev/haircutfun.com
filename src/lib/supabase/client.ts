@@ -19,25 +19,35 @@ function getSupabaseAnonKey(): string {
 }
 
 export function createClient() {
-  if (!supabaseInstance) {
-    supabaseInstance = createBrowserClient(
-      getSupabaseUrl(),
-      getSupabaseAnonKey(),
-      {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          flowType: 'pkce'
-        }
+  // Always create a fresh instance to avoid caching issues with auth state
+  supabaseInstance = createBrowserClient(
+    getSupabaseUrl(),
+    getSupabaseAnonKey(),
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
       }
-    );
-  }
+    }
+  );
 
   return supabaseInstance;
 }
 
 // Function to clear the cached instance (useful for testing or after sign out)
 export function clearClientCache() {
+  console.log('Supabase client: Clearing cached instance');
+  if (supabaseInstance) {
+    // If there are any cleanup methods on the instance, call them
+    try {
+      // Force close any existing connections
+      supabaseInstance.removeAllChannels?.();
+    } catch (error) {
+      console.log('Supabase client: Error during cleanup:', error);
+    }
+  }
   supabaseInstance = null;
+  console.log('Supabase client: Cache cleared');
 }

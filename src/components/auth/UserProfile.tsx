@@ -96,10 +96,16 @@ export function UserProfile() {
       await signOut();
       console.log('UserProfile: Sign out completed successfully');
       
+      // Let the auth state change handle the UI update naturally
+      // The AuthProvider will detect the session is gone and update the UI
+      
     } catch (error) {
       console.error('UserProfile: Error signing out:', error);
-      // Force cleanup even on error
       setIsOpen(false);
+      // On error, force a reload as fallback
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
     }
   };
 
