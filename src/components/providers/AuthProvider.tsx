@@ -22,19 +22,11 @@ interface AuthContextType {
   refreshUserData: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
-
 interface AuthProviderProps {
   children: React.ReactNode;
 }
+
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -49,7 +41,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   
   // Lazy Supabase client initialization
-  const getSupabase = () => createClient();
+  const getSupabase = () => {
+    const isCallback = typeof window !== 'undefined' && (
+      window.location.pathname.startsWith('/auth/callback') ||
+      !!localStorage.getItem('auth_callback_in_progress')
+    );
+    return createClient({ detectSessionInUrl: !isCallback });
+  };
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -93,21 +91,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('AuthProvider: Error fetching usage:', usageError);
       }
       
-      console.log('AuthProvider: User data fetched successfully', {
-        profile: !!profileData,
-        subscription: !!subscriptionData,
-        usage: !!usageData
-      });
-      
       setProfile(profileData || null);
       setSubscription(subscriptionData || null);
       setUsage(usageData || null);
     } catch (error) {
-      console.error('AuthProvider: Unexpected error fetching user data:', error);
-      // Set to null values so the app can continue
-      setProfile(null);
-      setSubscription(null);
-      setUsage(null);
+      console.error('AuthProvider: Error fetching user data:', error);
     }
   };
 
@@ -185,7 +173,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('AuthProvider: Supabase signOut error:', error);
       // Continue with cleanup even if Supabase fails
     }
-    
+
     // Clear all storage aggressively
     if (typeof window !== 'undefined') {
       console.log('AuthProvider: Clearing all storage');
@@ -353,15 +341,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     );
 
-    // Save subscription so we can unsubscribe during sign out
     authSubscriptionRef.current = authSubscription;
 
     return () => {
-      let _ = mounted; // silence linter if needed
       mounted = false;
-      authSubscription.unsubscribe();
-      authSubscriptionRef.current = null;
-    };
+      try {
+        authSubscriptionRef.current?.unsubscribe();
+        console.log('AuthProvider: Unsubscribed from auth state changes on unmount');
+      } catch (e) {
+        console.warn('AuthProvider: Failed to unsubscribe auth listener on cleanup:', e);
+      }
+    }
   }, []);
 
   const value: AuthContextType = {
@@ -381,4 +371,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       {children}
     </AuthContext.Provider>
   );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }

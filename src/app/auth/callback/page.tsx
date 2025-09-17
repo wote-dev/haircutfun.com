@@ -26,61 +26,75 @@ function AuthCallbackContent() {
       }
 
       if (code) {
-        const supabase = createClient()
-        
+        // Set flag ASAP to prevent AuthProvider from auto-detecting and exchanging the code concurrently
+        try {
+          localStorage.setItem('auth_callback_in_progress', 'true')
+        } catch {}
+
+        // Use a client that does NOT auto-detect the session in URL to avoid duplicate code exchange
+        const supabase = createClient({ detectSessionInUrl: false })
+
+        // If a session already exists (e.g., auth state already updated), skip exchange
+        try {
+          const { data: existing } = await supabase.auth.getSession()
+          if (existing?.session) {
+            console.log('Auth callback: Session already present, skipping code exchange')
+            const redirectTo = localStorage.getItem('auth_redirect_to') || '/'
+            localStorage.removeItem('auth_redirect_to')
+            localStorage.removeItem('auth_callback_in_progress')
+            setIsLoading(false)
+            router.replace(redirectTo)
+            return
+          }
+        } catch (e) {
+          console.warn('Auth callback: getSession check failed, continuing with code exchange', e)
+        }
+
         try {
           setStatus('Exchanging authorization code...')
           console.log('Auth callback: Starting code exchange with code:', code.substring(0, 10) + '...')
-          
-          // Set flag to prevent AuthProvider interference during callback
-          localStorage.setItem('auth_callback_in_progress', 'true')
-          
-          // Add timeout to prevent hanging (increased to 30 seconds for better reliability)
-          const exchangePromise = supabase.auth.exchangeCodeForSession(code)
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Code exchange timeout after 30 seconds')), 30000)
-          )
-          
-          const { data, error: exchangeError } = await Promise.race([exchangePromise, timeoutPromise]) as any
-          
+
+          // Exchange code directly (no manual timeout race that can create false negatives)
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+
           if (exchangeError) {
             console.error('Code exchange error:', exchangeError)
             console.error('Error details:', {
               message: exchangeError.message,
-              status: exchangeError.status,
-              statusText: exchangeError.statusText
+              status: (exchangeError as any).status,
+              statusText: (exchangeError as any).statusText
             })
             setStatus(`Authentication failed: ${exchangeError.message}`)
             setIsLoading(false)
-            
+
             // Clear the callback flag
             localStorage.removeItem('auth_callback_in_progress')
-            
+
             setTimeout(() => {
               router.push('/auth/error?message=' + encodeURIComponent(exchangeError.message))
             }, 1000)
             return
           }
-          
+
           if (data.session) {
             console.log('Auth callback: Session established successfully')
             setStatus('Authentication successful! Redirecting...')
-            
+
             // Validate that the session is actually accessible
             const { data: sessionCheck } = await supabase.auth.getSession()
             if (sessionCheck.session) {
               console.log('Auth callback: Session validation successful')
-              
+
               // Get the intended redirect URL from localStorage or default to home
               const redirectTo = localStorage.getItem('auth_redirect_to') || '/'
               localStorage.removeItem('auth_redirect_to')
-              
+
               console.log('Auth callback: Redirecting to:', redirectTo)
               setIsLoading(false)
-              
+
               // Clear the callback flag
               localStorage.removeItem('auth_callback_in_progress')
-              
+
               // Use replace instead of push to avoid back button issues
               router.replace(redirectTo)
             } else {
@@ -93,10 +107,10 @@ function AuthCallbackContent() {
           console.error('Unexpected error during auth callback:', err)
           setStatus('Authentication failed')
           setIsLoading(false)
-          
+
           // Clear the callback flag
           localStorage.removeItem('auth_callback_in_progress')
-          
+
           setTimeout(() => {
             router.push('/auth/error?message=Authentication failed')
           }, 1000)

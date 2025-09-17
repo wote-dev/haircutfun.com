@@ -18,7 +18,8 @@ function getSupabaseAnonKey(): string {
   return key;
 }
 
-export function createClient() {
+// Allow passing a minimal options object to toggle detectSessionInUrl when needed (e.g., on /auth/callback)
+export function createClient(options?: { detectSessionInUrl?: boolean }) {
   // Always create a fresh instance to avoid caching issues with auth state
   supabaseInstance = createBrowserClient(
     getSupabaseUrl(),
@@ -27,9 +28,9 @@ export function createClient() {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce'
-      }
+        detectSessionInUrl: options?.detectSessionInUrl ?? true,
+        flowType: 'pkce',
+      },
     }
   );
 
