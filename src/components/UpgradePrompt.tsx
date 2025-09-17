@@ -208,7 +208,7 @@ export function UpgradePrompt({
           {!user ? (
             <>
               <SignInButton 
-                className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+                className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl smooth-gradient-hover"
                 redirectTo={currentPath}
               >
                 Sign In to Upgrade
@@ -226,7 +226,7 @@ export function UpgradePrompt({
                 <button
                   onClick={() => handleUpgrade('pro')}
                   disabled={isLoading || loadingPlan === 'pro'}
-                  className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl smooth-gradient-hover disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loadingPlan === 'pro' ? (
                     <div className="flex items-center justify-center space-x-2">
@@ -240,7 +240,7 @@ export function UpgradePrompt({
                 <button
                   onClick={() => handleUpgrade('premium')}
                   disabled={isLoading || loadingPlan === 'premium'}
-                  className="flex-1 bg-gradient-to-r from-accent to-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-accent to-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl smooth-gradient-hover disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loadingPlan === 'premium' ? (
                     <div className="flex items-center justify-center space-x-2">

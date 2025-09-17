@@ -27,7 +27,7 @@ const pricingTiers = [
       "Standard processing speed"
     ],
     buttonText: "Start Free Trial",
-    buttonStyle: "border border-primary text-primary hover:bg-primary hover:text-white",
+    buttonStyle: "border border-primary text-primary hover:bg-primary hover:text-white smooth-hover",
     popular: false
   },
   {
@@ -38,29 +38,23 @@ const pricingTiers = [
     features: [
       "25 virtual haircut tries per month",
       "Access to ALL premium hairstyles",
-      "HD photo processing",
-      "Advanced AI hair analysis",
       "Priority processing speed",
-      "Multiple angle views",
       "Save & compare results",
       "Priority customer support"
     ],
     limitations: [],
     buttonText: "Start Pro Plan",
-    buttonStyle: "gradient-primary text-white shadow-lg hover:shadow-xl hover:scale-105",
+    buttonStyle: "gradient-primary text-white smooth-gradient-hover",
     popular: true
   },
   {
     name: "Premium",
     price: "$12.99",
     period: "month",
-    description: "75 generations per month plus exclusive celebrity hairstyles",
+    description: "75 generations per month plus premium features",
     features: [
       "75 virtual haircut tries per month",
       "Everything in Pro plan",
-      "Exclusive celebrity hairstyles",
-      "Custom hair color simulation",
-      "Professional stylist consultation",
       "Personalized style recommendations",
       "Early access to new features",
       "White-glove customer support",
@@ -68,7 +62,7 @@ const pricingTiers = [
     ],
     limitations: [],
     buttonText: "Go Premium",
-    buttonStyle: "gradient-accent text-white shadow-lg hover:shadow-xl hover:scale-105",
+    buttonStyle: "gradient-accent text-white smooth-gradient-hover",
     popular: false
   }
 ];
@@ -84,7 +78,7 @@ const faqs = [
   },
   {
     question: "What's the difference between Pro and Premium?",
-    answer: "Pro gives you 25 generations per month, while Premium offers 75 generations per month plus exclusive celebrity hairstyles, custom hair color simulation, and professional stylist consultations."
+    answer: "Pro gives you 25 generations per month with access to premium hairstyles and priority support, while Premium offers 75 generations per month plus personalized style recommendations, early access to new features, and white-glove customer support."
   },
   {
     question: "Do you offer refunds?",
@@ -119,7 +113,7 @@ export default function PricingPage() {
       return (
         <Link
           href="/try-on"
-          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold transition-all duration-300 ${tier.buttonStyle}`}
+          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold ${tier.buttonStyle}`}
         >
           {tier.buttonText}
         </Link>
@@ -129,7 +123,7 @@ export default function PricingPage() {
     if (!user) {
       return (
         <SignInButton 
-          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold transition-all duration-300 ${tier.buttonStyle}`}
+          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold ${tier.buttonStyle}`}
           redirectTo={currentPath}
         >
           Sign In to Subscribe
@@ -138,11 +132,11 @@ export default function PricingPage() {
     }
 
     return (
-      <button
-        onClick={() => handlePlanSelect(planType)}
-        disabled={isLoading || isLoadingThisPlan}
-        className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${tier.buttonStyle}`}
-      >
+        <button
+          onClick={() => handlePlanSelect(planType)}
+          disabled={isLoading || isLoadingThisPlan}
+          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${tier.buttonStyle}`}
+        >
         {isLoadingThisPlan ? (
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -272,7 +266,7 @@ export default function PricingPage() {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">Premium Styles</h3>
               <p className="text-muted-foreground">
-                Access exclusive celebrity hairstyles and trending cuts from top salons.
+                Access premium hairstyles and trending cuts from top stylists.
               </p>
             </div>
             

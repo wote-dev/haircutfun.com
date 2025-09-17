@@ -24,7 +24,7 @@ export default function Home() {
           </p>
           <Link
             href="/try-on"
-            className="inline-flex items-center px-10 py-5 border-glow-multi bg-background text-foreground font-bold rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 text-lg shadow-xl"
+            className="inline-flex items-center px-10 py-5 border-glow-multi bg-background text-foreground font-bold rounded-2xl text-lg shadow-xl smooth-lift"
           >
             Start Your Virtual Try-On
             <svg className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

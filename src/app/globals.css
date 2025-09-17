@@ -166,27 +166,90 @@ body {
   border-color: var(--border);
 }
 
-/* Border glow utilities */
+/* Smooth animation utilities */
+.smooth-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform, box-shadow, opacity;
+}
+
+.smooth-hover-fast {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform, box-shadow, opacity;
+}
+
+.smooth-scale:hover {
+  transform: scale(1.02);
+}
+
+.smooth-scale-lg:hover {
+  transform: scale(1.05);
+}
+
+.smooth-lift:hover {
+  transform: translateY(-2px);
+}
+
+.smooth-lift-scale:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.smooth-gradient-hover {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform, box-shadow;
+}
+
+.smooth-gradient-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.smooth-gradient-hover:hover::before {
+  opacity: 1;
+}
+
+.smooth-gradient-hover:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Border glow utilities with improved smoothness */
 .border-glow-primary {
   border: 2px solid var(--primary);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform, box-shadow;
 }
 
 .border-glow-primary:hover {
   box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .border-glow-accent {
   border: 2px solid var(--accent);
   box-shadow: 0 0 20px rgba(96, 165, 250, 0.3), 0 0 40px rgba(96, 165, 250, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform, box-shadow;
 }
 
 .border-glow-accent:hover {
   box-shadow: 0 0 30px rgba(96, 165, 250, 0.5), 0 0 60px rgba(96, 165, 250, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .border-glow-multi {
@@ -194,12 +257,14 @@ body {
   background: linear-gradient(var(--background), var(--background)) padding-box,
               linear-gradient(135deg, var(--primary), var(--accent)) border-box;
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 0 40px rgba(96, 165, 250, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform, box-shadow;
 }
 
 .border-glow-multi:hover {
   box-shadow: 0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(96, 165, 250, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
 }
 
 @layer utilities {

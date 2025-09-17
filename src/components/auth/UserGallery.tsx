@@ -106,7 +106,7 @@ export function UserGallery() {
         </div>
         
         {images.length >= 12 && (
-          <button className="w-full mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium">
+          <button className="w-full mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium smooth-hover">
             View all images →
           </button>
         )}

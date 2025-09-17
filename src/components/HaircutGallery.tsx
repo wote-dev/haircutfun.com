@@ -312,7 +312,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
                     </svg>
                     {style.popularity}% match
                   </div>
-                  <button className="text-primary hover:text-primary/80 hover:scale-110 transition-all duration-300">
+                  <button className="text-primary hover:text-primary/80 smooth-hover">
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
@@ -329,7 +329,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
         <p className="text-muted-foreground mb-4">
           Can't find the perfect style? Our AI will recommend more options based on your face shape.
         </p>
-        <button className="text-primary hover:text-primary/80 hover:scale-105 font-medium transition-all duration-300">
+        <button className="text-primary hover:text-primary/80 font-medium smooth-hover">
           Get AI Recommendations →
         </button>
       </div>

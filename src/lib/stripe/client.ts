@@ -82,10 +82,7 @@ export const PLAN_CONFIGS = {
     features: [
       '25 virtual haircut tries per month',
       'Access to ALL premium hairstyles',
-      'HD photo processing',
-      'Advanced AI hair analysis',
       'Priority processing speed',
-      'Multiple angle views',
       'Save & compare results',
       'Priority customer support'
     ]
@@ -97,9 +94,6 @@ export const PLAN_CONFIGS = {
     features: [
       '75 virtual haircut tries per month',
       'Everything in Pro plan',
-      'Exclusive celebrity hairstyles',
-      'Custom hair color simulation',
-      'Professional stylist consultation',
       'Personalized style recommendations',
       'Early access to new features',
       'White-glove customer support',

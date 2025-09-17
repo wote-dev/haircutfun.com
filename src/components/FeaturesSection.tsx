@@ -74,9 +74,9 @@ export function FeaturesSection() {
         <div className="mx-auto mt-20 max-w-7xl">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => (
-              <div key={feature.name} className="group bg-background/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-border/50 hover:shadow-2xl hover:scale-105 transition-all duration-300 hover:border-primary/20">
+              <div key={feature.name} className="group bg-background/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-border/50 hover:shadow-2xl hover:border-primary/20 smooth-scale">
                 <div className="flex items-center mb-6">
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg group-hover:scale-110 transition-transform duration-300 ${
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg group-hover:scale-110 smooth-hover ${
                     index % 3 === 0 ? 'gradient-primary' : 
                     index % 3 === 1 ? 'gradient-secondary' : 'gradient-accent'
                   }`}>

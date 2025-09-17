@@ -98,7 +98,7 @@ export function Navigation() {
                     <Link
                       href={item.href}
                       className={`
-                        relative px-5 py-2.5 rounded-2xl text-sm font-medium transition-all duration-300
+                        relative px-5 py-2.5 rounded-2xl text-sm font-medium smooth-hover
                         ${isActive
                           ? "text-primary bg-primary/8 shadow-sm"
                           : "text-gray-600 hover:text-primary hover:bg-primary/4"
@@ -121,20 +121,20 @@ export function Navigation() {
               <motion.div 
                 whileHover={{ scale: 1.02 }} 
                 whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
               >
                 <Link
                   href="/try-on"
                   className="
                     group relative overflow-hidden px-6 py-2.5 rounded-2xl text-sm font-semibold
                     bg-gradient-to-r from-primary to-accent text-white shadow-lg
-                    hover:shadow-xl hover:shadow-primary/25 transition-all duration-300
+                    smooth-gradient-hover
                     flex items-center space-x-2
                   "
                 >
                   <Sparkles className="h-4 w-4 relative z-10" />
                   <span className="relative z-10">Get Started</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
                 </Link>
               </motion.div>
               
@@ -148,28 +148,29 @@ export function Navigation() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-3 rounded-2xl bg-gray-50/80 hover:bg-gray-100/80 border border-gray-200/50 hover:border-gray-300/50 transition-all duration-300 shadow-sm"
+              className="md:hidden p-3 rounded-2xl bg-gray-50/80 hover:bg-gray-100/80 border border-gray-200/50 hover:border-gray-300/50 smooth-hover shadow-sm"
               aria-label="Toggle menu"
             >
               <AnimatePresence mode="wait">
                 {isOpen ? (
                   <motion.div
                     key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   >
                     <X className="h-5 w-5 text-gray-600" />
                   </motion.div>
                 ) : (
                   <motion.div
                     key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    initial={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   >
                     <Menu className="h-5 w-5 text-gray-600" />
                   </motion.div>
@@ -182,10 +183,10 @@ export function Navigation() {
           <AnimatePresence>
             {isOpen && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, height: 0, y: -20 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="md:hidden border-t border-white/20 bg-white/50 backdrop-blur-xl"
               >
                 <div className="px-8 py-8 space-y-3">
@@ -207,7 +208,7 @@ export function Navigation() {
                           href={item.href}
                           onClick={() => setIsOpen(false)}
                           className={`
-                            block px-5 py-3.5 rounded-2xl text-base font-medium transition-all duration-300
+                            block px-5 py-3.5 rounded-2xl text-base font-medium smooth-hover
                             ${isActive
                               ? "text-primary bg-gradient-to-r from-primary/8 to-primary/12 border border-primary/15 shadow-sm"
                               : "text-gray-600 hover:text-primary hover:bg-primary/4"
@@ -239,7 +240,7 @@ export function Navigation() {
                       className="
                         flex items-center justify-center space-x-2 w-full px-6 py-4 rounded-2xl
                         bg-gradient-to-r from-primary to-accent text-white font-semibold
-                        shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300
+                        smooth-gradient-hover
                       "
                     >
                       <Sparkles className="h-4 w-4" />
