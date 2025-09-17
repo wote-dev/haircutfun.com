@@ -28,6 +28,11 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
     return <>{children}</>;
   }
 
+  // If user still has free tries remaining, render children (allow free usage)
+  if (remainingTries > 0) {
+    return <>{children}</>;
+  }
+
   const handleUpgrade = async (planType: 'pro' | 'premium') => {
     if (!user) return;
     
@@ -55,13 +60,13 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
           {description}
         </p>
 
-        {/* Free Tries Info */}
-        {remainingTries > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        {/* Free Trial Info - Only show for users who have used their free generation */}
+        {remainingTries === 0 && (
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-blue-800 text-sm">
-              <span className="font-semibold">{remainingTries} free tries remaining</span>
+              <span className="font-semibold">🎉 Ready for more?</span>
               <br />
-              Try our basic features first, then upgrade for premium styles!
+              You've tried our free generation! Upgrade now to unlock unlimited styling possibilities.
             </p>
           </div>
         )}
@@ -135,7 +140,7 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
                         <span>Processing...</span>
                       </div>
                     ) : (
-                      'Upgrade to Pro ($9.99)'
+                      'Upgrade to Pro ($4.99)'
                     )}
                   </button>
                   <button
@@ -149,7 +154,7 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
                         <span>Processing...</span>
                       </div>
                     ) : (
-                      'Go Premium ($19.99)'
+                      'Go Premium ($12.99)'
                     )}
                   </button>
                 </div>

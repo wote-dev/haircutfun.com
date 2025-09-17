@@ -32,7 +32,7 @@ const pricingTiers = [
   },
   {
     name: "Pro",
-    price: "$9.99",
+    price: "$4.99",
     period: "month",
     description: "25 generations per month plus premium features",
     features: [
@@ -52,7 +52,7 @@ const pricingTiers = [
   },
   {
     name: "Premium",
-    price: "$19.99",
+    price: "$12.99",
     period: "month",
     description: "75 generations per month plus exclusive celebrity hairstyles",
     features: [
@@ -76,7 +76,7 @@ const pricingTiers = [
 const faqs = [
   {
     question: "How does the free trial work?",
-    answer: "You get 1 completely free virtual haircut try with no credit card required. After that, you'll need to upgrade to continue using our service."
+    answer: "You get 1 completely free virtual haircut try with no credit card required. After using your free generation, you'll see upgrade options to continue using our service with Pro or Premium plans."
   },
   {
     question: "Can I cancel my subscription anytime?",

@@ -77,7 +77,7 @@ export const PLAN_CONFIGS = {
   },
   pro: {
     name: 'Pro',
-    price: 9.99,
+    price: 4.99,
     generationsLimit: 25,
     features: [
       '25 virtual haircut tries per month',
@@ -92,7 +92,7 @@ export const PLAN_CONFIGS = {
   },
   premium: {
     name: 'Premium',
-    price: 19.99,
+    price: 12.99,
     generationsLimit: 75,
     features: [
       '75 virtual haircut tries per month',
