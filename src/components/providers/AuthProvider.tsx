@@ -142,11 +142,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = async () => {
-    console.log('AuthProvider: Starting NUCLEAR sign out process');
+    console.log('AuthProvider: Starting MIDDLEWARE-AWARE sign out process');
     setIsSigningOut(true);
     
     try {
-      // Clear local state FIRST to immediately update UI
+      // STEP 1: Set sign-out flag BEFORE doing anything else
+      // This tells middleware to skip session restoration on next request
+      if (typeof window !== 'undefined') {
+        console.log('AuthProvider: Setting sign-out flag for middleware');
+        document.cookie = '__signout_flag=true;path=/;max-age=60';
+      }
+      
+      // STEP 2: Clear local state to immediately update UI
       setUser(null);
       setSession(null);
       setProfile(null);
@@ -155,101 +162,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       const supabase = getSupabase();
       
-      // Sign out from Supabase with global scope
+      // STEP 3: Sign out from Supabase with global scope
       console.log('AuthProvider: Calling Supabase signOut with global scope');
       await supabase.auth.signOut({ scope: 'global' });
       console.log('AuthProvider: Supabase signOut completed');
       
-      // NUCLEAR storage clearing - clear EVERYTHING
-      if (typeof window !== 'undefined') {
-        console.log('AuthProvider: NUCLEAR storage clearing - removing ALL storage');
-        
-        // Get all keys before clearing
-        const localKeys = [...Object.keys(localStorage)];
-        const sessionKeys = [...Object.keys(sessionStorage)];
-        
-        // Clear ALL localStorage (not just auth-related)
-        console.log('AuthProvider: Clearing ALL localStorage');
-        localStorage.clear();
-        
-        // Clear ALL sessionStorage
-        console.log('AuthProvider: Clearing ALL sessionStorage');
-        sessionStorage.clear();
-        
-        // Clear ALL cookies with extreme prejudice
-        console.log('AuthProvider: NUCLEAR cookie clearing');
-        const cookies = document.cookie.split(";");
-        
-        cookies.forEach(function(c) { 
-          const eqPos = c.indexOf("=");
-          const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
-          
-          if (name) {
-            console.log('AuthProvider: NUCLEAR clearing cookie:', name);
-            
-            // Clear for ALL possible combinations
-            const domains = [
-              '',
-              window.location.hostname,
-              '.' + window.location.hostname,
-              'localhost',
-              '.localhost'
-            ];
-            
-            const paths = ['/', '/auth', '/api'];
-            
-            domains.forEach(domain => {
-              paths.forEach(path => {
-                // Clear without secure
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path}${domain ? `;domain=${domain}` : ''}`;
-                // Clear with secure
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path}${domain ? `;domain=${domain}` : ''};secure`;
-                // Clear with SameSite
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path}${domain ? `;domain=${domain}` : ''};SameSite=None;secure`;
-              });
-            });
-          }
-        });
-        
-        // Additional cookie clearing attempts
-        console.log('AuthProvider: Additional cookie clearing attempts');
-        document.cookie.split(";").forEach(function(c) { 
-          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-      }
-      
-      // Clear Supabase client cache AFTER storage clearing
+      // STEP 4: Clear Supabase client cache
       console.log('AuthProvider: Clearing Supabase client cache');
       clearClientCache();
       
-      // NUCLEAR OPTION: Force page reload to break any middleware session restoration
-      console.log('AuthProvider: NUCLEAR OPTION - Forcing page reload to break middleware cycle');
-      
-      // Small delay to ensure all clearing operations complete
-      setTimeout(() => {
-        console.log('AuthProvider: Executing forced page reload');
-        window.location.href = '/';
-      }, 100);
+      // STEP 5: Redirect to home page (middleware will handle the rest)
+      console.log('AuthProvider: Redirecting to home page');
+      window.location.href = '/';
       
     } catch (error) {
       console.error('AuthProvider: Sign out error:', error);
-      // Even on error, ensure local state is cleared and force reload
+      // Even on error, ensure local state is cleared and redirect
       setUser(null);
       setSession(null);
       setProfile(null);
       setSubscription(null);
       setUsage(null);
       
-      // Nuclear option even on error
+      // Redirect even on error (middleware will handle cookie clearing)
       if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
+        window.location.href = '/';
       }
     } finally {
-      // Clear the signing out flag (though page will reload anyway)
       setIsSigningOut(false);
     }
   };
