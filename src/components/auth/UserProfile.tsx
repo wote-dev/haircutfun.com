@@ -96,14 +96,10 @@ export function UserProfile() {
       await signOut();
       console.log('UserProfile: Sign out completed successfully');
       
-      // Force a page reload to ensure clean state
-      window.location.href = '/';
-      
     } catch (error) {
       console.error('UserProfile: Error signing out:', error);
       // Force cleanup even on error
       setIsOpen(false);
-      window.location.href = '/';
     }
   };
 

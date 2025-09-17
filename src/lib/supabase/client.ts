@@ -19,19 +19,20 @@ function getSupabaseAnonKey(): string {
 }
 
 export function createClient() {
-  // Always create a fresh instance to avoid caching issues with auth state
-  supabaseInstance = createBrowserClient(
-    getSupabaseUrl(),
-    getSupabaseAnonKey(),
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce'
+  if (!supabaseInstance) {
+    supabaseInstance = createBrowserClient(
+      getSupabaseUrl(),
+      getSupabaseAnonKey(),
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          flowType: 'pkce'
+        }
       }
-    }
-  );
+    );
+  }
 
   return supabaseInstance;
 }
