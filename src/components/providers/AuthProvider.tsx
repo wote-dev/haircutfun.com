@@ -142,7 +142,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = async () => {
-    console.log('AuthProvider: Starting sign out process');
+    console.log('AuthProvider: Starting NUCLEAR sign out process');
     setIsSigningOut(true);
     
     try {
@@ -155,53 +155,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       const supabase = getSupabase();
       
-      // Sign out from Supabase
-      console.log('AuthProvider: Calling Supabase signOut');
+      // Sign out from Supabase with global scope
+      console.log('AuthProvider: Calling Supabase signOut with global scope');
       await supabase.auth.signOut({ scope: 'global' });
       console.log('AuthProvider: Supabase signOut completed');
       
-      // AGGRESSIVE storage clearing to prevent session restoration
+      // NUCLEAR storage clearing - clear EVERYTHING
       if (typeof window !== 'undefined') {
-        console.log('AuthProvider: Aggressively clearing ALL storage');
+        console.log('AuthProvider: NUCLEAR storage clearing - removing ALL storage');
         
         // Get all keys before clearing
         const localKeys = [...Object.keys(localStorage)];
         const sessionKeys = [...Object.keys(sessionStorage)];
         
-        // Clear ALL localStorage keys that could contain auth data
-        localKeys.forEach(key => {
-          if (key.startsWith('sb-') || 
-              key.includes('supabase') || 
-              key.includes('auth') ||
-              key.includes('session') ||
-              key.includes('token') ||
-              key.includes('refresh') ||
-              key.includes('access')) {
-            console.log('AuthProvider: Removing localStorage key:', key);
-            localStorage.removeItem(key);
-          }
-        });
+        // Clear ALL localStorage (not just auth-related)
+        console.log('AuthProvider: Clearing ALL localStorage');
+        localStorage.clear();
         
-        // Clear ALL sessionStorage keys that could contain auth data
-        sessionKeys.forEach(key => {
-          if (key.startsWith('sb-') || 
-              key.includes('supabase') || 
-              key.includes('auth') ||
-              key.includes('session') ||
-              key.includes('token') ||
-              key.includes('refresh') ||
-              key.includes('access')) {
-            console.log('AuthProvider: Removing sessionStorage key:', key);
-            sessionStorage.removeItem(key);
-          }
-        });
+        // Clear ALL sessionStorage
+        console.log('AuthProvider: Clearing ALL sessionStorage');
+        sessionStorage.clear();
         
-        // Clear our custom keys
-        localStorage.removeItem('auth_redirect_to');
-        localStorage.removeItem('auth_callback_in_progress');
-        
-        // Clear ALL cookies aggressively
-        console.log('AuthProvider: Clearing ALL cookies');
+        // Clear ALL cookies with extreme prejudice
+        console.log('AuthProvider: NUCLEAR cookie clearing');
         const cookies = document.cookie.split(";");
         
         cookies.forEach(function(c) { 
@@ -209,17 +185,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
           
           if (name) {
-            console.log('AuthProvider: Clearing cookie:', name);
+            console.log('AuthProvider: NUCLEAR clearing cookie:', name);
             
-            // Clear for multiple paths and domains
-            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
-            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + window.location.hostname;
+            // Clear for ALL possible combinations
+            const domains = [
+              '',
+              window.location.hostname,
+              '.' + window.location.hostname,
+              'localhost',
+              '.localhost'
+            ];
             
-            // Also try clearing with secure flag
-            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;secure";
-            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname + ";secure";
+            const paths = ['/', '/auth', '/api'];
+            
+            domains.forEach(domain => {
+              paths.forEach(path => {
+                // Clear without secure
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path}${domain ? `;domain=${domain}` : ''}`;
+                // Clear with secure
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path}${domain ? `;domain=${domain}` : ''};secure`;
+                // Clear with SameSite
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=${path}${domain ? `;domain=${domain}` : ''};SameSite=None;secure`;
+              });
+            });
           }
+        });
+        
+        // Additional cookie clearing attempts
+        console.log('AuthProvider: Additional cookie clearing attempts');
+        document.cookie.split(";").forEach(function(c) { 
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
         });
       }
       
@@ -227,28 +222,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.log('AuthProvider: Clearing Supabase client cache');
       clearClientCache();
       
-      console.log('AuthProvider: Sign out process completed successfully');
+      // NUCLEAR OPTION: Force page reload to break any middleware session restoration
+      console.log('AuthProvider: NUCLEAR OPTION - Forcing page reload to break middleware cycle');
+      
+      // Small delay to ensure all clearing operations complete
+      setTimeout(() => {
+        console.log('AuthProvider: Executing forced page reload');
+        window.location.href = '/';
+      }, 100);
       
     } catch (error) {
       console.error('AuthProvider: Sign out error:', error);
-      // Even on error, ensure local state is cleared
+      // Even on error, ensure local state is cleared and force reload
       setUser(null);
       setSession(null);
       setProfile(null);
       setSubscription(null);
       setUsage(null);
       
-      // Still try to clear storage on error
+      // Nuclear option even on error
       if (typeof window !== 'undefined') {
-        const localKeys = [...Object.keys(localStorage)];
-        localKeys.forEach(key => {
-          if (key.startsWith('sb-')) {
-            localStorage.removeItem(key);
-          }
-        });
+        localStorage.clear();
+        sessionStorage.clear();
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
       }
     } finally {
-      // Clear the signing out flag
+      // Clear the signing out flag (though page will reload anyway)
       setIsSigningOut(false);
     }
   };
