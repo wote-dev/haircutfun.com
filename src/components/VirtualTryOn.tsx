@@ -497,7 +497,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
                           AI-Generated Preview
                         </p>
                         <div className="text-xs text-muted-foreground bg-background/60 rounded px-3 py-2">
-                          💡 Full image generation coming soon with Imagen API
+                          ✨ AI-powered haircut preview generated
                         </div>
                       </div>
                     </div>

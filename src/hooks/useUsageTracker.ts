@@ -21,9 +21,45 @@ interface UsageData {
   monthYear: string;
 }
 
+// Helper function to get localStorage usage for non-authenticated users
+function getLocalStorageUsage(): { freeTriesUsed: number; maxFreeTries: number } {
+  if (typeof window === 'undefined') return { freeTriesUsed: 0, maxFreeTries: 1 };
+  
+  try {
+    const localData = localStorage.getItem('haircutfun_usage');
+    if (!localData) return { freeTriesUsed: 0, maxFreeTries: 1 };
+    
+    const parsed = JSON.parse(localData);
+    return {
+      freeTriesUsed: parsed.freeTriesUsed || 0,
+      maxFreeTries: 1 // Non-authenticated users get 1 free try
+    };
+  } catch {
+    return { freeTriesUsed: 0, maxFreeTries: 1 };
+  }
+}
+
+// Helper function to update localStorage usage for non-authenticated users
+function updateLocalStorageUsage(freeTriesUsed: number) {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const data = {
+      freeTriesUsed,
+      lastUsed: new Date().toISOString(),
+      monthYear: currentMonth
+    };
+    localStorage.setItem('haircutfun_usage', JSON.stringify(data));
+  } catch (error) {
+    console.error('Error updating localStorage usage:', error);
+  }
+}
+
 export function useUsageTracker() {
   const { user } = useAuth();
   const [usageData, setUsageData] = useState<UsageData | null>(null);
+  const [localUsage, setLocalUsage] = useState({ freeTriesUsed: 0, maxFreeTries: 1 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +67,9 @@ export function useUsageTracker() {
   useEffect(() => {
     async function loadUsageData() {
       if (!user) {
+        // For non-authenticated users, use localStorage
+        const localData = getLocalStorageUsage();
+        setLocalUsage(localData);
         setUsageData(null);
         setIsLoading(false);
         return;
@@ -71,10 +110,29 @@ export function useUsageTracker() {
   };
 
   // Use a free try and update state
-  const useFreeTry = (): Promise<UsageData> => {
+  const useFreeTry = (): Promise<UsageData | { freeTriesUsed: number; maxFreeTries: number }> => {
     return new Promise(async (resolve, reject) => {
-      if (!user || !usageData) {
-        reject(new Error('User not authenticated'));
+      if (!user) {
+        // Handle non-authenticated users with localStorage
+        if (localUsage.freeTriesUsed >= localUsage.maxFreeTries) {
+          reject(new Error('No free tries remaining'));
+          return;
+        }
+        
+        try {
+          const newUsage = { ...localUsage, freeTriesUsed: localUsage.freeTriesUsed + 1 };
+          updateLocalStorageUsage(newUsage.freeTriesUsed);
+          setLocalUsage(newUsage);
+          resolve(newUsage);
+        } catch (err) {
+          console.error('Error using free try for non-authenticated user:', err);
+          reject(err);
+        }
+        return;
+      }
+      
+      if (!usageData) {
+        reject(new Error('Usage data not loaded'));
         return;
       }
       
@@ -103,11 +161,16 @@ export function useUsageTracker() {
     isAuthenticated: !!user,
     
     // Computed values (sync versions based on current data)
-    // TEMPORARY: For testing, allow unlimited usage for non-signed-in users
-    canUseFree: usageData ? usageData.freeTriesUsed < usageData.maxFreeTries : true, // Allow unlimited for non-authenticated
+    canUseFree: user 
+      ? (usageData ? usageData.freeTriesUsed < usageData.maxFreeTries : false)
+      : localUsage.freeTriesUsed < localUsage.maxFreeTries,
     hasPremium: usageData ? usageData.isPremium : false,
-    remainingTries: usageData ? Math.max(0, usageData.maxFreeTries - usageData.freeTriesUsed) : 999, // Show 999 for non-authenticated
-    needsUpgrade: usageData ? !usageData.isPremium && usageData.freeTriesUsed >= usageData.maxFreeTries : false, // Never need upgrade when not authenticated
+    remainingTries: user 
+      ? (usageData ? Math.max(0, usageData.maxFreeTries - usageData.freeTriesUsed) : 0)
+      : Math.max(0, localUsage.maxFreeTries - localUsage.freeTriesUsed),
+    needsUpgrade: user 
+      ? (usageData ? !usageData.isPremium && usageData.freeTriesUsed >= usageData.maxFreeTries : false)
+      : localUsage.freeTriesUsed >= localUsage.maxFreeTries,
     
     // Actions
     useFreeTry,
