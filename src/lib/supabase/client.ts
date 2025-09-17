@@ -24,11 +24,24 @@ export function createClient() {
     return supabaseInstance;
   }
 
-  // Create new instance with runtime validation
+  // Create new instance with runtime validation and proper storage configuration
   supabaseInstance = createBrowserClient(
     getSupabaseUrl(),
-    getSupabaseAnonKey()
+    getSupabaseAnonKey(),
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+      }
+    }
   );
 
   return supabaseInstance;
+}
+
+// Function to clear the cached instance (useful for testing or after sign out)
+export function clearClientCache() {
+  supabaseInstance = null;
 }
