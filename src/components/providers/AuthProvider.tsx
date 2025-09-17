@@ -146,88 +146,56 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsSigningOut(true);
     
     try {
+      // Clear local state FIRST to immediately update UI
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setSubscription(null);
+      setUsage(null);
+      
       const supabase = getSupabase();
       
-      // Sign out from Supabase FIRST
+      // Sign out from Supabase
       console.log('AuthProvider: Calling Supabase signOut');
       await supabase.auth.signOut({ scope: 'global' });
       console.log('AuthProvider: Supabase signOut completed');
       
-    } catch (error) {
-      console.error('AuthProvider: Supabase signOut error:', error);
-      // Continue with cleanup even if Supabase fails
-    }
-    
-    // Clear all storage aggressively
-    if (typeof window !== 'undefined') {
-      console.log('AuthProvider: Clearing all storage');
+      // Clear Supabase client cache
+      console.log('AuthProvider: Clearing Supabase client cache');
+      clearClientCache();
       
-      // Clear our custom keys
-      localStorage.removeItem('auth_redirect_to');
-      localStorage.removeItem('auth_callback_in_progress');
-      
-      // Get all storage keys before clearing
-      const localKeys = Object.keys(localStorage);
-      const sessionKeys = Object.keys(sessionStorage);
-      
-      // Clear ALL Supabase-related keys more aggressively
-      localKeys.forEach(key => {
-        if (key.startsWith('sb-') || 
-            key.includes('supabase') || 
-            key.includes('auth') ||
-            key.includes('session') ||
-            key.includes('token')) {
-          console.log('AuthProvider: Removing localStorage key:', key);
-          localStorage.removeItem(key);
-        }
-      });
-      
-      // Clear sessionStorage too
-      sessionKeys.forEach(key => {
-        if (key.startsWith('sb-') || 
-            key.includes('supabase') || 
-            key.includes('auth') ||
-            key.includes('session') ||
-            key.includes('token')) {
-          console.log('AuthProvider: Removing sessionStorage key:', key);
-          sessionStorage.removeItem(key);
-        }
-      });
-      
-      // Also clear any cookies that might be set - be more aggressive
-      console.log('AuthProvider: Clearing all cookies');
-      const cookies = document.cookie.split(";");
-      console.log('AuthProvider: Found cookies:', cookies);
-      
-      cookies.forEach(function(c) { 
-        const eqPos = c.indexOf("=");
-        const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
-        console.log('AuthProvider: Clearing cookie:', name);
+      // Clear only essential storage items (less aggressive approach)
+      if (typeof window !== 'undefined') {
+        console.log('AuthProvider: Clearing essential storage');
         
-        // Clear for multiple paths and domains
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + window.location.hostname;
-      });
-    }
-    
-    // Clear Supabase client cache
-    console.log('AuthProvider: Clearing Supabase client cache');
-    clearClientCache();
-    
-    // Clear local state AFTER Supabase operations
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setSubscription(null);
-    setUsage(null);
-    
-    console.log('AuthProvider: Sign out process completed');
-    
-    // Clear the signing out flag after a delay to prevent immediate re-auth
-    setTimeout(() => {
+        // Clear our custom keys
+        localStorage.removeItem('auth_redirect_to');
+        localStorage.removeItem('auth_callback_in_progress');
+        
+        // Clear only Supabase auth keys (more targeted)
+        const localKeys = Object.keys(localStorage);
+        localKeys.forEach(key => {
+          if (key.startsWith('sb-') && key.includes('auth')) {
+            console.log('AuthProvider: Removing localStorage key:', key);
+            localStorage.removeItem(key);
+          }
+        });
+      }
+      
+      console.log('AuthProvider: Sign out process completed successfully');
+      
+    } catch (error) {
+      console.error('AuthProvider: Sign out error:', error);
+      // Even on error, ensure local state is cleared
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setSubscription(null);
+      setUsage(null);
+    } finally {
+      // Clear the signing out flag
       setIsSigningOut(false);
-    }, 2000);
+    }
   };
 
   useEffect(() => {
@@ -292,28 +260,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (!mounted) return;
         
-        // If we're in the middle of signing out, ignore auth state changes
-        if (isSigningOut && session) {
-          console.log('AuthProvider: Ignoring auth state change during sign out');
+        // Handle sign out events immediately
+        if (event === 'SIGNED_OUT' || !session) {
+          console.log('AuthProvider: Handling sign out event');
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setSubscription(null);
+          setUsage(null);
+          setLoading(false);
           return;
         }
         
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          console.log('AuthProvider: Fetching user data for authenticated user');
+        // Handle sign in events
+        if (event === 'SIGNED_IN' || (session && !isSigningOut)) {
+          console.log('AuthProvider: Handling sign in event');
+          setSession(session);
+          setUser(session.user);
+          
           try {
             await fetchUserData(session.user.id);
             console.log('AuthProvider: User data fetch completed');
           } catch (fetchError) {
             console.error('AuthProvider: Error fetching user data on auth change:', fetchError);
           }
-        } else {
-          console.log('AuthProvider: No session, clearing user data');
-          setProfile(null);
-          setSubscription(null);
-          setUsage(null);
         }
         
         if (mounted) {
