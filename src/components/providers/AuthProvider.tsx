@@ -42,6 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<UsageTracking | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   
   // Lazy Supabase client initialization
   const getSupabase = () => createClient();
@@ -142,6 +143,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = async () => {
     console.log('AuthProvider: Starting sign out process');
+    setIsSigningOut(true);
     
     try {
       const supabase = getSupabase();
@@ -192,9 +194,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       });
       
-      // Also clear any cookies that might be set
-      document.cookie.split(";").forEach(function(c) { 
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      // Also clear any cookies that might be set - be more aggressive
+      console.log('AuthProvider: Clearing all cookies');
+      const cookies = document.cookie.split(";");
+      console.log('AuthProvider: Found cookies:', cookies);
+      
+      cookies.forEach(function(c) { 
+        const eqPos = c.indexOf("=");
+        const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+        console.log('AuthProvider: Clearing cookie:', name);
+        
+        // Clear for multiple paths and domains
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + window.location.hostname;
       });
     }
     
@@ -210,6 +223,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUsage(null);
     
     console.log('AuthProvider: Sign out process completed');
+    
+    // Clear the signing out flag after a delay to prevent immediate re-auth
+    setTimeout(() => {
+      setIsSigningOut(false);
+    }, 2000);
   };
 
   useEffect(() => {
@@ -273,6 +291,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('AuthProvider: Auth state change:', event, session ? 'Session exists' : 'No session');
         
         if (!mounted) return;
+        
+        // If we're in the middle of signing out, ignore auth state changes
+        if (isSigningOut && session) {
+          console.log('AuthProvider: Ignoring auth state change during sign out');
+          return;
+        }
         
         setSession(session);
         setUser(session?.user ?? null);
