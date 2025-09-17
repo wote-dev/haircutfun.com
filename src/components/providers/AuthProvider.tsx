@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { createClient, clearClientCache } from '../../lib/supabase/client';
 import { Database } from '../../lib/types/database';
@@ -44,6 +44,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [usage, setUsage] = useState<UsageTracking | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const isSigningOutRef = useRef(false);
+  const authSubscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const router = useRouter();
   
   // Lazy Supabase client initialization
@@ -146,8 +148,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = async () => {
     console.log('AuthProvider: Starting sign out process');
     setIsSigningOut(true);
+    isSigningOutRef.current = true;
+
+    // Optimistically clear auth state so UI updates immediately
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setSubscription(null);
+    setUsage(null);
     
     try {
+      // Proactively unsubscribe from auth state changes to avoid rehydration
+      try {
+        authSubscriptionRef.current?.unsubscribe();
+        console.log('AuthProvider: Unsubscribed from auth state changes during sign out');
+      } catch (e) {
+        console.warn('AuthProvider: Failed to unsubscribe auth listener:', e);
+      }
+
       const supabase = getSupabase();
       
       // Sign out from Supabase FIRST (client/local)
@@ -225,13 +243,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('AuthProvider: Clearing Supabase client cache');
     clearClientCache();
     
-    // Clear local state AFTER Supabase operations
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setSubscription(null);
-    setUsage(null);
-    
     console.log('AuthProvider: Sign out process completed');
 
     // Refresh the route so any server components read cleared cookies/state
@@ -245,6 +256,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Clear the signing out flag after a delay to prevent immediate re-auth
     setTimeout(() => {
       setIsSigningOut(false);
+      isSigningOutRef.current = false;
     }, 2000);
   };
 
@@ -310,8 +322,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (!mounted) return;
         
-        // If we're in the middle of signing out, ignore auth state changes
-        if (isSigningOut && session) {
+        // If we're in the middle of signing out, ignore auth state changes (use ref to avoid stale closure)
+        if (isSigningOutRef.current) {
           console.log('AuthProvider: Ignoring auth state change during sign out');
           return;
         }
@@ -341,10 +353,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     );
 
+    // Save subscription so we can unsubscribe during sign out
+    authSubscriptionRef.current = authSubscription;
+
     return () => {
       let _ = mounted; // silence linter if needed
       mounted = false;
       authSubscription.unsubscribe();
+      authSubscriptionRef.current = null;
     };
   }, []);
 

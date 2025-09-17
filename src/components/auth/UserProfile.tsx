@@ -12,6 +12,7 @@ export function UserProfile() {
   const [showGallery, setShowGallery] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -85,6 +86,9 @@ export function UserProfile() {
   const handleSignOut = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isSigningOut) return;
+    setIsSigningOut(true);
     
     console.log('UserProfile: Sign out button clicked!');
     
@@ -96,9 +100,6 @@ export function UserProfile() {
       await signOut();
       console.log('UserProfile: Sign out completed successfully');
       
-      // Let the auth state change handle the UI update naturally
-      // The AuthProvider will detect the session is gone and update the UI
-      
     } catch (error) {
       console.error('UserProfile: Error signing out:', error);
       setIsOpen(false);
@@ -106,6 +107,8 @@ export function UserProfile() {
       setTimeout(() => {
         window.location.href = '/';
       }, 1000);
+    } finally {
+      setIsSigningOut(false);
     }
   };
 
@@ -233,12 +236,13 @@ export function UserProfile() {
 
               <button
                 onClick={handleSignOut}
-                className="flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors group"
+                disabled={isSigningOut}
+                className={`flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors group ${isSigningOut ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <svg className="h-4 w-4 mr-3 text-red-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                Sign Out
+                {isSigningOut ? 'Signing out…' : 'Sign Out'}
               </button>
             </div>
           </div>
