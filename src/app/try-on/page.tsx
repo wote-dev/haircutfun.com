@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { GenderSelection } from "@/components/GenderSelection";
 import { HaircutGallery } from "@/components/HaircutGallery";
@@ -8,20 +9,52 @@ import { VirtualTryOn } from "@/components/VirtualTryOn";
 
 type Step = 'upload' | 'gender' | 'select' | 'preview';
 
-export default function TryOnPage() {
+function TryOnPageContent() {
+  const searchParams = useSearchParams();
+  const preselectedHaircut = searchParams.get('haircut');
+
+  // Trending haircuts data to determine gender
+  const trendingHaircuts = {
+    female: ["Wolf Cut", "Curtain Bangs", "Modern Shag", "Pixie Cut"],
+    male: ["Textured Crop", "Side Part", "Quiff", "Undercut Fade"]
+  };
+
+  // Determine gender from preselected haircut
+  const getGenderFromHaircut = (haircutName: string | null): 'male' | 'female' | null => {
+    if (!haircutName) return null;
+    
+    if (trendingHaircuts.female.includes(haircutName)) {
+      return 'female';
+    } else if (trendingHaircuts.male.includes(haircutName)) {
+      return 'male';
+    }
+    return null;
+  };
+
+  const preselectedGender = getGenderFromHaircut(preselectedHaircut);
+
   const [currentStep, setCurrentStep] = useState<Step>('upload');
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
-  const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
-  const [selectedHaircut, setSelectedHaircut] = useState<string | null>(null);
+  const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(preselectedGender);
+  const [selectedHaircut, setSelectedHaircut] = useState<string | null>(preselectedHaircut);
 
   const handlePhotoUpload = (photoUrl: string) => {
     setUploadedPhoto(photoUrl);
-    setCurrentStep('gender');
+    if (preselectedHaircut && preselectedGender) {
+      // Skip gender selection if we have a preselected haircut with known gender
+      setCurrentStep('preview');
+    } else {
+      setCurrentStep('gender');
+    }
   };
 
   const handleGenderSelect = (gender: 'male' | 'female') => {
     setSelectedGender(gender);
-    setCurrentStep('select');
+    if (preselectedHaircut) {
+      setCurrentStep('preview');
+    } else {
+      setCurrentStep('select');
+    }
   };
 
   const handleHaircutSelect = (haircutId: string) => {
@@ -32,8 +65,8 @@ export default function TryOnPage() {
   const resetProcess = () => {
     setCurrentStep('upload');
     setUploadedPhoto(null);
-    setSelectedGender(null);
-    setSelectedHaircut(null);
+    setSelectedGender(preselectedGender);
+    setSelectedHaircut(preselectedHaircut);
   };
 
   return (
@@ -145,5 +178,13 @@ export default function TryOnPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TryOnPage() {
+  return (
+    <Suspense>
+      <TryOnPageContent />
+    </Suspense>
   );
 }

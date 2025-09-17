@@ -91,74 +91,75 @@ export function TrendingHaircuts() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {currentStyles.map((style, index) => (
-              <motion.div
-                key={style.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="group cursor-pointer"
-              >
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-200/50 shadow-lg hover:shadow-2xl transition-all duration-500">
-                  {/* Trend Badge */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold flex items-center space-x-1">
-                      <span>{style.trend}</span>
-                      <span className="text-gray-600">Trending</span>
-                    </div>
-                  </div>
-                  
-                  {/* Image Placeholder with Gradient */}
-                  <div className="aspect-[3/4] bg-gradient-to-br from-primary/20 via-accent/10 to-primary/30 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                      >
-                        <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </motion.div>
+              <Link href={`/try-on?haircut=${encodeURIComponent(style.name)}`} key={style.name}>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="group cursor-pointer"
+                >
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-200/50 shadow-lg hover:shadow-2xl transition-all duration-500">
+                    {/* Trend Badge */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold flex items-center space-x-1">
+                        <span>{style.trend}</span>
+                        <span className="text-gray-600">Trending</span>
+                      </div>
                     </div>
                     
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="bg-white text-primary px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 shadow-lg"
-                      >
-                        <span>Try On</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </motion.button>
+                    {/* Image Placeholder with Gradient */}
+                    <div className="aspect-[3/4] bg-gradient-to-br from-primary/20 via-accent/10 to-primary/30 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                        >
+                          <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </motion.div>
+                      </div>
+                      
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="bg-white text-primary px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 shadow-lg"
+                        >
+                          <span>Try On</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </motion.button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* Style Info */}
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                        {style.name}
-                      </h3>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-semibold text-gray-600">
-                          {style.popularity}%
+                    
+                    {/* Style Info */}
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                          {style.name}
+                        </h3>
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="text-sm font-semibold text-gray-600">
+                            {style.popularity}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground bg-gray-100 px-3 py-1 rounded-full">
+                          {style.category}
+                        </span>
+                        <span className="text-xs text-primary font-semibold">
+                          {style.popularity}% match rate
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground bg-gray-100 px-3 py-1 rounded-full">
-                        {style.category}
-                      </span>
-                      <span className="text-xs text-primary font-semibold">
-                        {style.popularity}% match rate
-                      </span>
-                    </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </Link>
             ))}
           </motion.div>
           

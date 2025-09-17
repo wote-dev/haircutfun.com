@@ -92,7 +92,7 @@ export function UserProfile() {
   };
 
   if (!user) {
-    return <SignInButton />;
+    return null;
   }
 
   const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';

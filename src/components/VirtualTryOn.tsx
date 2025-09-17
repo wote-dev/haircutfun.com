@@ -73,6 +73,14 @@ const haircutData: Record<string, { name: string; category: string; gender: 'mal
     gender: 'female',
     description: 'Sharp, clean lines for a modern sophisticated look'
   },
+  'wolf-cut': {
+    name: 'Wolf Cut',
+    category: 'Trendy',
+    gender: 'female',
+    description: 'Edgy mullet-shag hybrid with layers and texture',
+    isPremium: true,
+    popularity: 96
+  },
   // Male hairstyles
   'buzz-cut': {
     name: 'Buzz Cut',
@@ -145,7 +153,24 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
   const { canUseFree, hasPremium, remainingTries, needsUpgrade, useFreeTry, isAuthenticated, isLoading: usageLoading } = useUsageTracker();
   const resultSectionRef = useRef<HTMLDivElement>(null);
 
-  const selectedStyle = haircutData[selectedHaircut];
+  // Map trending haircut names to haircutData keys
+  const mapHaircutNameToKey = (name: string): string => {
+    const nameToKeyMap: Record<string, string> = {
+      'Wolf Cut': 'wolf-cut',
+      'Curtain Bangs': 'curtain-bangs',
+      'Modern Shag': 'shag-modern',
+      'Pixie Cut': 'pixie-cut',
+      'Textured Crop': 'textured-crop',
+      'Side Part': 'side-part',
+      'Quiff': 'quiff',
+      'Undercut Fade': 'undercut-fade'
+    };
+    
+    return nameToKeyMap[name] || selectedHaircut;
+  };
+
+  const haircutKey = mapHaircutNameToKey(selectedHaircut);
+  const selectedStyle = haircutData[haircutKey];
 
   useEffect(() => {
     generateHaircutImage();
