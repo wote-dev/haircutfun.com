@@ -141,107 +141,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = async () => {
+    console.log('AuthProvider: Starting sign out process');
+    
+    // Clear local state immediately for instant UI feedback
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setSubscription(null);
+    setUsage(null);
+    
     try {
-      console.log('AuthProvider: Starting sign out process');
       const supabase = getSupabase();
       
-      // Sign out from Supabase first
+      // Sign out from Supabase
       console.log('AuthProvider: Calling Supabase signOut');
-      const { error } = await supabase.auth.signOut({
-        scope: 'global' // This ensures sign out from all sessions
-      });
-      
-      if (error) {
-        console.error('AuthProvider: Supabase signOut error:', error);
-        // Continue with cleanup even if there's an error
-      } else {
-        console.log('AuthProvider: Supabase signOut successful');
-      }
-      
-      // Clear all Supabase-related localStorage keys
-      if (typeof window !== 'undefined') {
-        console.log('AuthProvider: Clearing all localStorage data');
-        
-        // Clear our custom auth redirect
-        localStorage.removeItem('auth_redirect_to');
-        
-        // Clear all Supabase-related keys
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
-            keysToRemove.push(key);
-          }
-        }
-        
-        keysToRemove.forEach(key => {
-          localStorage.removeItem(key);
-          console.log(`AuthProvider: Removed localStorage key: ${key}`);
-        });
-        
-        // Also clear sessionStorage
-        const sessionKeysToRemove = [];
-        for (let i = 0; i < sessionStorage.length; i++) {
-          const key = sessionStorage.key(i);
-          if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
-            sessionKeysToRemove.push(key);
-          }
-        }
-        
-        sessionKeysToRemove.forEach(key => {
-          sessionStorage.removeItem(key);
-          console.log(`AuthProvider: Removed sessionStorage key: ${key}`);
-        });
-      }
-      
-      // Clear local state
-       console.log('AuthProvider: Clearing local state');
-       setUser(null);
-       setSession(null);
-       setProfile(null);
-       setSubscription(null);
-       setUsage(null);
-       
-       // Clear Supabase client cache and create fresh instance
-      console.log('AuthProvider: Clearing Supabase client cache');
-      clearClientCache();
-      // Create a fresh client instance to ensure clean state
-      const freshClient = createClient();
-       
-       console.log('AuthProvider: Sign out process completed successfully');
+      await supabase.auth.signOut({ scope: 'global' });
+      console.log('AuthProvider: Supabase signOut completed');
       
     } catch (error) {
-      console.error('AuthProvider: Error during sign out:', error);
-      
-      // Even if there's an error, clear everything locally
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setSubscription(null);
-      setUsage(null);
-      
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_redirect_to');
-        // Clear Supabase keys even on error
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-       }
-       
-       // Clear the Supabase client cache even on error
-       console.log('AuthProvider: Clearing Supabase client cache after error');
-       clearClientCache();
-       // Create a fresh client instance
-       const freshClient = createClient();
-       
-       console.log('AuthProvider: Forced local cleanup completed');
-       // Don't throw the error - we want the UI to update even if there was a network issue
+      console.error('AuthProvider: Supabase signOut error:', error);
+      // Continue with cleanup even if Supabase fails
     }
+    
+    // Clear all storage regardless of Supabase result
+    if (typeof window !== 'undefined') {
+      console.log('AuthProvider: Clearing all storage');
+      
+      // Clear our custom keys
+      localStorage.removeItem('auth_redirect_to');
+      
+      // Clear all Supabase-related keys
+      const allKeys = Object.keys(localStorage);
+      allKeys.forEach(key => {
+        if (key.startsWith('sb-') || key.includes('supabase')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Clear sessionStorage too
+      const sessionKeys = Object.keys(sessionStorage);
+      sessionKeys.forEach(key => {
+        if (key.startsWith('sb-') || key.includes('supabase')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    }
+    
+    // Clear Supabase client cache
+    console.log('AuthProvider: Clearing Supabase client cache');
+    clearClientCache();
+    
+    console.log('AuthProvider: Sign out process completed');
   };
 
   useEffect(() => {

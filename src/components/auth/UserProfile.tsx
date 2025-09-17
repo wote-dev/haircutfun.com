@@ -82,16 +82,28 @@ export function UserProfile() {
     };
   }, [isOpen]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('UserProfile: Sign out button clicked!');
+    
     try {
       console.log('UserProfile: Initiating sign out');
       setIsOpen(false); // Close dropdown immediately for better UX
+      
+      console.log('UserProfile: Calling signOut function...');
       await signOut();
-      console.log('UserProfile: Sign out completed');
+      console.log('UserProfile: Sign out completed successfully');
+      
+      // Force a page reload to ensure clean state
+      window.location.href = '/';
+      
     } catch (error) {
       console.error('UserProfile: Error signing out:', error);
-      // Even if there's an error, the AuthProvider will handle cleanup and redirect
-      // So we don't need to show an error message to the user
+      // Force cleanup even on error
+      setIsOpen(false);
+      window.location.href = '/';
     }
   };
 
