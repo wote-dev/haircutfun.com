@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the origin for success/cancel URLs
-    const origin = request.headers.get('origin') || 'http://localhost:3000';
+    // Get the origin for success/cancel URLs (port-aware)
+    const { origin } = new URL(request.url);
     
     const successUrl = `${origin}/dashboard?success=true&plan=${planType}`;
     const cancelUrl = `${origin}/pricing?canceled=true`;
@@ -44,8 +44,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Checkout error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to create checkout session';
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: message },
       { status: 500 }
     );
   }

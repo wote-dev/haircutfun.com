@@ -26,11 +26,28 @@ export function useStripe() {
         body: JSON.stringify({ planType }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
+        // Read body once and try to extract a useful error
+        const raw = await response.text();
+        let message = 'Failed to create checkout session';
+        try {
+          const parsed = raw ? JSON.parse(raw) : null;
+          if (parsed && typeof parsed.error === 'string' && parsed.error.length > 0) {
+            message = parsed.error;
+          }
+        } catch {
+          // Not JSON, fall back to raw text if present
+          if (raw && raw.trim().length > 0) {
+            message = raw;
+          } else {
+            message = `HTTP ${response.status}`;
+          }
+        }
+        console.error('Checkout API error:', { status: response.status, body: raw });
+        throw new Error(message);
       }
+
+      const data = await response.json();
 
       // Redirect to Stripe Checkout
       if (data.url) {

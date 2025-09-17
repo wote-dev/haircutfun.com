@@ -9,10 +9,10 @@ export function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
     }
     
-    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-08-27.basil',
-      typescript: true,
-    });
+    // Initialize Stripe without forcing an invalid/future API version.
+    // This uses the account's default API version set in the Stripe Dashboard,
+    // ensuring compatibility with the installed stripe SDK.
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
   }
   
   return stripeInstance;
