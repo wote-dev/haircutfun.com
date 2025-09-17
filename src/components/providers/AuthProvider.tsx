@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { createClient, clearClientCache } from '../../lib/supabase/client';
 import { Database } from '../../lib/types/database';
@@ -36,6 +37,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -191,7 +193,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('AuthProvider: Clearing Supabase client cache');
     clearClientCache();
     
-    console.log('AuthProvider: Sign out process completed');
+    console.log('AuthProvider: Sign out process completed, refreshing router to clear cache');
+    router.refresh();
   };
 
   useEffect(() => {
