@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { createClient, clearClientCache } from '../../lib/supabase/client';
 import { Database } from '../../lib/types/database';
+import { useRouter } from 'next/navigation';
 
 type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
 type Subscription = Database['public']['Tables']['subscriptions']['Row'];
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [usage, setUsage] = useState<UsageTracking | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const router = useRouter();
   
   // Lazy Supabase client initialization
   const getSupabase = () => createClient();
@@ -142,192 +144,209 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = async () => {
-    console.log('AuthProvider: Starting MIDDLEWARE-AWARE sign out process');
+    console.log('AuthProvider: Starting sign out process');
     setIsSigningOut(true);
     
     try {
-      // STEP 1: Set sign-out flag BEFORE doing anything else
-      // This tells middleware to skip session restoration on next request
-      if (typeof window !== 'undefined') {
-        console.log('AuthProvider: Setting sign-out flag for middleware');
-        document.cookie = '__signout_flag=true;path=/;max-age=60';
-      }
-      
-      // STEP 2: Clear local state to immediately update UI
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setSubscription(null);
-      setUsage(null);
-      
       const supabase = getSupabase();
       
-      // STEP 3: Sign out from Supabase with global scope
-      console.log('AuthProvider: Calling Supabase signOut with global scope');
+      // Sign out from Supabase FIRST (client/local)
+      console.log('AuthProvider: Calling Supabase signOut');
       await supabase.auth.signOut({ scope: 'global' });
       console.log('AuthProvider: Supabase signOut completed');
-      
-      // STEP 4: Clear Supabase client cache
-      console.log('AuthProvider: Clearing Supabase client cache');
-      clearClientCache();
-      
-      // STEP 5: Redirect to home page (middleware will handle the rest)
-      console.log('AuthProvider: Redirecting to home page');
-      window.location.href = '/';
+
+      // Also clear the server-side httpOnly cookies via API route
+      try {
+        await fetch('/api/auth/signout', { method: 'POST', credentials: 'include' });
+        console.log('AuthProvider: Server-side signOut completed');
+      } catch (serverSignOutError) {
+        console.error('AuthProvider: Server signOut error:', serverSignOutError);
+      }
       
     } catch (error) {
-      console.error('AuthProvider: Sign out error:', error);
-      // Even on error, ensure local state is cleared and redirect
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setSubscription(null);
-      setUsage(null);
-      
-      // Redirect even on error (middleware will handle cookie clearing)
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
-    } finally {
-      setIsSigningOut(false);
+      console.error('AuthProvider: Supabase signOut error:', error);
+      // Continue with cleanup even if Supabase fails
     }
+    
+    // Clear all storage aggressively
+    if (typeof window !== 'undefined') {
+      console.log('AuthProvider: Clearing all storage');
+      
+      // Clear our custom keys
+      localStorage.removeItem('auth_redirect_to');
+      localStorage.removeItem('auth_callback_in_progress');
+      
+      // Get all storage keys before clearing
+      const localKeys = Object.keys(localStorage);
+      const sessionKeys = Object.keys(sessionStorage);
+      
+      // Clear ALL Supabase-related keys more aggressively
+      localKeys.forEach(key => {
+        if (key.startsWith('sb-') || 
+            key.includes('supabase') || 
+            key.includes('auth') ||
+            key.includes('session') ||
+            key.includes('token')) {
+          console.log('AuthProvider: Removing localStorage key:', key);
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Clear sessionStorage too
+      sessionKeys.forEach(key => {
+        if (key.startsWith('sb-') || 
+            key.includes('supabase') || 
+            key.includes('auth') ||
+            key.includes('session') ||
+            key.includes('token')) {
+          console.log('AuthProvider: Removing sessionStorage key:', key);
+          sessionStorage.removeItem(key);
+        }
+      });
+      
+      // Also clear any cookies that might be set - be more aggressive
+      console.log('AuthProvider: Clearing all cookies');
+      const cookies = document.cookie.split(";");
+      console.log('AuthProvider: Found cookies:', cookies);
+      
+      cookies.forEach(function(c) { 
+        const eqPos = c.indexOf("=");
+        const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+        console.log('AuthProvider: Clearing cookie:', name);
+        
+        // Clear for multiple paths and domains
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + window.location.hostname;
+      });
+    }
+    
+    // Clear Supabase client cache
+    console.log('AuthProvider: Clearing Supabase client cache');
+    clearClientCache();
+    
+    // Clear local state AFTER Supabase operations
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setSubscription(null);
+    setUsage(null);
+    
+    console.log('AuthProvider: Sign out process completed');
+
+    // Refresh the route so any server components read cleared cookies/state
+    try {
+      router.refresh();
+    } catch (e) {
+      console.warn('AuthProvider: router.refresh failed, attempting hard reload');
+      if (typeof window !== 'undefined') window.location.reload();
+    }
+    
+    // Clear the signing out flag after a delay to prevent immediate re-auth
+    setTimeout(() => {
+      setIsSigningOut(false);
+    }, 2000);
   };
 
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth state listener');
+    let mounted = true;
     
-    const supabase = getSupabase();
-    
-    // Get initial session with aggressive validation
+    // Get initial session
     const getInitialSession = async () => {
       try {
-        console.log('AuthProvider: Getting initial session');
-        
-        // First, check if we have any auth-related storage that might be stale
-        if (typeof window !== 'undefined') {
-          const hasAuthStorage = Object.keys(localStorage).some(key => 
-            key.startsWith('sb-') || key.includes('auth') || key.includes('session')
-          );
-          
-          if (hasAuthStorage) {
-            console.log('AuthProvider: Found potential auth storage, validating...');
-          }
+        // Check if auth callback is in progress to avoid interference
+        if (typeof window !== 'undefined' && localStorage.getItem('auth_callback_in_progress')) {
+          console.log('AuthProvider: Auth callback in progress, skipping initial session check')
+          setLoading(false)
+          return
         }
         
-        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('AuthProvider: Getting initial session...')
+        const supabase = getSupabase();
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
         
         if (error) {
-          console.error('AuthProvider: Error getting initial session:', error);
-          // Clear any potentially corrupted storage
-          if (typeof window !== 'undefined') {
-            const localKeys = [...Object.keys(localStorage)];
-            localKeys.forEach(key => {
-              if (key.startsWith('sb-')) {
-                console.log('AuthProvider: Clearing corrupted storage key:', key);
-                localStorage.removeItem(key);
-              }
-            });
-          }
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setSubscription(null);
-          setUsage(null);
+          console.error('AuthProvider: Error getting session:', error);
           setLoading(false);
           return;
         }
         
-        console.log('AuthProvider: Initial session:', session ? 'exists' : 'null');
+        console.log('AuthProvider: Initial session:', initialSession ? 'Found' : 'None');
         
-        if (session && session.user) {
-          // Validate the session is actually valid
+        if (initialSession) {
+          setSession(initialSession);
+          setUser(initialSession.user);
+          console.log('AuthProvider: Fetching initial user data');
           try {
-            const { data: userData, error: userError } = await supabase.auth.getUser();
-            
-            if (userError || !userData.user) {
-              console.log('AuthProvider: Session validation failed, clearing state');
-              // Session is invalid, clear everything
-              await supabase.auth.signOut({ scope: 'global' });
-              setSession(null);
-              setUser(null);
-              setProfile(null);
-              setSubscription(null);
-              setUsage(null);
-            } else {
-              console.log('AuthProvider: Session validated successfully');
-              setSession(session);
-               setUser(session.user);
-               await fetchUserData(session.user.id);
-            }
-          } catch (validationError) {
-            console.error('AuthProvider: Session validation error:', validationError);
-            // Clear invalid session
-            setSession(null);
-            setUser(null);
-            setProfile(null);
-            setSubscription(null);
-            setUsage(null);
+            await fetchUserData(initialSession.user.id);
+            console.log('AuthProvider: Initial user data fetch completed');
+          } catch (fetchError) {
+            console.error('AuthProvider: Error fetching initial user data:', fetchError);
+          }
+        }
+        
+        if (mounted) {
+          console.log('AuthProvider: Setting loading to false after initial session check');
+          setLoading(false);
+          console.log('AuthProvider: Initial session check complete');
+        }
+      } catch (error) {
+        console.error('AuthProvider: Exception during initial session:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const supabase = getSupabase();
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        console.log('AuthProvider: Auth state change:', event, session ? 'Session exists' : 'No session');
+        
+        if (!mounted) return;
+        
+        // If we're in the middle of signing out, ignore auth state changes
+        if (isSigningOut && session) {
+          console.log('AuthProvider: Ignoring auth state change during sign out');
+          return;
+        }
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          console.log('AuthProvider: Fetching user data for authenticated user');
+          try {
+            await fetchUserData(session.user.id);
+            console.log('AuthProvider: User data fetch completed');
+          } catch (fetchError) {
+            console.error('AuthProvider: Error fetching user data on auth change:', fetchError);
           }
         } else {
-          console.log('AuthProvider: No valid session found');
-          setSession(null);
-          setUser(null);
+          console.log('AuthProvider: No session, clearing user data');
           setProfile(null);
           setSubscription(null);
           setUsage(null);
         }
-      } catch (error) {
-        console.error('AuthProvider: Error in getInitialSession:', error);
-        // On any error, ensure clean state
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        setSubscription(null);
-        setUsage(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    getInitialSession();
-    
-    // Listen for auth changes
-     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-      console.log('AuthProvider: Auth state change:', event, session ? 'session exists' : 'no session');
-      
-      // Handle sign-out events immediately
-      if (event === 'SIGNED_OUT' || !session) {
-        console.log('AuthProvider: Handling sign-out event');
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        setSubscription(null);
-        setUsage(null);
-        setLoading(false);
-        return;
-      }
-      
-      // Handle sign-in events
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        // Don't process sign-in events if we're in the middle of signing out
-        if (isSigningOut) {
-          console.log('AuthProvider: Ignoring sign-in event during sign-out process');
-          return;
-        }
         
-        console.log('AuthProvider: Processing sign-in event');
-        setSession(session);
-        setUser(session.user);
-        await fetchUserData(session.user.id);
-        setLoading(false);
+        if (mounted) {
+          console.log('AuthProvider: Setting loading to false after auth state change');
+          setLoading(false);
+        }
       }
-    });
-    
+    );
+
     return () => {
-      console.log('AuthProvider: Cleaning up auth state listener');
+      let _ = mounted; // silence linter if needed
+      mounted = false;
       authSubscription.unsubscribe();
     };
-  }, [isSigningOut]);
+  }, []);
 
   const value: AuthContextType = {
     user,

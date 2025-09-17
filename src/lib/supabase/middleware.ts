@@ -22,31 +22,6 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
-  // Check for sign-out flag - if present, clear all auth cookies and skip session restoration
-  const signOutFlag = request.cookies.get('__signout_flag')
-  if (signOutFlag) {
-    // Clear the sign-out flag and all auth-related cookies
-    supabaseResponse.cookies.delete('__signout_flag')
-    
-    // Clear all Supabase auth cookies
-    const authCookieNames = [
-      'sb-access-token',
-      'sb-refresh-token', 
-      'supabase-auth-token',
-      'supabase.auth.token'
-    ]
-    
-    // Get all cookies and clear any that look like Supabase auth cookies
-    const allCookies = request.cookies.getAll()
-    allCookies.forEach(cookie => {
-      if (cookie.name.includes('supabase') || cookie.name.includes('sb-') || authCookieNames.includes(cookie.name)) {
-        supabaseResponse.cookies.delete(cookie.name)
-      }
-    })
-    
-    return supabaseResponse
-  }
-
   const supabase = createServerClient(
     getSupabaseUrl(),
     getSupabaseAnonKey(),

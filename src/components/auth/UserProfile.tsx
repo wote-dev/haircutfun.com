@@ -20,14 +20,6 @@ export function UserProfile() {
     setMounted(true);
   }, []);
 
-  // Close dropdown when user signs out
-  useEffect(() => {
-    if (!user) {
-      setIsOpen(false);
-      setShowGallery(false);
-    }
-  }, [user]);
-
   // Update button position when dropdown opens or on scroll/resize
   const updatePosition = () => {
     if (buttonRef.current) {
@@ -96,18 +88,24 @@ export function UserProfile() {
     
     console.log('UserProfile: Sign out button clicked!');
     
-    // Close dropdown immediately for better UX
-    setIsOpen(false);
-    
     try {
+      console.log('UserProfile: Initiating sign out');
+      setIsOpen(false); // Close dropdown immediately for better UX
+      
       console.log('UserProfile: Calling signOut function...');
       await signOut();
       console.log('UserProfile: Sign out completed successfully');
       
+      // Let the auth state change handle the UI update naturally
+      // The AuthProvider will detect the session is gone and update the UI
+      
     } catch (error) {
       console.error('UserProfile: Error signing out:', error);
-      // On error, show a simple alert instead of forcing reload
-      alert('Sign out failed. Please try again.');
+      setIsOpen(false);
+      // On error, force a reload as fallback
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
     }
   };
 
