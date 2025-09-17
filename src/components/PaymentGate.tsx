@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUsageTracker } from "@/hooks/useUsageTracker";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useStripe } from "@/hooks/useStripe";
@@ -19,6 +20,8 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
   const { hasPremium, remainingTries } = useUsageTracker();
   const { createCheckoutSession, isLoading } = useStripe();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const router = useRouter();
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/try-on';
 
   // If user has premium access, render children
   if (hasPremium) {
@@ -105,7 +108,10 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
           <div className="space-y-3">
             {!user ? (
               <>
-                <SignInButton className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <SignInButton 
+                  className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  redirectTo={currentPath}
+                >
                   Sign In to Upgrade
                 </SignInButton>
                 <Link 

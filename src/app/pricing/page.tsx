@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, Star, Zap, Crown } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useStripe } from "@/hooks/useStripe";
@@ -93,8 +94,10 @@ const faqs = [
 
 export default function PricingPage() {
   const { user } = useAuth();
-  const { createCheckoutSession, isLoading, error } = useStripe();
+  const { createCheckoutSession, isLoading } = useStripe();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const router = useRouter();
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/pricing';
 
   const handlePlanSelect = async (planType: 'pro' | 'premium') => {
     if (!user) {
@@ -125,7 +128,10 @@ export default function PricingPage() {
 
     if (!user) {
       return (
-        <SignInButton className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold transition-all duration-300 ${tier.buttonStyle}`}>
+        <SignInButton 
+          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold transition-all duration-300 ${tier.buttonStyle}`}
+          redirectTo={currentPath}
+        >
           Sign In to Subscribe
         </SignInButton>
       );

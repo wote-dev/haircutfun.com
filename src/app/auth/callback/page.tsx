@@ -8,6 +8,7 @@ function AuthCallbackContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
+  const [status, setStatus] = useState('Processing authentication...')
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -16,7 +17,10 @@ function AuthCallbackContent() {
 
       if (error) {
         console.error('Auth error:', error)
-        router.push('/auth/error?message=' + encodeURIComponent(error))
+        setStatus('Authentication failed')
+        setTimeout(() => {
+          router.push('/auth/error?message=' + encodeURIComponent(error))
+        }, 1000)
         return
       }
 
@@ -24,26 +28,47 @@ function AuthCallbackContent() {
         const supabase = createClient()
         
         try {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          setStatus('Exchanging authorization code...')
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
           
           if (exchangeError) {
             console.error('Code exchange error:', exchangeError)
-            router.push('/auth/error?message=' + encodeURIComponent(exchangeError.message))
+            setStatus('Authentication failed')
+            setTimeout(() => {
+              router.push('/auth/error?message=' + encodeURIComponent(exchangeError.message))
+            }, 1000)
             return
           }
           
-          // Successful authentication - redirect to home or intended page
-          router.push('/')
+          if (data.session) {
+            setStatus('Authentication successful! Redirecting...')
+            
+            // Wait a moment to ensure the session is properly established
+            // and the AuthProvider can pick it up
+            setTimeout(() => {
+              // Get the intended redirect URL from localStorage or default to home
+              const redirectTo = localStorage.getItem('auth_redirect_to') || '/'
+              localStorage.removeItem('auth_redirect_to')
+              router.push(redirectTo)
+              setIsLoading(false)
+            }, 1500)
+          } else {
+            throw new Error('No session received after code exchange')
+          }
         } catch (err) {
           console.error('Unexpected error during auth callback:', err)
-          router.push('/auth/error?message=Authentication failed')
+          setStatus('Authentication failed')
+          setTimeout(() => {
+            router.push('/auth/error?message=Authentication failed')
+          }, 1000)
         }
       } else {
         // No code provided
-        router.push('/auth/error?message=No authorization code provided')
+        setStatus('No authorization code provided')
+        setTimeout(() => {
+          router.push('/auth/error?message=No authorization code provided')
+        }, 1000)
       }
-      
-      setIsLoading(false)
     }
 
     handleAuthCallback()
@@ -51,10 +76,14 @@ function AuthCallbackContent() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Completing authentication...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-6"></div>
+          <h2 className="text-2xl font-semibold text-foreground mb-2">Almost there!</h2>
+          <p className="text-muted-foreground text-lg">{status}</p>
+          <div className="mt-6 w-full bg-muted rounded-full h-2">
+            <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '70%' }}></div>
+          </div>
         </div>
       </div>
     )

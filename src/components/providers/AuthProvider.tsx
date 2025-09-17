@@ -16,7 +16,7 @@ interface AuthContextType {
   subscription: Subscription | null;
   usage: UsageTracking | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (redirectTo?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
@@ -89,8 +89,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (redirectTo?: string) => {
     try {
+      // Store the intended redirect URL in localStorage
+      if (redirectTo) {
+        localStorage.setItem('auth_redirect_to', redirectTo);
+      } else if (typeof window !== 'undefined') {
+        // Store current page as fallback
+        localStorage.setItem('auth_redirect_to', window.location.pathname + window.location.search);
+      }
+      
       const supabase = getSupabase();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -130,12 +138,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
+    let mounted = true;
+    
     // Get initial session
     const getInitialSession = async () => {
       try {
         console.log('AuthProvider: Getting initial session...');
         const supabase = getSupabase();
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
         
         if (error) {
           console.error('AuthProvider: Error getting session:', error);
@@ -148,14 +160,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (initialSession) {
           setSession(initialSession);
           setUser(initialSession.user);
-          await fetchUserData(initialSession.user.id);
+          try {
+            await fetchUserData(initialSession.user.id);
+          } catch (fetchError) {
+            console.error('AuthProvider: Error fetching user data:', fetchError);
+          }
         }
         
-        setLoading(false);
-        console.log('AuthProvider: Initial session check complete');
+        if (mounted) {
+          setLoading(false);
+          console.log('AuthProvider: Initial session check complete');
+        }
       } catch (error) {
         console.error('AuthProvider: Exception during initial session:', error);
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -165,22 +185,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const supabase = getSupabase();
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
+        console.log('AuthProvider: Auth state change:', event, session ? 'Session exists' : 'No session');
+        
+        if (!mounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchUserData(session.user.id);
+          try {
+            await fetchUserData(session.user.id);
+          } catch (fetchError) {
+            console.error('AuthProvider: Error fetching user data on auth change:', fetchError);
+          }
         } else {
           setProfile(null);
           setSubscription(null);
           setUsage(null);
         }
         
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
     return () => {
+      mounted = false;
       authSubscription.unsubscribe();
     };
   }, []);

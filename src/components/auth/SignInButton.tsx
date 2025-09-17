@@ -6,16 +6,17 @@ import { useAuth } from '../providers/AuthProvider';
 interface SignInButtonProps {
   className?: string;
   children?: React.ReactNode;
+  redirectTo?: string;
 }
 
-export function SignInButton({ className = '', children }: SignInButtonProps) {
+export function SignInButton({ className = '', children, redirectTo }: SignInButtonProps) {
   const { signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
-      await signInWithGoogle();
+      await signInWithGoogle(redirectTo);
     } catch (error) {
       console.error('Sign in failed:', error);
       // You could add toast notification here
