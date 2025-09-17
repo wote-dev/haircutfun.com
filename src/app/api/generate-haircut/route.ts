@@ -29,6 +29,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Check if user is authenticated
+    if (!user) {
+      console.log('API: Unauthenticated user attempted to generate haircut');
+      return NextResponse.json({ 
+        error: 'Authentication required', 
+        details: 'Please sign in to generate haircut images.' 
+      }, { status: 401 });
+    }
+
     let currentUsage: { generations_used: number; plan_limit: number; } | null = null;
     const currentMonth = getCurrentMonth();
 
@@ -72,7 +81,13 @@ export async function POST(request: NextRequest) {
         currentUsage = newUsage;
       } else if (usageError) {
         console.error('Error fetching usage data:', usageError);
-        return NextResponse.json({ details: 'Failed to retrieve usage data.' }, { status: 500 });
+        // Provide more specific error handling
+        if (usageError.code === 'PGRST301') {
+          return NextResponse.json({ details: 'Database connection error. Please try again.' }, { status: 503 });
+        }
+        return NextResponse.json({ 
+          details: 'Failed to retrieve usage data. Please try again or contact support if the issue persists.' 
+        }, { status: 500 });
       }
 
       // Update plan_limit if it has changed (e.g., user upgraded)
