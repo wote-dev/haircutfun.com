@@ -200,7 +200,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        console.log('AuthProvider: Getting initial session...');
+        // Check if auth callback is in progress to avoid interference
+        if (typeof window !== 'undefined' && localStorage.getItem('auth_callback_in_progress')) {
+          console.log('AuthProvider: Auth callback in progress, skipping initial session check')
+          setLoading(false)
+          return
+        }
+        
+        console.log('AuthProvider: Getting initial session...')
         const supabase = getSupabase();
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         

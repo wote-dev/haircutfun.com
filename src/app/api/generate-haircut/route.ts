@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     const { userPhoto, haircutStyle, haircutDescription, isFirstTry } = await request.json();
 
+    console.log('API: Request received - user:', !!user, 'isFirstTry:', isFirstTry);
+
     if (!userPhoto || !haircutStyle) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -34,22 +36,31 @@ export async function POST(request: NextRequest) {
 
     // Handle authenticated users
     if (user) {
-      const { data: usageData, error: usageError } = await supabase
-        .from('usage_tracking')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('month_year', currentMonth)
-        .single();
+      try {
+        const { data: usageData, error: usageError } = await supabase
+          .from('usage_tracking')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('month_year', currentMonth)
+          .single();
 
-      const { data: subscriptionData } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        const { data: subscriptionData, error: subscriptionError } = await supabase
+          .from('subscriptions')
+          .select('status')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
 
-      const isPremium = subscriptionData?.status === 'active';
+        // Check for database connection issues
+        if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+          console.error('Database connection error (subscriptions):', subscriptionError);
+          return NextResponse.json({ 
+            details: 'Database connection error. Please try again later.' 
+          }, { status: 503 });
+        }
+
+        const isPremium = subscriptionData?.status === 'active';
       const maxGenerations = isPremium ? 999999 : MAX_FREE_TRIES;
 
       currentUsage = usageData;
@@ -73,6 +84,9 @@ export async function POST(request: NextRequest) {
         currentUsage = newUsage;
       } else if (usageError) {
         console.error('Error fetching usage data:', usageError);
+        console.error('Error code:', usageError.code);
+        console.error('Error message:', usageError.message);
+        console.error('Error details:', usageError.details);
         // Provide more specific error handling
         if (usageError.code === 'PGRST301') {
           return NextResponse.json({ details: 'Database connection error. Please try again.' }, { status: 503 });
@@ -98,8 +112,14 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      if (currentUsage && currentUsage.generations_used >= maxGenerations) {
-        return NextResponse.json({ details: 'You have reached your generation limit. Please upgrade for more.' }, { status: 402 });
+        if (currentUsage && currentUsage.generations_used >= maxGenerations) {
+          return NextResponse.json({ details: 'You have reached your generation limit. Please upgrade for more.' }, { status: 402 });
+        }
+      } catch (error) {
+        console.error('Database error for authenticated user:', error);
+        return NextResponse.json({ 
+          details: 'Database connection error. Please try again later.' 
+        }, { status: 503 });
       }
     } else {
       // Handle non-authenticated users

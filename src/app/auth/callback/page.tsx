@@ -32,10 +32,13 @@ function AuthCallbackContent() {
           setStatus('Exchanging authorization code...')
           console.log('Auth callback: Starting code exchange with code:', code.substring(0, 10) + '...')
           
-          // Add timeout to prevent hanging
+          // Set flag to prevent AuthProvider interference during callback
+          localStorage.setItem('auth_callback_in_progress', 'true')
+          
+          // Add timeout to prevent hanging (increased to 30 seconds for better reliability)
           const exchangePromise = supabase.auth.exchangeCodeForSession(code)
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Code exchange timeout after 10 seconds')), 10000)
+            setTimeout(() => reject(new Error('Code exchange timeout after 30 seconds')), 30000)
           )
           
           const { data, error: exchangeError } = await Promise.race([exchangePromise, timeoutPromise]) as any
@@ -49,6 +52,10 @@ function AuthCallbackContent() {
             })
             setStatus(`Authentication failed: ${exchangeError.message}`)
             setIsLoading(false)
+            
+            // Clear the callback flag
+            localStorage.removeItem('auth_callback_in_progress')
+            
             setTimeout(() => {
               router.push('/auth/error?message=' + encodeURIComponent(exchangeError.message))
             }, 1000)
@@ -71,6 +78,9 @@ function AuthCallbackContent() {
               console.log('Auth callback: Redirecting to:', redirectTo)
               setIsLoading(false)
               
+              // Clear the callback flag
+              localStorage.removeItem('auth_callback_in_progress')
+              
               // Use replace instead of push to avoid back button issues
               router.replace(redirectTo)
             } else {
@@ -83,6 +93,10 @@ function AuthCallbackContent() {
           console.error('Unexpected error during auth callback:', err)
           setStatus('Authentication failed')
           setIsLoading(false)
+          
+          // Clear the callback flag
+          localStorage.removeItem('auth_callback_in_progress')
+          
           setTimeout(() => {
             router.push('/auth/error?message=Authentication failed')
           }, 1000)
