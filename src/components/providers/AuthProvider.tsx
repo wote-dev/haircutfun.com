@@ -202,9 +202,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
        setSubscription(null);
        setUsage(null);
        
-       // Clear the Supabase client cache to ensure fresh instance
-       console.log('AuthProvider: Clearing Supabase client cache');
-       clearClientCache();
+       // Clear Supabase client cache and create fresh instance
+      console.log('AuthProvider: Clearing Supabase client cache');
+      clearClientCache();
+      // Create a fresh client instance to ensure clean state
+      const freshClient = createClient();
        
        console.log('AuthProvider: Sign out process completed successfully');
       
@@ -234,6 +236,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
        // Clear the Supabase client cache even on error
        console.log('AuthProvider: Clearing Supabase client cache after error');
        clearClientCache();
+       // Create a fresh client instance
+       const freshClient = createClient();
        
        console.log('AuthProvider: Forced local cleanup completed');
        // Don't throw the error - we want the UI to update even if there was a network issue

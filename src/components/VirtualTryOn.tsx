@@ -173,27 +173,13 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
   const selectedStyle = haircutData[haircutKey];
 
   useEffect(() => {
-    // Only generate if we have authentication data loaded and user is authenticated
-    if (!usageLoading && isAuthenticated) {
+    // Generate if usage data is loaded (for both authenticated and non-authenticated users)
+    if (!usageLoading) {
       generateHaircutImage();
-    } else if (!usageLoading && !isAuthenticated) {
-      // User is not authenticated, stop processing and clear any generated image
-      console.log('VirtualTryOn: User not authenticated, stopping image generation');
-      setIsProcessing(false);
-      setGeneratedImage(null);
-      setError('Please sign in to generate haircut images.');
     }
-  }, [userPhoto, selectedHaircut, isAuthenticated, usageLoading]);
+  }, [userPhoto, selectedHaircut, usageLoading]);
 
   const generateHaircutImage = async () => {
-    // Early return if user is not authenticated
-    if (!isAuthenticated) {
-      console.log('VirtualTryOn: Cannot generate image - user not authenticated');
-      setIsProcessing(false);
-      setError('Please sign in to generate haircut images.');
-      return;
-    }
-
     // Check if haircut is premium and user doesn't have access
     if (selectedStyle?.isPremium && !hasPremium) {
       setPremiumFeatureName(selectedStyle.name);
@@ -202,7 +188,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       return;
     }
 
-    // Check if user can generate images
+    // Check if user can generate images (both authenticated and non-authenticated users get free tries)
     if (!canUseFree && !hasPremium) {
       setShowLimitPrompt(true);
       setIsProcessing(false);

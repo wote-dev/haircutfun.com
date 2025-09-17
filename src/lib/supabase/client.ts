@@ -19,12 +19,7 @@ function getSupabaseAnonKey(): string {
 }
 
 export function createClient() {
-  // Return cached instance if available
-  if (supabaseInstance) {
-    return supabaseInstance;
-  }
-
-  // Create new instance with runtime validation and proper storage configuration
+  // Always create a fresh instance to avoid caching issues with auth state
   supabaseInstance = createBrowserClient(
     getSupabaseUrl(),
     getSupabaseAnonKey(),
