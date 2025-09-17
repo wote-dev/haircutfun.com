@@ -18,6 +18,7 @@ function AuthCallbackContent() {
       if (error) {
         console.error('Auth error:', error)
         setStatus('Authentication failed')
+        setIsLoading(false)
         setTimeout(() => {
           router.push('/auth/error?message=' + encodeURIComponent(error))
         }, 1000)
@@ -34,6 +35,7 @@ function AuthCallbackContent() {
           if (exchangeError) {
             console.error('Code exchange error:', exchangeError)
             setStatus('Authentication failed')
+            setIsLoading(false)
             setTimeout(() => {
               router.push('/auth/error?message=' + encodeURIComponent(exchangeError.message))
             }, 1000)
@@ -41,23 +43,33 @@ function AuthCallbackContent() {
           }
           
           if (data.session) {
+            console.log('Auth callback: Session established successfully')
             setStatus('Authentication successful! Redirecting...')
             
-            // Wait a moment to ensure the session is properly established
-            // and the AuthProvider can pick it up
-            setTimeout(() => {
+            // Validate that the session is actually accessible
+            const { data: sessionCheck } = await supabase.auth.getSession()
+            if (sessionCheck.session) {
+              console.log('Auth callback: Session validation successful')
+              
               // Get the intended redirect URL from localStorage or default to home
               const redirectTo = localStorage.getItem('auth_redirect_to') || '/'
               localStorage.removeItem('auth_redirect_to')
-              router.push(redirectTo)
+              
+              console.log('Auth callback: Redirecting to:', redirectTo)
               setIsLoading(false)
-            }, 1500)
+              
+              // Use replace instead of push to avoid back button issues
+              router.replace(redirectTo)
+            } else {
+              throw new Error('Session validation failed after code exchange')
+            }
           } else {
             throw new Error('No session received after code exchange')
           }
         } catch (err) {
           console.error('Unexpected error during auth callback:', err)
           setStatus('Authentication failed')
+          setIsLoading(false)
           setTimeout(() => {
             router.push('/auth/error?message=Authentication failed')
           }, 1000)
@@ -65,6 +77,7 @@ function AuthCallbackContent() {
       } else {
         // No code provided
         setStatus('No authorization code provided')
+        setIsLoading(false)
         setTimeout(() => {
           router.push('/auth/error?message=No authorization code provided')
         }, 1000)
