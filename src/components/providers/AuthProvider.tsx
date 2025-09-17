@@ -48,38 +48,61 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUserData = async (userId: string) => {
     try {
+      console.log('AuthProvider: Fetching user data for:', userId);
       const supabase = getSupabase();
       
-      // Fetch user profile
-      const { data: profileData } = await supabase
+      // Fetch user profile (might not exist for new users)
+      const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
       
-      // Fetch subscription
-      const { data: subscriptionData } = await supabase
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('AuthProvider: Error fetching profile:', profileError);
+      }
+      
+      // Fetch subscription (might not exist for new users)
+      const { data: subscriptionData, error: subscriptionError } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       
-      // Fetch current month usage
+      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+        console.error('AuthProvider: Error fetching subscription:', subscriptionError);
+      }
+      
+      // Fetch current month usage (might not exist for new users)
       const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
-      const { data: usageData } = await supabase
+      const { data: usageData, error: usageError } = await supabase
         .from('usage_tracking')
         .select('*')
         .eq('user_id', userId)
         .eq('month_year', currentMonth)
-        .single();
+        .maybeSingle();
       
-      setProfile(profileData);
-      setSubscription(subscriptionData);
-      setUsage(usageData);
+      if (usageError && usageError.code !== 'PGRST116') {
+        console.error('AuthProvider: Error fetching usage:', usageError);
+      }
+      
+      console.log('AuthProvider: User data fetched successfully', {
+        profile: !!profileData,
+        subscription: !!subscriptionData,
+        usage: !!usageData
+      });
+      
+      setProfile(profileData || null);
+      setSubscription(subscriptionData || null);
+      setUsage(usageData || null);
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('AuthProvider: Unexpected error fetching user data:', error);
+      // Set to null values so the app can continue
+      setProfile(null);
+      setSubscription(null);
+      setUsage(null);
     }
   };
 
@@ -100,10 +123,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       
       const supabase = getSupabase();
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      console.log('AuthProvider: Initiating Google OAuth with redirect URL:', redirectUrl);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
           scopes: 'openid email profile',
         },
       });
@@ -116,23 +142,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = async () => {
     try {
+      console.log('AuthProvider: Starting sign out process');
       const supabase = getSupabase();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
       
-      // Clear local state
+      // First, clear local state immediately to provide instant feedback
+      console.log('AuthProvider: Clearing local state');
       setUser(null);
       setSession(null);
       setProfile(null);
       setSubscription(null);
       setUsage(null);
       
-      // Redirect to home page after successful sign out
+      // Clear any stored auth redirect
       if (typeof window !== 'undefined') {
-        window.location.href = '/';
+        localStorage.removeItem('auth_redirect_to');
+        console.log('AuthProvider: Cleared localStorage auth data');
+      }
+      
+      // Sign out from Supabase
+      console.log('AuthProvider: Calling Supabase signOut');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('AuthProvider: Supabase signOut error:', error);
+        throw error;
+      }
+      
+      console.log('AuthProvider: Supabase signOut successful');
+      
+      // Force a page reload to ensure complete cleanup
+      if (typeof window !== 'undefined') {
+        console.log('AuthProvider: Redirecting to home page');
+        // Use window.location.replace instead of href to prevent back button issues
+        window.location.replace('/');
       }
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('AuthProvider: Error during sign out:', error);
+      
+      // Even if there's an error, clear local state and redirect
+      // This ensures the user appears signed out even if there's a network issue
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setSubscription(null);
+      setUsage(null);
+      
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_redirect_to');
+        console.log('AuthProvider: Force redirecting to home page after error');
+        window.location.replace('/');
+      }
+      
       throw error;
     }
   };
@@ -160,14 +220,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (initialSession) {
           setSession(initialSession);
           setUser(initialSession.user);
+          console.log('AuthProvider: Fetching initial user data');
           try {
             await fetchUserData(initialSession.user.id);
+            console.log('AuthProvider: Initial user data fetch completed');
           } catch (fetchError) {
-            console.error('AuthProvider: Error fetching user data:', fetchError);
+            console.error('AuthProvider: Error fetching initial user data:', fetchError);
           }
         }
         
         if (mounted) {
+          console.log('AuthProvider: Setting loading to false after initial session check');
           setLoading(false);
           console.log('AuthProvider: Initial session check complete');
         }
@@ -193,18 +256,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('AuthProvider: Fetching user data for authenticated user');
           try {
             await fetchUserData(session.user.id);
+            console.log('AuthProvider: User data fetch completed');
           } catch (fetchError) {
             console.error('AuthProvider: Error fetching user data on auth change:', fetchError);
           }
         } else {
+          console.log('AuthProvider: No session, clearing user data');
           setProfile(null);
           setSubscription(null);
           setUsage(null);
         }
         
         if (mounted) {
+          console.log('AuthProvider: Setting loading to false after auth state change');
           setLoading(false);
         }
       }

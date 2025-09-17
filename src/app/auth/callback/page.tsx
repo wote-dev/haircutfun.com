@@ -30,11 +30,24 @@ function AuthCallbackContent() {
         
         try {
           setStatus('Exchanging authorization code...')
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          console.log('Auth callback: Starting code exchange with code:', code.substring(0, 10) + '...')
+          
+          // Add timeout to prevent hanging
+          const exchangePromise = supabase.auth.exchangeCodeForSession(code)
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Code exchange timeout after 10 seconds')), 10000)
+          )
+          
+          const { data, error: exchangeError } = await Promise.race([exchangePromise, timeoutPromise]) as any
           
           if (exchangeError) {
             console.error('Code exchange error:', exchangeError)
-            setStatus('Authentication failed')
+            console.error('Error details:', {
+              message: exchangeError.message,
+              status: exchangeError.status,
+              statusText: exchangeError.statusText
+            })
+            setStatus(`Authentication failed: ${exchangeError.message}`)
             setIsLoading(false)
             setTimeout(() => {
               router.push('/auth/error?message=' + encodeURIComponent(exchangeError.message))

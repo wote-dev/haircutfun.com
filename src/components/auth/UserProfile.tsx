@@ -84,10 +84,14 @@ export function UserProfile() {
 
   const handleSignOut = async () => {
     try {
+      console.log('UserProfile: Initiating sign out');
+      setIsOpen(false); // Close dropdown immediately for better UX
       await signOut();
-      setIsOpen(false);
+      console.log('UserProfile: Sign out completed');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('UserProfile: Error signing out:', error);
+      // Even if there's an error, the AuthProvider will handle cleanup and redirect
+      // So we don't need to show an error message to the user
     }
   };
 
