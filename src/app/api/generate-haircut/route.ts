@@ -23,24 +23,16 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const { userPhoto, haircutStyle, haircutDescription } = await request.json();
+    const { userPhoto, haircutStyle, haircutDescription, isFirstTry } = await request.json();
 
     if (!userPhoto || !haircutStyle) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Check if user is authenticated
-    if (!user) {
-      console.log('API: Unauthenticated user attempted to generate haircut');
-      return NextResponse.json({ 
-        error: 'Authentication required', 
-        details: 'Please sign in to generate haircut images.' 
-      }, { status: 401 });
-    }
-
     let currentUsage: { generations_used: number; plan_limit: number; } | null = null;
     const currentMonth = getCurrentMonth();
 
+    // Handle authenticated users
     if (user) {
       const { data: usageData, error: usageError } = await supabase
         .from('usage_tracking')
@@ -109,6 +101,20 @@ export async function POST(request: NextRequest) {
       if (currentUsage && currentUsage.generations_used >= maxGenerations) {
         return NextResponse.json({ details: 'You have reached your generation limit. Please upgrade for more.' }, { status: 402 });
       }
+    } else {
+      // Handle non-authenticated users
+      console.log('API: Non-authenticated user attempting to generate haircut, isFirstTry:', isFirstTry);
+      
+      // Allow non-authenticated users only if it's their first try
+      if (!isFirstTry) {
+        console.log('API: Non-authenticated user has already used their free try');
+        return NextResponse.json({ 
+          error: 'Free trial used', 
+          details: 'You\'ve used your free try! Sign up for Pro to get 25 monthly generations or Premium for 75 monthly generations.' 
+        }, { status: 402 });
+      }
+      
+      console.log('API: Allowing non-authenticated user their first free try');
     }
 
     const base64Data = userPhoto.includes(',') ? userPhoto.split(',')[1] : userPhoto;

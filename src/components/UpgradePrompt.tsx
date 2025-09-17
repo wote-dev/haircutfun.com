@@ -53,6 +53,12 @@ export function UpgradePrompt({
   const getContent = () => {
     switch (trigger) {
       case 'limit_reached':
+        if (!user) {
+          return {
+            title: title || "Free Try Used!",
+            description: description || "You've used your free haircut generation! Sign up for Pro to get 25 monthly generations or Premium for 75 monthly generations."
+          };
+        }
         return {
           title: title || "Free Tries Used Up!",
           description: description || "You've used all your free haircut generations. Upgrade to Pro for 25 monthly generations or Premium for 75 monthly generations."
@@ -89,7 +95,9 @@ export function UpgradePrompt({
             </div>
             <div>
               <h4 className="font-semibold text-foreground text-sm">{content.title}</h4>
-              <p className="text-xs text-muted-foreground">{remainingTries} free tries left</p>
+              <p className="text-xs text-muted-foreground">
+                {!user ? "Sign up to continue" : `${remainingTries} free tries left`}
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -161,7 +169,10 @@ export function UpgradePrompt({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
               <p className="text-orange-800 text-sm font-medium">
-                You've used all {2} free generations
+                {!user 
+                  ? "You've used your 1 free generation" 
+                  : `You've used all ${remainingTries + 1} free generations`
+                }
               </p>
             </div>
           </div>

@@ -214,17 +214,24 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // --- THIS IS THE FIX ---
-          // The key was changed from 'imageData' to 'userPhoto' to match the API
           userPhoto: userPhoto,
           haircutStyle: selectedStyle?.name,
           haircutDescription: selectedStyle?.description,
+          isFirstTry: !isAuthenticated && remainingTries === 1, // First try for non-authenticated users
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle specific error cases
+        if (response.status === 402 && data?.error === 'Free trial used') {
+          // Non-authenticated user has used their free try
+          setShowLimitPrompt(true);
+          setIsProcessing(false);
+          return;
+        }
+        
         // Use the detailed error message from the API if available
         const errorMessage = data?.details || data?.error || `HTTP ${response.status}: Failed to generate haircut`;
         throw new Error(errorMessage);
@@ -233,6 +240,21 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       if (data.success && data.imageData) {
         setGeneratedImage(`data:image/jpeg;base64,${data.imageData}`);
         setDescription(''); // Clear any previous description
+        
+        // Update localStorage for non-authenticated users after successful generation
+        if (!isAuthenticated && !hasPremium) {
+          try {
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const localData = {
+              freeTriesUsed: 1, // Mark that they've used their free try
+              lastUsed: new Date().toISOString(),
+              monthYear: currentMonth
+            };
+            localStorage.setItem('haircutfun_usage', JSON.stringify(localData));
+          } catch (error) {
+            console.error('Error updating localStorage:', error);
+          }
+        }
         
         // Scroll to the result section after a brief delay to ensure the image is rendered
         setTimeout(() => {
