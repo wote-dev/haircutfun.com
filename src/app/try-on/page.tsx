@@ -87,11 +87,14 @@ function TryOnPageContent() {
             {['upload', 'gender', 'select', 'preview'].map((step, index) => {
               const stepNumber = index + 1;
               const isActive = currentStep === step;
+              
+              // Only mark steps as completed if they were actually completed by user interaction
+              // Don't auto-complete steps when preselected values exist
               const isCompleted = 
-                (step === 'upload' && uploadedPhoto) ||
-                (step === 'gender' && selectedGender) ||
-                (step === 'select' && selectedHaircut) ||
-                (step === 'preview' && currentStep === 'preview');
+                (step === 'upload' && uploadedPhoto && currentStep !== 'upload') ||
+                (step === 'gender' && selectedGender && currentStep !== 'gender' && currentStep !== 'upload') ||
+                (step === 'select' && selectedHaircut && currentStep === 'preview') ||
+                false; // Never auto-complete preview step
               
               return (
                 <div key={step} className="flex flex-col sm:flex-row items-center">
@@ -100,9 +103,9 @@ function TryOnPageContent() {
                       <div
                         className={`flex h-16 w-16 lg:h-20 lg:w-20 items-center justify-center rounded-full text-lg lg:text-xl font-bold transition-all duration-500 shadow-2xl ${
                           isActive
-                            ? 'bg-gradient-to-r from-primary to-accent text-white shadow-primary/40 scale-110'
+                            ? 'bg-primary text-white shadow-primary/40 scale-110'
                             : isCompleted
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/40'
+                            ? 'bg-green-500 text-white shadow-green-500/40'
                             : 'bg-white/90 text-muted-foreground border-2 border-gray-200 shadow-gray-200/50'
                         }`}
                       >
@@ -115,7 +118,7 @@ function TryOnPageContent() {
                         )}
                       </div>
                       {isActive && (
-                        <div className="absolute -inset-2 bg-gradient-to-r from-primary to-accent rounded-full blur-lg opacity-40 animate-pulse" />
+                        <div className="absolute -inset-2 bg-primary rounded-full blur-lg opacity-40 animate-pulse" />
                       )}
                     </div>
                     <div className="text-center">
@@ -137,7 +140,7 @@ function TryOnPageContent() {
                   {index < 3 && (
                     <div className="hidden sm:flex items-center mx-6 lg:mx-8">
                       <div className={`h-1 w-16 lg:w-24 rounded-full transition-all duration-700 ${
-                        isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-300'
+                        isCompleted ? 'bg-green-500' : 'bg-gray-300'
                       }`} />
                     </div>
                   )}
