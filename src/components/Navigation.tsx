@@ -67,17 +67,18 @@ export function Navigation() {
         : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20 py-2">
           {/* Logo */}
           <Link href="/" className="flex items-center group">
-            <div className="relative">
+            <div className="relative flex items-center justify-center py-1">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300" />
               <Image
                 src="/new-logo.png"
                 alt="HaircutFun Logo"
                 width={120}
                 height={40}
-                className="relative"
+                className="relative object-contain"
+                priority
               />
             </div>
           </Link>
@@ -149,7 +150,7 @@ export function Navigation() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden"
-                style={{ top: '64px' }}
+                style={{ top: '80px' }}
                 onClick={() => setIsOpen(false)}
               />
               

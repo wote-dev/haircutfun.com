@@ -10,9 +10,9 @@ export const metadata: Metadata = {
   description: "Ever wonder what you'd look like with a new hairstyle? Stop wondering and start seeing! With HaircutFun, you can try on dozens of haircuts virtually using the power of AI. Upload your photo and find your perfect look in seconds. It's fun, fast, and free to try!",
   keywords: "haircut, virtual try-on, hairstyle, AI, beauty, salon, haircut simulator, style finder",
   icons: {
-    icon: "/new-logo.png",
-    shortcut: "/new-logo.png",
-    apple: "/new-logo.png",
+    icon: "/haircuttr.png",
+    shortcut: "/haircuttr.png",
+    apple: "/haircuttr.png",
   },
   openGraph: {
     title: "HaircutFun - See Your New Look Before the Cut!",

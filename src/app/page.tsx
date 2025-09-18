@@ -5,7 +5,6 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroSection } from "../components/HeroSection";
 import { TrendingHaircuts } from "../components/TrendingHaircuts";
-import { FeaturesSection } from "../components/FeaturesSection";
 import { HowItWorksSection } from "../components/HowItWorksSection";
 import { usePageTransitionContext } from "@/components/providers/PageTransitionProvider";
 
@@ -16,7 +15,6 @@ export default function Home() {
     <div className="flex flex-col">
       <HeroSection />
       <TrendingHaircuts />
-      <FeaturesSection />
       <HowItWorksSection />
       
       {/* CTA Section */}
