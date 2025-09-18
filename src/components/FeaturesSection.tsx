@@ -74,10 +74,10 @@ export function FeaturesSection() {
         <div className="mx-auto max-w-4xl text-center mb-20">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 border border-primary/20">
             <Sparkles className="h-4 w-4" />
-            Why Choose Us?
+            Features
           </div>
           <h2 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl mb-6 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text">
-            Why Choose <span className="font-bold" style={{color: '#584678'}}>HaircutFun</span>?
+            Powerful Features
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
             Discover the perfect hairstyle with our AI-powered platform designed for modern hair enthusiasts. 

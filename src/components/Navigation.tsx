@@ -77,7 +77,7 @@ export function Navigation() {
                 alt="HaircutFun Logo"
                 width={120}
                 height={40}
-                className="relative object-contain"
+                className="relative object-contain w-auto h-auto"
                 priority
               />
             </div>

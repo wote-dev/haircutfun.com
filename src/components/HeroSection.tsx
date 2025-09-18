@@ -11,28 +11,28 @@ export function HeroSection() {
   const { navigateWithLoading } = usePageTransitionContext();
   
   // Carousel images for left and right sides
-  // Left side: Alternating between Emma and Sarah (female hairstyles)
+  // Left side: Women's hairstyles from filler images
   const leftCarouselImages = [
-    "/modern-shag2.jpg",    // Emma
-    "/modern-shag.jpg",     // Sarah
-    "/pixie-cut2.jpg",      // Emma
-    "/pixie-cut.jpg",       // Sarah
-    "/wolf-cut2.jpg",       // Emma
-    "/wolf-cut.jpg",        // Sarah
-    "/curtain-bangs2.jpg",  // Emma
-    "/curtain-bangs.jpg"    // Sarah
+    "/FILLER-IMAGES-WOMEN/modernshag.png",
+    "/FILLER-IMAGES-WOMEN/pixiecut.png",
+    "/FILLER-IMAGES-WOMEN/curtainbangs.png",
+    "/FILLER-IMAGES-WOMEN/bluntbob.png",
+    "/FILLER-IMAGES-WOMEN/classicbob.png",
+    "/modern-shag2.jpg",    // Keep some existing for variety
+    "/pixie-cut2.jpg",
+    "/curtain-bangs2.jpg"
   ];
   
-  // Right side: Alternating between Daniel and Mike (male hairstyles)
+  // Right side: Men's hairstyles from filler images
   const rightCarouselImages = [
-    "/side-part.png",       // Daniel
-    "/side-part2.jpg",      // Mike
-    "/quiff.png",           // Daniel
-    "/quiff2.jpg",          // Mike
-    "/buzzcut.png",         // Daniel
-    "/buzzcut2.jpg",        // Mike
-    "/textered-top.png",    // Daniel
-    "/textured-top2.jpg"    // Mike
+    "/FILLER-IMAGES-MALE/sidepart.png",
+    "/FILLER-IMAGES-MALE/texturedcrop.png",
+    "/FILLER-IMAGES-MALE/Pompadour.png",
+    "/FILLER-IMAGES-MALE/buzzcut.png",
+    "/FILLER-IMAGES-MALE/crewcut.jpg",
+    "/side-part.png",       // Keep some existing for variety
+    "/quiff.png",
+    "/textered-top.png"
   ];
   
   return (

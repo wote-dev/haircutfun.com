@@ -1,229 +1,322 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ModernGallery from "@/components/ModernGallery";
 
-const haircutCategories = [
-  {
-    name: "Short Styles",
-    description: "Bold and chic cuts that make a statement",
-    styles: [
-      { name: "Pixie Cut", popularity: 95 },
-      { name: "Buzz Cut", popularity: 78 },
-      { name: "Short Bob", popularity: 88 },
-      { name: "Undercut Fade", popularity: 82 },
-    ],
-  },
-  {
-    name: "Medium Length",
-    description: "Versatile styles perfect for any occasion",
-    styles: [
-      { name: "Classic Bob", popularity: 88 },
-      { name: "Modern Shag", popularity: 85 },
-      { name: "Wavy Lob", popularity: 90 },
-      { name: "Shoulder Length", popularity: 87 },
-    ],
-  },
-  {
-    name: "Long Styles",
-    description: "Flowing cuts with movement and elegance",
-    styles: [
-      { name: "Long Layers", popularity: 92 },
-      { name: "Curtain Bangs", popularity: 87 },
-      { name: "Beach Waves", popularity: 89 },
-      { name: "Straight & Sleek", popularity: 84 },
-    ],
-  },
-];
+interface HaircutStyle {
+  name: string;
+  category: string;
+  popularity: number;
+  trend: string;
+  description: string;
+  isPremium?: boolean;
+  image?: string;
+  variations?: {
+    [personId: string]: string; // Maps person ID to their specific haircut image
+  };
+}
 
-const trendingStyles = [
-  {
-    name: "Wolf Cut",
-    description: "The edgy mullet-shag hybrid taking social media by storm",
-    trend: "🔥 Trending",
-    popularity: 96,
-  },
-  {
-    name: "Curtain Bangs",
-    description: "Face-framing bangs that work with any hair length",
-    trend: "✨ Popular",
-    popularity: 94,
-  },
-  {
-    name: "Modern Shag",
-    description: "Updated 70s classic with contemporary flair",
-    trend: "💫 Rising",
-    popularity: 91,
-  },
-];
+const allHaircuts: {
+  female: HaircutStyle[];
+  male: HaircutStyle[];
+} = {
+  female: [
+    { 
+      name: "Modern Shag", 
+      category: "Medium", 
+      popularity: 91, 
+      trend: "💫", 
+      description: "Updated 70s classic", 
+      image: "/FILLER-IMAGES-WOMEN/modernshag.png",
+      variations: {
+        'example-1': '/modern-shag.jpg',
+        'example-2': '/FILLER-IMAGES-WOMEN/modernshag.png',
+        'example-3': '/modern-shag2.jpg'
+      }
+    },
+    { 
+      name: "Pixie Cut", 
+      category: "Short", 
+      popularity: 95, 
+      trend: "🔥", 
+      description: "Chic and bold", 
+      image: "/FILLER-IMAGES-WOMEN/pixiecut.png",
+      variations: {
+        'example-1': '/pixie-cut.jpg',
+        'example-2': '/FILLER-IMAGES-WOMEN/pixiecut.png',
+        'example-3': '/pixie-cut2.jpg'
+      }
+    },
+    { 
+      name: "Curtain Bangs", 
+      category: "Medium", 
+      popularity: 94, 
+      trend: "✨", 
+      description: "Face-framing bangs", 
+      image: "/FILLER-IMAGES-WOMEN/curtainbangs.png",
+      variations: {
+        'example-1': '/curtain-bangs.jpg',
+        'example-2': '/FILLER-IMAGES-WOMEN/curtainbangs.png',
+        'example-3': '/curtain-bangs2.jpg'
+      }
+    },
+    { 
+      name: "Blunt Bob", 
+      category: "Short", 
+      popularity: 88, 
+      trend: "🔥", 
+      description: "Sharp and sophisticated", 
+      image: "/FILLER-IMAGES-WOMEN/bluntbob.png",
+      variations: {
+        'example-1': '/FILLER-IMAGES-WOMEN/bluntbob.png',
+        'example-2': '/FILLER-IMAGES-WOMEN/bluntbob.png',
+        'example-3': '/wolf-cut2.jpg'
+      }
+    },
+    { 
+      name: "Classic Bob", 
+      category: "Short", 
+      popularity: 86, 
+      trend: "✨", 
+      description: "Timeless and elegant", 
+      image: "/FILLER-IMAGES-WOMEN/classicbob.png",
+      variations: {
+        'example-1': '/FILLER-IMAGES-WOMEN/classicbob.png',
+        'example-2': '/FILLER-IMAGES-WOMEN/classicbob.png',
+        'example-3': '/curtain-bangs2.jpg'
+      }
+    },
+    { 
+      name: "Wolf Cut", 
+      category: "Trendy", 
+      popularity: 96, 
+      trend: "🔥", 
+      description: "Edgy mullet-shag hybrid", 
+      image: "/wolf-cut.png",
+      variations: {
+        'example-1': '/wolf-cut.jpg',
+        'example-2': '/wolf-cut.png',
+        'example-3': '/wolf-cut2.jpg'
+      }
+    },
+    { 
+      name: "Long Layers", 
+      category: "Long", 
+      popularity: 92, 
+      trend: "✨", 
+      description: "Flowing cuts with movement", 
+      image: "/modern-shag.png",
+      variations: {
+        'example-1': '/modern-shag.jpg',
+        'example-2': '/modern-shag.png',
+        'example-3': '/modern-shag2.jpg'
+      }
+    },
+    { 
+      name: "Beach Waves", 
+      category: "Long", 
+      popularity: 89, 
+      trend: "💫", 
+      description: "Effortless wavy texture", 
+      image: "/curtain-bangs.png",
+      variations: {
+        'example-1': '/curtain-bangs.jpg',
+        'example-2': '/curtain-bangs.png',
+        'example-3': '/curtain-bangs2.jpg'
+      }
+    }
+  ],
+  male: [
+    { 
+      name: "Textured Crop", 
+      category: "Short", 
+      popularity: 86, 
+      trend: "🔥", 
+      description: "Modern textured styling", 
+      image: "/FILLER-IMAGES-MALE/texturedcrop.png",
+      variations: {
+        'example-1': '/FILLER-IMAGES-MALE/texturedcrop.png',
+        'example-2': '/textered-top.png',
+        'example-3': '/textured-top2.jpg',
+        'example-4': '/textured-top2.jpg'
+      }
+    },
+    { 
+      name: "Side Part", 
+      category: "Medium", 
+      popularity: 91, 
+      trend: "✨", 
+      description: "Professional classic", 
+      image: "/FILLER-IMAGES-MALE/sidepart.png",
+      variations: {
+        'example-1': '/FILLER-IMAGES-MALE/sidepart.png',
+        'example-2': '/side-part.png',
+        'example-3': '/side-part2.jpg',
+        'example-4': '/side-part2.jpg'
+      }
+    },
+    { 
+      name: "Pompadour", 
+      category: "Medium", 
+      popularity: 89, 
+      trend: "💫", 
+      description: "Classic volume and style", 
+      image: "/FILLER-IMAGES-MALE/Pompadour.png",
+      variations: {
+        'example-1': '/FILLER-IMAGES-MALE/Pompadour.png',
+        'example-2': '/quiff.png',
+        'example-3': '/quiff2.jpg',
+        'example-4': '/quiff2.jpg'
+      }
+    },
+    { 
+      name: "Buzz Cut", 
+      category: "Short", 
+      popularity: 85, 
+      trend: "🔥", 
+      description: "Clean minimalist cut", 
+      isPremium: true, 
+      image: "/FILLER-IMAGES-MALE/buzzcut.png",
+      variations: {
+        'example-1': '/FILLER-IMAGES-MALE/buzzcut.png',
+        'example-2': '/buzzcut.png',
+        'example-3': '/buzzcut2.jpg',
+        'example-4': '/buzzcut2.jpg'
+      }
+    },
+    { 
+      name: "Crew Cut", 
+      category: "Short", 
+      popularity: 83, 
+      trend: "✨", 
+      description: "Military-inspired precision", 
+      image: "/FILLER-IMAGES-MALE/crewcut.jpg",
+      variations: {
+        'example-1': '/FILLER-IMAGES-MALE/crewcut.jpg',
+        'example-2': '/buzzcut.png',
+        'example-3': '/buzzcut2.jpg',
+        'example-4': '/buzzcut2.jpg'
+      }
+    },
+    { 
+      name: "Quiff", 
+      category: "Medium", 
+      popularity: 88, 
+      trend: "💫", 
+      description: "Textured volume style", 
+      image: "/quiff.png",
+      variations: {
+        'example-1': '/quiff.png',
+        'example-2': '/quiff2.jpg',
+        'example-3': '/quiff2.jpg',
+        'example-4': '/quiff2.jpg'
+      }
+    },
+    { 
+      name: "Undercut Fade", 
+      category: "Short", 
+      popularity: 82, 
+      trend: "💫", 
+      description: "Bold and edgy fade", 
+      image: "/buzzcut.png",
+      variations: {
+        'example-1': '/buzzcut.png',
+        'example-2': '/FILLER-IMAGES-MALE/buzzcut.png',
+        'example-3': '/buzzcut2.jpg',
+        'example-4': '/buzzcut2.jpg'
+      }
+    }
+  ]
+};
 
 export default function GalleryPage() {
+  const [selectedGender, setSelectedGender] = useState<'female' | 'male'>('female');
+  const currentStyles = allHaircuts[selectedGender];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 pt-32 pb-16">
         <div className="container mx-auto px-4 text-center">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-6 py-3 mb-6">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <span className="text-sm font-semibold text-primary">Complete Gallery</span>
+          </div>
           <h1 className="text-4xl font-bold text-foreground mb-4 sm:text-5xl">
             Hairstyle Gallery
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Explore dozens of professional hairstyles and find your perfect match
+            Explore all available hairstyles and see how they'll look on you with our AI-powered virtual try-on
           </p>
-          <Link
-            href="/try-on"
-            className="inline-flex items-center px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+          
+          {/* Gender Selection Toggle */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="inline-flex items-center bg-muted/50 rounded-full p-1 mb-8"
           >
-            Try Virtual Haircuts
-            <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+            <button
+              onClick={() => setSelectedGender('female')}
+              className={`px-6 py-3 rounded-full font-semibold text-sm transition-colors ${
+                selectedGender === 'female'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Women's Styles
+            </button>
+            <button
+              onClick={() => setSelectedGender('male')}
+              className={`px-6 py-3 rounded-full font-semibold text-sm transition-colors ${
+                selectedGender === 'male'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Men's Styles
+            </button>
+          </motion.div>
         </div>
       </section>
 
-      {/* Trending Styles */}
-      <section className="py-16">
+      {/* Gallery Section */}
+      <section className="py-16 bg-gradient-to-br from-muted/30 via-background to-secondary/20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Trending Now
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              The hottest hairstyles everyone&apos;s talking about
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {trendingStyles.map((style, index) => (
-              <div key={style.name} className="bg-background border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-square bg-gradient-to-br from-primary/20 to-accent/20 relative">
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-white/90 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                      {style.trend}
-                    </span>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="h-20 w-20 rounded-full bg-primary/30 mx-auto mb-4 flex items-center justify-center">
-                        <svg className="h-10 w-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
-                    {style.name}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {style.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <svg className="h-4 w-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      {style.popularity}% match rate
-                    </div>
-                    <Link
-                      href="/try-on"
-                      className="text-primary hover:text-primary/80 font-medium text-sm"
-                    >
-                      Try Now →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Style Categories */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Browse by Length
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Find styles that match your preferred hair length
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {haircutCategories.map((category) => (
-              <div key={category.name} className="bg-background border rounded-2xl p-8">
-                <h3 className="text-2xl font-bold text-foreground mb-3">
-                  {category.name}
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  {category.description}
-                </p>
-                
-                <div className="space-y-4">
-                  {category.styles.map((style) => (
-                    <div key={style.name} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                          <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </div>
-                        <span className="font-medium text-foreground">
-                          {style.name}
-                        </span>
-                      </div>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <svg className="h-4 w-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        {style.popularity}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <Link
-                  href="/try-on"
-                  className="mt-6 w-full flex items-center justify-center px-4 py-3 border border-primary text-primary rounded-lg hover:bg-primary hover:text-primary-foreground transition-colors font-medium"
-                >
-                  Try These Styles
-                </Link>
-              </div>
-            ))}
-          </div>
+          <motion.div 
+            key={selectedGender}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ModernGallery 
+              styles={currentStyles} 
+              selectedGender={selectedGender}
+            />
+          </motion.div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16">
+      <section className="py-16 bg-gradient-to-r from-primary/10 to-accent/10">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Ready to Find Your Perfect Style?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Upload your photo and try on any of these styles instantly with our AI-powered virtual try-on technology.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="h-16 px-10 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors">
-                <Link href="/try-on" className="flex items-center space-x-3">
-                  <Sparkles className="h-6 w-6" />
-                  <span>Start Virtual Try-On</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </Button>
-              
-              <Button asChild variant="outline" size="lg" className="h-16 px-10 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-colors">
-                <Link href="/about" className="flex items-center space-x-3">
-                  <Zap className="h-6 w-6" />
-                  <span>Learn More</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
+          <h2 className="text-3xl font-bold text-foreground mb-4">
+            Ready to Try Your Perfect Style?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Upload your photo and see how any of these hairstyles will look on you with our AI-powered virtual try-on technology.
+          </p>
+          <Button asChild size="lg" className="h-14 px-8 text-lg font-semibold">
+            <Link href="/try-on" className="flex items-center space-x-3">
+              <Sparkles className="h-5 w-5" />
+              <span>Start Virtual Try-On</span>
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

@@ -6,43 +6,38 @@ import { Button } from "@/components/ui/button";
 import { HeroSection } from "../components/HeroSection";
 import { TrendingHaircuts } from "../components/TrendingHaircuts";
 import { HowItWorksSection } from "../components/HowItWorksSection";
+import { FAQSection } from "@/components/FAQSection";
 import { usePageTransitionContext } from "@/components/providers/PageTransitionProvider";
 
 export default function Home() {
   const { navigateWithLoading } = usePageTransitionContext();
   
   return (
-    <div className="flex flex-col">
-      <HeroSection />
-      <TrendingHaircuts />
-      <HowItWorksSection />
-      
-      {/* CTA Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-muted/30 via-background to-secondary/20">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent"></div>
-        <div className="relative container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-foreground mb-6">
-            Ready to Find Your Perfect Haircut?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Join thousands of users who have discovered their ideal hairstyle with HaircutFun.
-          </p>
-          <Button
-            onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
-            size="lg"
-            className="h-16 px-10 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
-          >
-            <div className="flex items-center space-x-3">
-              <Sparkles className="h-6 w-6" />
-              <span>Start Your Virtual Try-On</span>
-              <ArrowRight className="h-5 w-5" />
-            </div>
-          </Button>
-        </div>
-        {/* Decorative elements */}
-        <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
-        <div className="absolute bottom-10 right-10 w-32 h-32 bg-accent/10 rounded-full blur-2xl"></div>
-      </section>
-    </div>
+      <main className="min-h-screen">
+        <HeroSection />
+        <TrendingHaircuts />
+        <HowItWorksSection />
+        <FAQSection />
+        
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-6">
+              Ready to Transform Your Look?
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join dozens of users who've discovered their perfect hairstyle with HaircutFun
+            </p>
+            <Link href="/try-on">
+              <Button size="lg" className="h-14 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors">
+                <div className="flex items-center space-x-2">
+                  <span>Start Your Transformation</span>
+                  <ArrowRight className="h-5 w-5" />
+                </div>
+              </Button>
+            </Link>
+          </div>
+        </section>
+      </main>
   );
 }
