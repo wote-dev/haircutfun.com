@@ -19,6 +19,12 @@ const baseImages = [
     src: '/base-image-woman.png',
     alt: 'Example Person 2',
     name: 'Sarah'
+  },
+  {
+    id: 'example-3',
+    src: '/base-image-woman2.jpg',
+    alt: 'Example Person 3',
+    name: 'Emma'
   }
 ];
 
@@ -31,29 +37,139 @@ interface HaircutStyle {
   description: string;
   isPremium?: boolean;
   image?: string;
+  variations?: {
+    [personId: string]: string; // Maps person ID to their specific haircut image
+  };
 }
+
+// Function to get the correct haircut image for a specific person
+const getHaircutImageForPerson = (haircutName: string, personId: string, defaultImage?: string): string => {
+  const haircut = [...trendingHaircuts.female, ...trendingHaircuts.male].find(h => h.name === haircutName);
+  if (haircut?.variations?.[personId]) {
+    return haircut.variations[personId];
+  }
+  return defaultImage || haircut?.image || '';
+};
 
 const trendingHaircuts: {
   female: HaircutStyle[];
   male: HaircutStyle[];
 } = {
   female: [
-    { name: "Wolf Cut", category: "Trendy", popularity: 96, trend: "🔥", description: "Edgy mullet-shag hybrid", image: "/wolf-cut.jpg" },
-    { name: "Curtain Bangs", category: "Medium", popularity: 94, trend: "✨", description: "Face-framing bangs", image: "/curtain-bangs.jpg" },
-    { name: "Modern Shag", category: "Medium", popularity: 91, trend: "💫", description: "Updated 70s classic", image: "/modern-shag.jpg" },
-    { name: "Pixie Cut", category: "Short", popularity: 95, trend: "🔥", description: "Chic and bold", image: "/pixie-cut.jpg" }
+    { 
+      name: "Wolf Cut", 
+      category: "Trendy", 
+      popularity: 96, 
+      trend: "🔥", 
+      description: "Edgy mullet-shag hybrid", 
+      image: "/wolf-cut2.jpg",
+      variations: {
+        'example-1': '/wolf-cut.jpg',    // Daniel
+        'example-2': '/wolf-cut.png',    // Sarah  
+        'example-3': '/wolf-cut2.jpg'    // Emma
+      }
+    },
+    { 
+      name: "Curtain Bangs", 
+      category: "Medium", 
+      popularity: 94, 
+      trend: "✨", 
+      description: "Face-framing bangs", 
+      image: "/curtain-bangs2.jpg",
+      variations: {
+        'example-1': '/curtain-bangs.jpg',    // Daniel
+        'example-2': '/curtain-bangs.png',    // Sarah
+        'example-3': '/curtain-bangs2.jpg'    // Emma
+      }
+    },
+    { 
+      name: "Modern Shag", 
+      category: "Medium", 
+      popularity: 91, 
+      trend: "💫", 
+      description: "Updated 70s classic", 
+      image: "/modern-shag2.jpg",
+      variations: {
+        'example-1': '/modern-shag.jpg',    // Daniel
+        'example-2': '/modern-shag.png',    // Sarah
+        'example-3': '/modern-shag2.jpg'    // Emma
+      }
+    },
+    { 
+      name: "Pixie Cut", 
+      category: "Short", 
+      popularity: 95, 
+      trend: "🔥", 
+      description: "Chic and bold", 
+      image: "/pixie-cut2.jpg",
+      variations: {
+        'example-1': '/pixie-cut.jpg',    // Daniel
+        'example-2': '/pixie-cut.png',    // Sarah
+        'example-3': '/pixie-cut2.jpg'    // Emma
+      }
+    }
   ],
   male: [
-    { name: "Textured Crop", category: "Short", popularity: 86, trend: "🔥", description: "Modern textured styling", image: "/textered-top.png" },
-    { name: "Side Part", category: "Medium", popularity: 91, trend: "✨", description: "Professional classic", image: "/side-part.png" },
-    { name: "Quiff", category: "Medium", popularity: 88, trend: "💫", description: "Textured volume style", image: "/quiff.png" },
-    { name: "Buzz Cut", category: "Short", popularity: 85, trend: "🔥", description: "Clean minimalist cut", isPremium: true, image: "/buzzcut.png" }
+    { 
+      name: "Textured Crop", 
+      category: "Short", 
+      popularity: 86, 
+      trend: "🔥", 
+      description: "Modern textured styling", 
+      image: "/textered-top.png",
+      variations: {
+        'example-1': '/textered-top.png',    // Daniel
+        'example-2': '/textered-top2.jpg',   // Sarah
+        'example-3': '/textered-top3.jpg'    // Emma
+      }
+    },
+    { 
+      name: "Side Part", 
+      category: "Medium", 
+      popularity: 91, 
+      trend: "✨", 
+      description: "Professional classic", 
+      image: "/side-part.png",
+      variations: {
+        'example-1': '/side-part.png',       // Daniel
+        'example-2': '/side-part2.jpg',      // Sarah
+        'example-3': '/side-part3.jpg'       // Emma
+      }
+    },
+    { 
+      name: "Quiff", 
+      category: "Medium", 
+      popularity: 88, 
+      trend: "💫", 
+      description: "Textured volume style", 
+      image: "/quiff.png",
+      variations: {
+        'example-1': '/quiff.png',           // Daniel
+        'example-2': '/quiff2.jpg',          // Sarah
+        'example-3': '/quiff3.jpg'           // Emma
+      }
+    },
+    { 
+      name: "Buzz Cut", 
+      category: "Short", 
+      popularity: 85, 
+      trend: "🔥", 
+      description: "Clean minimalist cut", 
+      isPremium: true, 
+      image: "/buzzcut.png",
+      variations: {
+        'example-1': '/buzzcut.png',         // Daniel
+        'example-2': '/buzzcut2.jpg',        // Sarah
+        'example-3': '/buzzcut3.jpg'         // Emma
+      }
+    }
   ]
 };
 
 export function TrendingHaircuts() {
   const [selectedGender, setSelectedGender] = useState<'female' | 'male'>('female');
   const [selectedBaseImage, setSelectedBaseImage] = useState<string>(baseImages[0].id);
+  const [previewStates, setPreviewStates] = useState<{[key: string]: {baseImageSrc: string, personId: string, isPreview: boolean}}>({});
   const currentStyles = trendingHaircuts[selectedGender];
 
   const handleTryOn = (haircutName: string, baseImageSrc: string) => {
@@ -61,6 +177,28 @@ export function TrendingHaircuts() {
     localStorage.setItem('selectedBaseImage', baseImageSrc);
     // Navigate to try-on page with haircut parameter
     window.location.href = `/try-on?haircut=${encodeURIComponent(haircutName)}`;
+  };
+
+  const handleAvatarPreview = (haircutName: string, baseImageSrc: string, personId: string) => {
+    setPreviewStates(prev => ({
+      ...prev,
+      [haircutName]: {
+        baseImageSrc,
+        personId,
+        isPreview: true
+      }
+    }));
+  };
+
+  const resetPreview = (haircutName: string) => {
+    setPreviewStates(prev => ({
+      ...prev,
+      [haircutName]: {
+        baseImageSrc: '',
+        personId: '',
+        isPreview: false
+      }
+    }));
   };
 
   return (
@@ -164,25 +302,51 @@ export function TrendingHaircuts() {
                     {/* Image Display */}
                     <div className="aspect-[3/4] bg-gradient-to-br from-primary/20 via-accent/10 to-primary/30 relative overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                      {style.image ? (
-                        <Image
-                          src={style.image}
-                          alt={style.name}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <motion.div
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                          >
-                            <svg className="h-6 w-6 sm:h-10 sm:w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </motion.div>
+                      
+                      {/* Show preview avatar if selected, otherwise show haircut image */}
+                      {previewStates[style.name]?.isPreview ? (
+                        <div 
+                          className="relative w-full h-full cursor-pointer"
+                          onClick={() => resetPreview(style.name)}
+                          title="Click to exit preview"
+                        >
+                          <Image
+                            src={getHaircutImageForPerson(style.name, previewStates[style.name].personId, previewStates[style.name].baseImageSrc)}
+                            alt={`${style.name} on selected person`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          />
+                          
+                          {/* Simple preview indicator */}
+                          <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
+                            Preview
+                          </div>
                         </div>
+                      ) : (
+                        /* Normal Mode - Show haircut image */
+                        <>
+                          {style.image ? (
+                            <Image
+                              src={style.image}
+                              alt={style.name}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <motion.div
+                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                              >
+                                <svg className="h-6 w-6 sm:h-10 sm:w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                              </motion.div>
+                            </div>
+                          )}
+                        </>
                       )}
                       
                       {/* Hover Overlay */}
@@ -232,18 +396,19 @@ export function TrendingHaircuts() {
                           <div className="flex space-x-2">
                             {baseImages
                               .filter((baseImage, baseIndex) => {
-                                // Show male base image for male styles, female base image for female styles
+                                // Show male base image for male styles, both female base images for female styles
                                 if (selectedGender === 'male') {
                                   return baseIndex === 0; // Only show Daniel's image for male styles
                                 } else {
-                                  return baseIndex === 1; // Only show Sarah's image for female styles
+                                  return baseIndex === 1 || baseIndex === 2; // Show both Sarah's and Emma's images for female styles
                                 }
                               })
                               .map((baseImage, filteredIndex) => (
                               <button
                                 key={baseImage.id}
-                                onClick={() => handleTryOn(style.name, baseImage.src)}
+                                onClick={() => handleAvatarPreview(style.name, baseImage.src, baseImage.id)}
                                 className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 transition-all duration-200 hover:border-primary hover:scale-110 border-gray-200 hover:shadow-md"
+                                title={`Preview ${style.name} on ${baseImage.name}`}
                               >
                                 <Image
                                   src={baseImage.src}
@@ -256,7 +421,7 @@ export function TrendingHaircuts() {
                             ))}
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            Click to try
+                            Click to preview
                           </span>
                         </div>
                       </div>
