@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Check, Crown, Zap, ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
-export default function DashboardPage() {
+// Component that handles search params
+function DashboardContent() {
   const { user, subscription, usage, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -286,5 +287,21 @@ export default function DashboardPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
