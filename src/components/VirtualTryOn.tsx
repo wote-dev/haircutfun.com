@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { useUsageTracker } from "@/hooks/useUsageTracker";
 import { LimitReachedPrompt, PremiumFeaturePrompt, CompactUpgradePrompt } from "@/components/UpgradePrompt";
 
@@ -340,18 +341,21 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
               {error}
             </p>
             <div className="flex gap-4 justify-center">
-              <button
+              <Button
                 onClick={generateHaircutImage}
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                size="lg"
+                className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Try Again
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={onBack}
-                className="px-6 py-3 border border-border rounded-lg font-semibold text-foreground hover:bg-muted transition-colors"
+                variant="outline"
+                size="lg"
+                className="px-6 py-3 border border-border text-foreground hover:bg-muted transition-colors"
               >
                 Choose Different Style
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -386,18 +390,19 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
               </ul>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/pricing"
-                className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-              >
-                Upgrade to Pro
-              </Link>
-              <button
+              <Button asChild size="lg" className="px-8 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                <Link href="/pricing">
+                  Upgrade to Pro
+                </Link>
+              </Button>
+              <Button
                 onClick={onBack}
-                className="px-6 py-3 border border-border rounded-lg font-semibold text-foreground hover:bg-muted transition-colors"
+                variant="outline"
+                size="lg"
+                className="px-6 py-3 border border-border text-foreground hover:bg-muted transition-colors"
               >
                 Go Back
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -562,12 +567,13 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
           {/* Actions */}
           <div className="space-y-4">
             {generatedImage && (
-              <button
+              <Button
                 onClick={handleSave}
                 disabled={isSaved}
-                className={`w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition-colors ${
+                size="lg"
+                className={`w-full flex items-center justify-center px-6 py-3 font-semibold transition-colors ${
                   isSaved
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-green-500 text-white hover:bg-green-500'
                     : 'bg-primary text-primary-foreground hover:bg-primary/90'
                 }`}
               >
@@ -586,41 +592,47 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
                     Save This Look
                   </>
                 )}
-              </button>
+              </Button>
             )}
             
-            <button
+            <Button
               onClick={generateHaircutImage}
               disabled={isProcessing}
-              className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold text-foreground hover:bg-muted hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="outline"
+              size="lg"
+              className="w-full flex items-center justify-center px-6 py-3 border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               {isProcessing ? 'Generating...' : 'Regenerate'}
-            </button>
+            </Button>
             
             {generatedImage && (
-              <button
+              <Button
                 onClick={handleShare}
-                className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold text-foreground hover:bg-muted hover:scale-105 transition-all duration-300"
+                variant="outline"
+                size="lg"
+                className="w-full flex items-center justify-center px-6 py-3 border border-border text-foreground hover:bg-muted transition-colors"
               >
                 <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                 </svg>
                 Share Result
-              </button>
+              </Button>
             )}
             
-            <button
+            <Button
               onClick={onReset}
-              className="w-full flex items-center justify-center px-6 py-3 text-muted-foreground hover:text-foreground hover:scale-105 transition-all duration-300"
+              variant="ghost"
+              size="lg"
+              className="w-full flex items-center justify-center px-6 py-3 text-muted-foreground hover:text-foreground transition-colors"
             >
               <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Try Another Photo
-            </button>
+            </Button>
           </div>
         </div>
       </div>

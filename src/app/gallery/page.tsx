@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ArrowRight, Sparkles, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const haircutCategories = [
   {
@@ -205,18 +207,21 @@ export default function GalleryPage() {
               Upload your photo and try on any of these styles instantly with our AI-powered virtual try-on technology.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/try-on"
-                className="border-glow-primary bg-background text-foreground px-8 py-4 rounded-lg font-semibold transition-all duration-300"
-              >
-                Start Virtual Try-On
-              </Link>
-              <Link
-                href="/about"
-                className="border border-border text-foreground px-8 py-4 rounded-lg font-semibold hover:bg-muted transition-colors"
-              >
-                Learn More
-              </Link>
+              <Button asChild size="lg" className="h-16 px-10 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors">
+                <Link href="/try-on" className="flex items-center space-x-3">
+                  <Sparkles className="h-6 w-6" />
+                  <span>Start Virtual Try-On</span>
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <Button asChild variant="outline" size="lg" className="h-16 px-10 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-colors">
+                <Link href="/about" className="flex items-center space-x-3">
+                  <Zap className="h-6 w-6" />
+                  <span>Learn More</span>
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

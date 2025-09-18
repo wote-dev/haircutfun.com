@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Star } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 // Base images for preview
 const baseImages = [
@@ -437,16 +438,13 @@ export function TrendingHaircuts() {
             transition={{ duration: 0.6, delay: 1 }}
             className="text-center mt-8 sm:mt-12"
           >
-            <div>
-              <Link href="/gallery">
-                <button className="px-6 py-3 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <span>View All Styles</span>
-                    <ArrowRight className="h-5 w-5" />
-                  </div>
-                </button>
+            <Button asChild size="lg" className="h-14 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors">
+              <Link href="/gallery" className="flex items-center space-x-3">
+                <Sparkles className="h-5 w-5" />
+                <span>View All Styles</span>
+                <ArrowRight className="h-5 w-5" />
               </Link>
-            </div>
+            </Button>
           </motion.div>
         </div>
       </div>

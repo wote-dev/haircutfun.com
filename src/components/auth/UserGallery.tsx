@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../providers/AuthProvider';
 import { createClient } from '../../lib/supabase/client';
+import { Button } from '@/components/ui/button';
 
 interface GeneratedImage {
   id: string;
@@ -106,9 +107,9 @@ export function UserGallery() {
         </div>
         
         {images.length >= 12 && (
-          <button className="w-full mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium smooth-hover">
+          <Button variant="ghost" size="sm" className="w-full mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
             View all images →
-          </button>
+          </Button>
         )}
       </div>
 

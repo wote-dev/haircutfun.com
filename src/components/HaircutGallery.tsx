@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useUsageTracker } from "@/hooks/useUsageTracker";
+import { Button } from "@/components/ui/button";
 
 interface HaircutGalleryProps {
   userPhoto: string;
@@ -312,11 +313,11 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
                     </svg>
                     {style.popularity}% match
                   </div>
-                  <button className="text-primary hover:text-primary/80 smooth-hover">
+                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 transition-colors p-1">
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -329,9 +330,9 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
         <p className="text-muted-foreground mb-4">
           Can't find the perfect style? Our AI will recommend more options based on your face shape.
         </p>
-        <button className="text-primary hover:text-primary/80 font-medium smooth-hover">
+        <Button variant="ghost" className="text-primary hover:text-primary/80 font-medium transition-colors">
           Get AI Recommendations →
-        </button>
+        </Button>
       </div>
     </div>
   );

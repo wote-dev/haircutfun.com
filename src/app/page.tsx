@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { HeroSection } from "../components/HeroSection";
 import { TrendingHaircuts } from "../components/TrendingHaircuts";
 import { FeaturesSection } from "../components/FeaturesSection";
@@ -27,18 +29,17 @@ export default function Home() {
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
             Join thousands of users who have discovered their ideal hairstyle with HaircutFun.
           </p>
-          <button
+          <Button
             onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
-            className="group h-16 px-10 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl rounded-2xl transition-colors"
+            size="lg"
+            className="h-16 px-10 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
           >
-            <div className="flex items-center space-x-3 relative z-10">
+            <div className="flex items-center space-x-3">
+              <Sparkles className="h-6 w-6" />
               <span>Start Your Virtual Try-On</span>
-              <svg className="h-6 w-6 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+              <ArrowRight className="h-5 w-5" />
             </div>
-          </button>
+          </Button>
         </div>
         {/* Decorative elements */}
         <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>

@@ -2,6 +2,10 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
+import { Camera, Upload, X, Info, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface PhotoUploadProps {
   onPhotoUpload: (photoUrl: string) => void;
@@ -262,65 +266,61 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
   if (isProcessing) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="bg-background border-2 border-dashed border-primary rounded-2xl p-12 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Processing Your Photo
-          </h3>
-          <p className="text-muted-foreground">
-            Please wait while we analyze your image...
-          </p>
-        </div>
+        <Card className="border-dashed border-2 border-primary">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+            <CardTitle className="text-lg mb-2">Processing Your Photo</CardTitle>
+            <CardDescription>Please wait while we analyze your image...</CardDescription>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-foreground mb-4">
+    <div className="max-w-2xl mx-auto space-y-8">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold mb-4">
           {cameraMode ? 'Take Your Photo' : 'Upload Your Photo'}
         </h2>
-        <p className="text-lg text-muted-foreground">
+        <p className="text-lg text-muted-foreground mb-6">
           Take a clear, front-facing photo for the best results. Make sure your face is well-lit and visible.
         </p>
         
         {/* Mode Toggle Buttons */}
-        <div className="flex justify-center gap-4 mt-6">
-          <button
+        <div className="flex justify-center gap-4">
+          <Button
             onClick={() => {
               if (cameraMode) {
                 stopCamera();
               }
               openFileDialog();
             }}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-              !cameraMode
-                ? 'gradient-primary text-white shadow-lg hover:shadow-xl hover:scale-105'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground hover:scale-105'
-            }`}
+            variant={!cameraMode ? "default" : "outline"}
+            size="lg"
+            className="h-12"
           >
-            📁 Upload File
-          </button>
-          <button
+            <Upload className="h-4 w-4" />
+            Upload File
+          </Button>
+          <Button
             onClick={cameraMode ? stopCamera : startCamera}
             disabled={isCameraLoading}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-              cameraMode
-                ? 'gradient-secondary text-white shadow-lg hover:shadow-xl hover:scale-105'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground hover:scale-105'
-            } ${isCameraLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+            variant={cameraMode ? "default" : "outline"}
+            size="lg"
+            className="h-12"
           >
-            {isCameraLoading ? '📷 Loading...' : cameraMode ? '❌ Stop Camera' : '📷 Use Camera'}
-          </button>
+            <Camera className="h-4 w-4" />
+            {isCameraLoading ? 'Loading...' : cameraMode ? 'Stop Camera' : 'Use Camera'}
+          </Button>
         </div>
       </div>
 
       {/* Base Image Options */}
       {!cameraMode && (
-        <div className="mb-8">
+        <div>
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-foreground mb-2">
+            <h3 className="text-xl font-semibold mb-2">
               Or Try With Example Images
             </h3>
             <p className="text-muted-foreground">
@@ -328,12 +328,12 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
             </p>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {baseImages.map((image, index) => (
-              <button
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {baseImages.map((image) => (
+              <Card
                 key={image.id}
+                className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 border-2 hover:border-primary"
                 onClick={() => handleBaseImageSelect(image.src)}
-                className="relative group bg-background border-2 border-border rounded-xl overflow-hidden hover:border-primary transition-all duration-300 hover:shadow-lg hover:scale-105"
               >
                 <div className="aspect-square relative">
                   <Image
@@ -348,7 +348,7 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
                     <p className="text-sm font-medium">{image.description}</p>
                   </div>
                 </div>
-              </button>
+              </Card>
             ))}
           </div>
         </div>
@@ -356,38 +356,48 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
 
       {/* Camera Mode */}
       {cameraMode ? (
-        <div className="relative bg-background border-2 border-solid border-primary rounded-2xl overflow-hidden">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-96 object-cover scale-x-[-1]"
-          />
-          <canvas ref={canvasRef} className="hidden" />
-          
-          {/* Camera Controls Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 md:p-6">
-            <div className="flex justify-center gap-2 md:gap-4">
-              <button
-                onClick={capturePhoto}
-                className="bg-white text-black px-4 py-2 md:px-8 md:py-4 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-1 md:gap-2 text-sm md:text-base"
-              >
-                📸 <span className="hidden sm:inline">Capture Photo</span><span className="sm:hidden">Capture</span>
-              </button>
-              <button
-                onClick={stopCamera}
-                className="bg-red-500 text-white px-3 py-2 md:px-6 md:py-4 rounded-full font-semibold hover:bg-red-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 text-sm md:text-base"
-              >
-                ❌ <span className="hidden sm:inline">Cancel</span>
-              </button>
+        <Card className="overflow-hidden border-2 border-primary">
+          <CardContent className="p-0">
+            <div className="relative">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-96 object-cover scale-x-[-1]"
+              />
+              <canvas ref={canvasRef} className="hidden" />
+              
+              {/* Camera Controls Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                <div className="flex justify-center gap-4">
+                  <Button
+                    onClick={capturePhoto}
+                    size="lg"
+                    className="bg-white text-black hover:bg-gray-100 h-12"
+                  >
+                    <Camera className="h-4 w-4" />
+                    <span className="hidden sm:inline">Capture Photo</span>
+                    <span className="sm:hidden">Capture</span>
+                  </Button>
+                  <Button
+                    onClick={stopCamera}
+                    variant="destructive"
+                    size="lg"
+                    className="h-12"
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="hidden sm:inline">Cancel</span>
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ) : (
         /* File Upload Mode */
-        <div
-          className={`relative bg-background border-2 border-dashed rounded-2xl p-12 text-center transition-colors cursor-pointer ${
+        <Card
+          className={`cursor-pointer transition-all duration-300 border-2 border-dashed ${
             isDragging
               ? 'border-primary bg-primary/5'
               : 'border-border hover:border-primary/50 hover:bg-primary/2'
@@ -397,71 +407,82 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
           onDragLeave={handleDragLeave}
           onClick={openFileDialog}
         >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileInputChange}
-          className="hidden"
-        />
-        
-        <div className="space-y-6">
-          <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              {isDragging ? 'Drop your photo here' : 'Drag and drop your photo'}
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              or click to browse from your device
-            </p>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileInputChange}
+              className="hidden"
+            />
             
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openFileDialog();
-              }}
-              className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-            >
-              📁 Choose Photo
-            </button>
-          </div>
-        </div>
-        </div>
+            <div className="space-y-6 text-center">
+              <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Camera className="h-8 w-8 text-primary" />
+              </div>
+              
+              <div>
+                <CardTitle className="text-xl mb-2">
+                  {isDragging ? 'Drop your photo here' : 'Drag and drop your photo'}
+                </CardTitle>
+                <CardDescription className="mb-6">
+                  or click to browse from your device
+                </CardDescription>
+                
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openFileDialog();
+                  }}
+                  size="lg"
+                  className="h-12"
+                >
+                  <Upload className="h-4 w-4" />
+                  Choose Photo
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Tips */}
-      <div className="mt-8 bg-muted/50 rounded-xl p-6">
-        <h4 className="font-semibold text-foreground mb-3 flex items-center">
-          <svg className="h-5 w-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Tips for Best Results
-        </h4>
-        <ul className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex items-start">
-            <span className="text-primary mr-2">•</span>
-            Use a front-facing photo with your face clearly visible
-          </li>
-          <li className="flex items-start">
-            <span className="text-primary mr-2">•</span>
-            Ensure good lighting - natural light works best
-          </li>
-          <li className="flex items-start">
-            <span className="text-primary mr-2">•</span>
-            Keep your hair pulled back to see your face shape clearly
-          </li>
-          <li className="flex items-start">
-            <span className="text-primary mr-2">•</span>
-            Avoid heavy makeup or accessories that might obscure your features
-          </li>
-        </ul>
-      </div>
+      <Card className="bg-muted/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-primary" />
+            Tips for Best Results
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-3">
+            <li className="flex items-start gap-3">
+              <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-muted-foreground">
+                Use a front-facing photo with your face clearly visible
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-muted-foreground">
+                Ensure good lighting - natural light works best
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-muted-foreground">
+                Keep your hair pulled back to see your face shape clearly
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-muted-foreground">
+                Avoid heavy makeup or accessories that might obscure your features
+              </span>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }
