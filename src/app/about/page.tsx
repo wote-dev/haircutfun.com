@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Sparkles, ArrowRight, Users, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const features = [
   {
@@ -33,29 +38,11 @@ const features = [
   }
 ];
 
-const stats = [
-  { number: "1M+", label: "Happy Users" },
-  { number: "500+", label: "Hairstyles" },
-  { number: "98%", label: "Accuracy Rate" },
+const achievements = [
+  { number: "500+", label: "Hairstyles Available" },
+  { number: "AI-Powered", label: "Technology" },
+  { number: "Instant", label: "Results" },
   { number: "24/7", label: "Available" }
-];
-
-const team = [
-  {
-    name: "Sarah Chen",
-    role: "AI Research Lead",
-    bio: "PhD in Computer Vision, former Google AI researcher specializing in facial recognition and image processing."
-  },
-  {
-    name: "Marcus Rodriguez",
-    role: "Hair Stylist Consultant",
-    bio: "Award-winning stylist with 15+ years experience. Creative director at top NYC salons."
-  },
-  {
-    name: "Emily Watson",
-    role: "UX Design Director",
-    bio: "Former Apple designer focused on creating intuitive, beautiful user experiences."
-  }
 ];
 
 export default function AboutPage() {
@@ -81,7 +68,7 @@ export default function AboutPage() {
               Our Mission
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Finding the perfect hairstyle shouldn&apos;t be a guessing game. We believe everyone deserves to feel confident and beautiful, which is why we created HaircutFun - the world&apos;s most advanced virtual hairstyle try-on platform.
+              Finding the perfect hairstyle shouldn&apos;t be a guessing game. We believe everyone deserves to feel confident and beautiful, which is why we created HaircutFun - an advanced virtual hairstyle try-on platform designed to transform how people approach hair styling.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
               By combining artificial intelligence with professional styling expertise, we help you discover hairstyles that complement your unique features, lifestyle, and personality - all before you step foot in a salon.
@@ -90,17 +77,25 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Achievements Section */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Built for the Future of Beauty
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Our platform represents the next generation of beauty technology, designed to scale with growing demand.
+            </p>
+          </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {stats.map((stat, index) => (
+            {achievements.map((achievement, index) => (
               <div key={index} className="text-center">
                 <div className="text-4xl font-bold text-primary mb-2">
-                  {stat.number}
+                  {achievement.number}
                 </div>
                 <div className="text-muted-foreground font-medium">
-                  {stat.label}
+                  {achievement.label}
                 </div>
               </div>
             ))}
@@ -136,43 +131,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Meet Our Team
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our diverse team combines expertise in AI, beauty, and design to create the best possible experience.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {team.map((member, index) => (
-              <div key={index} className="bg-background border rounded-2xl p-8 text-center">
-                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 mx-auto mb-6 flex items-center justify-center">
-                  <svg className="h-12 w-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  {member.name}
-                </h3>
-                <p className="text-primary font-medium mb-4">
-                  {member.role}
-                </p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {member.bio}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Technology Section */}
-      <section className="py-16">
+      <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -180,7 +140,7 @@ export default function AboutPage() {
                 The Technology Behind HaircutFun
               </h2>
               <p className="text-lg text-muted-foreground">
-                Learn how our AI creates realistic hairstyle previews
+                Enterprise-grade AI technology designed for millions of transformations
               </p>
             </div>
             
@@ -196,7 +156,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Facial Recognition</h4>
-                      <p className="text-muted-foreground text-sm">Our AI identifies key facial features and proportions</p>
+                      <p className="text-muted-foreground text-sm">Our AI identifies key facial features and proportions with precision</p>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -205,7 +165,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Style Matching</h4>
-                      <p className="text-muted-foreground text-sm">Intelligent algorithms match styles to your face shape</p>
+                      <p className="text-muted-foreground text-sm">Intelligent algorithms match styles to your unique face shape</p>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -214,7 +174,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Realistic Rendering</h4>
-                      <p className="text-muted-foreground text-sm">Advanced graphics create photorealistic results</p>
+                      <p className="text-muted-foreground text-sm">Advanced graphics create photorealistic results at scale</p>
                     </div>
                   </div>
                 </div>
@@ -230,7 +190,7 @@ export default function AboutPage() {
                   Powered by Machine Learning
                 </h4>
                 <p className="text-muted-foreground text-sm">
-                  Trained on millions of hairstyle images to deliver the most accurate results possible.
+                  Trained on extensive hairstyle datasets to deliver increasingly accurate results as our platform grows.
                 </p>
               </div>
             </div>
@@ -238,30 +198,131 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/10 via-background to-accent/10">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Ready to Discover Your Perfect Style?
+      {/* Growth & Vision Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-foreground mb-8">
+              Growing the Future of Beauty Tech
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Join over 1 million users who have found their ideal hairstyle with HaircutFun.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/try-on"
-                className="border-glow-primary bg-background text-foreground px-8 py-4 rounded-lg font-semibold transition-all duration-300"
-              >
-                Try Virtual Haircuts
-              </Link>
-              <Link
-                href="/gallery"
-                className="border border-border text-foreground px-8 py-4 rounded-lg font-semibold hover:bg-muted transition-colors"
-              >
-                Browse Styles
-              </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-background border rounded-2xl p-8">
+                <div className="text-3xl mb-4">🚀</div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  Rapid Innovation
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Our platform evolves daily with new features, styles, and AI improvements based on cutting-edge research and user feedback.
+                </p>
+              </div>
+              <div className="bg-background border rounded-2xl p-8">
+                <div className="text-3xl mb-4">🌍</div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  Global Reach
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Built to serve beauty enthusiasts worldwide, with infrastructure designed to handle massive scale and diverse styling preferences.
+                </p>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced CTA Section */}
+      <section className="py-20 bg-gradient-to-br from-primary/20 via-background to-accent/20 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--primary)_0%,_transparent_50%)] opacity-10"></div>
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Main heading with animation */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-4xl font-bold text-foreground mb-6 sm:text-5xl lg:text-6xl">
+                Ready to Discover Your
+                <span className="block text-primary font-extrabold mt-2">
+                  Perfect Style?
+                </span>
+              </h2>
+            </motion.div>
+
+            {/* Subtitle with community emphasis */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="mb-12"
+            >
+              <div className="flex items-center justify-center mb-4">
+                <Users className="h-6 w-6 text-primary mr-2" />
+                <span className="text-lg font-medium text-primary">Join the Movement</span>
+              </div>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+                Be part of the growing community of beauty enthusiasts discovering their ideal hairstyles with cutting-edge AI technology.
+              </p>
+            </motion.div>
+
+            {/* Enhanced CTA buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            >
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button asChild size="lg" className="group h-16 px-10 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 relative overflow-hidden">
+                  <Link href="/try-on" className="flex items-center space-x-3 relative z-10">
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                    >
+                      <Sparkles className="h-6 w-6" />
+                    </motion.div>
+                    <span>Try Virtual Haircuts</span>
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                  </Link>
+                </Button>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button asChild variant="outline" size="lg" className="group h-16 px-10 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden">
+                  <Link href="/gallery" className="flex items-center space-x-3 relative z-10">
+                    <Zap className="h-6 w-6 group-hover:text-primary transition-colors duration-300" />
+                    <span>Browse Styles</span>
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+                  </Link>
+                </Button>
+              </motion.div>
+            </motion.div>
+
+            {/* Additional encouragement */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+              className="mt-8 text-sm text-muted-foreground"
+            >
+              ✨ No commitment required • Instant results • Privacy protected
+            </motion.div>
           </div>
         </div>
       </section>

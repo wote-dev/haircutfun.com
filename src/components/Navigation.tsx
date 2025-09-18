@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserProfile } from "./auth/UserProfile";
+import { usePageTransitionContext } from "@/components/providers/PageTransitionProvider";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -20,6 +21,7 @@ export function Navigation() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { navigateWithLoading } = usePageTransitionContext();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,7 +61,11 @@ export function Navigation() {
   }, [isOpen]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/40 transition-all duration-300">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? 'bg-background/95 backdrop-blur-lg border-b border-border/40' 
+        : 'bg-transparent'
+    }`}>
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -84,11 +90,11 @@ export function Navigation() {
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
-                <Link
+                <button
                   key={item.name}
-                  href={item.href}
+                  onClick={() => navigateWithLoading(item.href)}
                   className={`
-                    relative px-4 py-2 rounded-lg text-sm font-medium
+                    relative px-4 py-2 rounded-lg text-sm font-medium cursor-pointer
                     ${isActive 
                       ? 'text-primary' 
                       : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors duration-150'
@@ -111,7 +117,7 @@ export function Navigation() {
                       style={{ willChange: 'transform' }}
                     />
                   )}
-                </Link>
+                </button>
               );
             })}
           </div>
@@ -120,13 +126,11 @@ export function Navigation() {
           <div className="hidden lg:flex items-center space-x-4">
             <UserProfile />
             <Button 
-              asChild
+              onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
               className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              <Link href="/try-on">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Get Started
-              </Link>
+              <Sparkles className="h-4 w-4 mr-2" />
+              Get Started
             </Button>
           </div>
 
@@ -181,7 +185,11 @@ export function Navigation() {
                   stiffness: 300,
                   damping: 30
                 }}
-                className="lg:hidden absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-b border-border/40 shadow-xl"
+                className={`lg:hidden absolute top-full left-0 right-0 backdrop-blur-xl border-b shadow-xl ${
+                  scrolled 
+                    ? 'bg-background/98 border-border/40' 
+                    : 'bg-background/90 border-border/20'
+                }`}
               >
                 <div className="container mx-auto px-4 sm:px-6 py-6">
                   <div className="flex flex-col space-y-1">
@@ -198,11 +206,13 @@ export function Navigation() {
                             ease: "easeOut"
                           }}
                         >
-                          <Link
-                            href={item.href}
-                            onClick={() => setIsOpen(false)}
+                          <button
+                            onClick={() => {
+                              setIsOpen(false);
+                              navigateWithLoading(item.href);
+                            }}
                             className={`
-                              block px-4 py-3 rounded-xl text-base font-medium transition-all duration-200
+                              block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all duration-200
                               ${isActive 
                                 ? 'text-primary bg-primary/10 border border-primary/20 shadow-sm' 
                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
@@ -210,7 +220,7 @@ export function Navigation() {
                             `}
                           >
                             {item.name}
-                          </Link>
+                          </button>
                         </motion.div>
                       );
                     })}
@@ -224,14 +234,15 @@ export function Navigation() {
                     >
                       <UserProfile />
                       <Button 
-                        asChild
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigateWithLoading("/try-on", "Preparing your virtual try-on...");
+                        }}
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
                         size="lg"
                       >
-                        <Link href="/try-on" onClick={() => setIsOpen(false)}>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Get Started
-                        </Link>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Get Started
                       </Button>
                     </motion.div>
                   </div>

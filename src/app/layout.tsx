@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navigation } from "@/components/Navigation";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://haircutfun.com'),
@@ -47,10 +48,12 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>
-          <Navigation />
-          <main className="flex-1">
-            {children}
-          </main>
+          <PageTransitionProvider>
+            <Navigation />
+            <main className="flex-1">
+              {children}
+            </main>
+          </PageTransitionProvider>
         </AuthProvider>
         <footer className="border-t bg-muted/50 py-8">
           <div className="container mx-auto px-4">

@@ -22,17 +22,24 @@ const baseImages: BaseImage[] = [
   },
   {
     id: 'example-2',
-    src: '/base-image-me.jpeg', // Placeholder for now
+    src: '/base-image-woman.png',
     alt: 'Example Person 2', 
-    name: 'Coming Soon',
-    description: 'Another example will be added soon'
+    name: 'Sarah',
+    description: 'Clean portrait with natural lighting'
   },
   {
     id: 'example-3',
-    src: '/base-image-me.jpeg', // Placeholder for now
+    src: '/base-image-woman2.jpg',
     alt: 'Example Person 3',
-    name: 'Coming Soon',
-    description: 'More examples coming soon'
+    name: 'Emma',
+    description: 'Professional photo with great detail'
+  },
+  {
+    id: 'example-4',
+    src: '/base-image-guy 2.jpg',
+    alt: 'Example Person 4',
+    name: 'Mike',
+    description: 'Clear headshot perfect for styling'
   }
 ];
 
@@ -58,9 +65,9 @@ export function BaseImageSelector() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto mb-12">
           {baseImages.map((image, index) => {
-            const isAvailable = index === 0; // Only first image is available for now
+            const isAvailable = true; // All images are now available
             const isSelected = selectedImage === image.id;
             
             return (

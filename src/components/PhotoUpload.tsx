@@ -13,13 +13,25 @@ const baseImages = [
     id: 'example-1',
     src: '/base-image-me.jpeg',
     alt: 'Example Person 1',
-    description: 'Try with this example'
+    description: 'Try with Daniel'
   },
   {
     id: 'example-2',
-    src: '/base-image-me.jpeg', // Placeholder - user will add another image later
+    src: '/base-image-woman.png',
     alt: 'Example Person 2',
-    description: 'Another example (coming soon)'
+    description: 'Try with Sarah'
+  },
+  {
+    id: 'example-3',
+    src: '/base-image-woman2.jpg',
+    alt: 'Example Person 3',
+    description: 'Try with Emma'
+  },
+  {
+    id: 'example-4',
+    src: '/base-image-guy 2.jpg',
+    alt: 'Example Person 4',
+    description: 'Try with Mike'
   }
 ];
 
@@ -316,15 +328,12 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {baseImages.map((image, index) => (
               <button
                 key={image.id}
                 onClick={() => handleBaseImageSelect(image.src)}
-                className={`relative group bg-background border-2 border-border rounded-xl overflow-hidden hover:border-primary transition-all duration-300 hover:shadow-lg hover:scale-105 ${
-                  index === 1 ? 'opacity-60 cursor-not-allowed' : ''
-                }`}
-                disabled={index === 1} // Disable the second placeholder for now
+                className="relative group bg-background border-2 border-border rounded-xl overflow-hidden hover:border-primary transition-all duration-300 hover:shadow-lg hover:scale-105"
               >
                 <div className="aspect-square relative">
                   <Image
@@ -338,13 +347,6 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
                   <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                     <p className="text-sm font-medium">{image.description}</p>
                   </div>
-                  {index === 1 && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <span className="text-white text-sm font-medium bg-black/60 px-3 py-1 rounded-full">
-                        Coming Soon
-                      </span>
-                    </div>
-                  )}
                 </div>
               </button>
             ))}

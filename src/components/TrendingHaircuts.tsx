@@ -448,13 +448,29 @@ export function TrendingHaircuts() {
             transition={{ duration: 0.6, delay: 1 }}
             className="text-center mt-8 sm:mt-12"
           >
-            <Link
-              href="/gallery"
-              className="inline-flex items-center space-x-2 sm:space-x-3 px-6 sm:px-8 py-3 sm:py-4 border-glow-multi bg-background text-foreground font-semibold rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            <motion.div
+              whileHover={{ 
+                scale: 1.05,
+                y: -2
+              }} 
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <span className="text-sm sm:text-base">View All Styles</span>
-              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Link>
+              <Link href="/gallery">
+                <button className="group h-14 px-8 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden bg-background text-foreground rounded-xl shadow-lg hover:shadow-xl">
+                  <div className="flex items-center space-x-2 relative z-10">
+                    <span>View All Styles</span>
+                    <motion.div
+                      whileHover={{ x: 4 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                      <ArrowRight className="h-5 w-5 group-hover:text-primary transition-colors duration-300" />
+                    </motion.div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                  </div>
+                </button>
+              </Link>
+            </motion.div>
           </motion.div>
         </div>
       </div>

@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { usePageTransitionContext } from "@/components/providers/PageTransitionProvider";
 
 export function HeroSection() {
+  const { navigateWithLoading } = usePageTransitionContext();
+  
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-background via-background to-secondary/20 min-h-screen flex items-center justify-center pt-24 pb-16">
-      {/* Subtle background decoration */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--primary)_0%,_transparent_50%)] opacity-5"></div>
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl"></div>
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/20 min-h-screen flex items-center justify-center pt-24 pb-16">
+      {/* Enhanced background decorations */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--primary)_0%,_transparent_50%)] opacity-10"></div>
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
       
-      <div className="container mx-auto px-6 flex items-center justify-center min-h-[85vh]">
+      <div className="container mx-auto px-6 flex items-center justify-center min-h-[85vh] relative z-10">
         <div className="mx-auto max-w-5xl text-center space-y-8">
           {/* Badge */}
           <motion.div
@@ -23,10 +26,10 @@ export function HeroSection() {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="flex justify-center"
           >
-            <Badge variant="secondary" className="px-4 py-2 text-sm font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors">
-              <Sparkles className="w-3 h-3 mr-2" />
+            <div className="inline-flex items-center gap-2 text-sm text-primary bg-muted/50 px-4 py-2 rounded-full border border-border/50">
+              <Sparkles className="h-4 w-4 text-primary" />
               AI-Powered Virtual Try-On
-            </Badge>
+            </div>
           </motion.div>
 
           {/* Main heading */}
@@ -73,8 +76,12 @@ export function HeroSection() {
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Button asChild size="lg" className="group h-14 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 relative overflow-hidden">
-                <Link href="/try-on" className="flex items-center space-x-2 relative z-10">
+              <Button 
+                onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
+                size="lg" 
+                className="group h-14 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 relative overflow-hidden"
+              >
+                <div className="flex items-center space-x-2 relative z-10">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -83,7 +90,7 @@ export function HeroSection() {
                   </motion.div>
                   <span>Start Virtual Try-On</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-                </Link>
+                </div>
               </Button>
             </motion.div>
             
@@ -95,8 +102,13 @@ export function HeroSection() {
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Button asChild variant="outline" size="lg" className="group h-14 px-8 text-lg font-semibold border-2 border-primary/20 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden">
-                <Link href="/gallery" className="flex items-center space-x-2 relative z-10">
+              <Button 
+                onClick={() => navigateWithLoading("/gallery", "Loading gallery...")}
+                variant="outline" 
+                size="lg" 
+                className="group h-14 px-8 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden"
+              >
+                <div className="flex items-center space-x-2 relative z-10">
                   <Play className="h-5 w-5 group-hover:text-primary transition-colors duration-300" />
                   <span>View Gallery</span>
                   <motion.div
@@ -106,7 +118,7 @@ export function HeroSection() {
                     <ArrowRight className="h-4 w-4 ml-1 group-hover:text-primary transition-colors duration-300" />
                   </motion.div>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-                </Link>
+                </div>
               </Button>
             </motion.div>
           </motion.div>
@@ -121,14 +133,19 @@ export function HeroSection() {
             <div className="flex items-center space-x-2">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-background"></div>
+                  <img
+                    key={i}
+                    className="w-8 h-8 rounded-full border-2 border-background"
+                    src={`https://i.pravatar.cc/32?img=${i}`}
+                    alt={`User ${i}`}
+                  />
                 ))}
               </div>
-              <span className="font-medium">10,000+ happy customers</span>
+              <span className="font-medium">50+ happy customers</span>
             </div>
             <div className="flex items-center space-x-1">
               <span className="text-yellow-500">★★★★★</span>
-              <span className="font-medium">4.9/5 rating</span>
+              <span className="font-medium">Loved by our users</span>
             </div>
           </motion.div>
         </div>
