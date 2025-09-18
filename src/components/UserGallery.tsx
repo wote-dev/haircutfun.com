@@ -98,7 +98,7 @@ export function UserGallery() {
                 className="object-cover"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200" />
+              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-colors" />
             </div>
           ))}
         </div>

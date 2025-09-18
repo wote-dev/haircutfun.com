@@ -222,15 +222,10 @@ export function TrendingHaircuts() {
         <div className="relative mx-auto max-w-6xl">
           {/* Gallery Header */}
           <div className="text-center mb-8 sm:mb-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-4 sm:px-6 py-2 sm:py-3 mb-4 sm:mb-6"
-            >
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-4 sm:px-6 py-2 sm:py-3 mb-4 sm:mb-6">
               <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <span className="text-xs sm:text-sm font-semibold text-primary">Popular Styles</span>
-            </motion.div>
+            </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 sm:mb-4">
               Trending Haircuts
             </h2>
@@ -247,9 +242,9 @@ export function TrendingHaircuts() {
             >
               <button
                 onClick={() => setSelectedGender('female')}
-                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 ${
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-xs sm:text-sm transition-colors ${
                   selectedGender === 'female'
-                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -257,9 +252,9 @@ export function TrendingHaircuts() {
               </button>
               <button
                 onClick={() => setSelectedGender('male')}
-                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 ${
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-xs sm:text-sm transition-colors ${
                   selectedGender === 'male'
-                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -288,7 +283,6 @@ export function TrendingHaircuts() {
                   stiffness: 300, 
                   damping: 25 
                 }}
-                whileHover={{ scale: 1.02, y: -2 }}
                 className="group"
               >
                   <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-200/50 shadow-md hover:shadow-xl smooth-lift">
@@ -346,24 +340,19 @@ export function TrendingHaircuts() {
                             />
                           ) : (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <motion.div
-                                whileHover={{ scale: 1.1, rotate: 5 }}
-                                className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                              >
+                              <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                                 <svg className="h-6 w-6 sm:h-10 sm:w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                              </motion.div>
+                              </div>
                             </div>
                           )}
                         </>
                       )}
                       
                       {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 sm:pb-6">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-colors flex items-end justify-center pb-4 sm:pb-6">
+                        <button
                           onClick={() => {
                             // Use the appropriate base image for the selected gender
                             const baseImage = selectedGender === 'male' ? baseImages[0] : baseImages[1];
@@ -373,7 +362,7 @@ export function TrendingHaircuts() {
                         >
                           <span>Try On</span>
                           <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </motion.button>
+                        </button>
                       </div>
                     </div>
                     
@@ -448,29 +437,16 @@ export function TrendingHaircuts() {
             transition={{ duration: 0.6, delay: 1 }}
             className="text-center mt-8 sm:mt-12"
           >
-            <motion.div
-              whileHover={{ 
-                scale: 1.05,
-                y: -2
-              }} 
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
+            <div>
               <Link href="/gallery">
-                <button className="group h-14 px-8 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden bg-background text-foreground rounded-xl shadow-lg hover:shadow-xl">
-                  <div className="flex items-center space-x-2 relative z-10">
+                <button className="px-6 py-3 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg">
+                  <div className="flex items-center space-x-2">
                     <span>View All Styles</span>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                    >
-                      <ArrowRight className="h-5 w-5 group-hover:text-primary transition-colors duration-300" />
-                    </motion.div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                    <ArrowRight className="h-5 w-5" />
                   </div>
                 </button>
               </Link>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>

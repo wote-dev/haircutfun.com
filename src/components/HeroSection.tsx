@@ -114,59 +114,33 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
           >
-            <motion.div 
-              whileHover={{ 
-                scale: 1.05,
-                y: -2
-              }} 
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
+            <div>
               <Button 
                 onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
                 size="lg" 
-                className="group h-14 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 relative overflow-hidden"
+                className="h-14 px-8 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
               >
-                <div className="flex items-center space-x-2 relative z-10">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6, ease: "easeInOut" }}
-                  >
-                    <Sparkles className="h-5 w-5" />
-                  </motion.div>
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="h-5 w-5" />
                   <span>Start Virtual Try-On</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
                 </div>
               </Button>
-            </motion.div>
+            </div>
             
-            <motion.div 
-              whileHover={{ 
-                scale: 1.05,
-                y: -2
-              }} 
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
+            <div>
               <Button 
                 onClick={() => navigateWithLoading("/gallery", "Loading gallery...")}
                 variant="outline" 
                 size="lg" 
-                className="group h-14 px-8 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden"
+                className="h-14 px-8 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-colors"
               >
-                <div className="flex items-center space-x-2 relative z-10">
-                  <Play className="h-5 w-5 group-hover:text-primary transition-colors duration-300" />
+                <div className="flex items-center space-x-2">
+                  <Play className="h-5 w-5" />
                   <span>View Gallery</span>
-                  <motion.div
-                    whileHover={{ x: 4 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  >
-                    <ArrowRight className="h-4 w-4 ml-1 group-hover:text-primary transition-colors duration-300" />
-                  </motion.div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                  <ArrowRight className="h-4 w-4 ml-1" />
                 </div>
               </Button>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Social proof */}

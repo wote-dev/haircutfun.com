@@ -94,12 +94,12 @@ export function UserGallery() {
             <button
               key={image.id}
               onClick={() => setSelectedImage(image)}
-              className="aspect-square rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all duration-200 group"
+              className="aspect-square rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-colors group"
             >
               <img
                 src={image.image_url}
                 alt={`${image.haircut_style} hairstyle`}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                className="w-full h-full object-cover"
               />
             </button>
           ))}

@@ -44,7 +44,7 @@ export function ImageCarousel({
           <motion.div
             key={`${image}-${index}`}
             className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg"
-            whileHover={{ scale: 1.05 }}
+
             transition={{ duration: 0.3 }}
           >
             <img

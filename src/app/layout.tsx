@@ -86,7 +86,7 @@ export default function RootLayout({
                   href="https://x.com/wote_dev" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-slate-700"
+                  className="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white font-medium rounded-lg shadow-lg border border-slate-700 transition-colors"
                 >
                   <span className="text-sm text-slate-300">Built by</span>
                   <div className="flex items-center gap-1.5">

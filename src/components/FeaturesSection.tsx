@@ -92,7 +92,7 @@ export function FeaturesSection() {
             return (
               <Card 
                 key={feature.name} 
-                className="group relative overflow-hidden hover:shadow-2xl transition-all duration-500 border-border/50 hover:border-primary/30 bg-card/80 backdrop-blur-sm hover:-translate-y-2"
+                className="group relative overflow-hidden border-border/50 hover:border-primary/30 bg-card/80 backdrop-blur-sm transition-colors"
                 style={{
                   animationDelay: `${index * 100}ms`,
                 }}
@@ -111,7 +111,7 @@ export function FeaturesSection() {
                 
                 <CardHeader className="pb-6 relative z-10">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary shadow-lg">
                       <IconComponent className="h-8 w-8" />
                     </div>
                   </div>

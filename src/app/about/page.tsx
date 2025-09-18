@@ -39,7 +39,7 @@ const features = [
 ];
 
 const achievements = [
-  { number: "500+", label: "Hairstyles Available" },
+  { number: "15+", label: "Hairstyles Available" },
   { number: "AI-Powered", label: "Technology" },
   { number: "Instant", label: "Results" },
   { number: "24/7", label: "Available" }
@@ -117,7 +117,7 @@ export default function AboutPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {features.map((feature, index) => (
-              <div key={index} className="bg-background border rounded-2xl p-8 hover:shadow-lg transition-shadow">
+              <div key={index} className="bg-background border rounded-2xl p-8 hover:shadow-lg transition-colors">
                 <div className="text-4xl mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">
                   {feature.title}
@@ -231,14 +231,12 @@ export default function AboutPage() {
 
       {/* Enhanced CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary/20 via-background to-accent/20 relative overflow-hidden">
-        {/* Background decorations */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--primary)_0%,_transparent_50%)] opacity-10"></div>
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Main heading with animation */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -253,7 +251,6 @@ export default function AboutPage() {
               </h2>
             </motion.div>
 
-            {/* Subtitle with community emphasis */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -270,7 +267,6 @@ export default function AboutPage() {
               </p>
             </motion.div>
 
-            {/* Enhanced CTA buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -278,42 +274,23 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <Button asChild size="lg" className="group h-16 px-10 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 relative overflow-hidden">
-                  <Link href="/try-on" className="flex items-center space-x-3 relative z-10">
-                    <motion.div
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6, ease: "easeInOut" }}
-                    >
-                      <Sparkles className="h-6 w-6" />
-                    </motion.div>
-                    <span>Try Virtual Haircuts</span>
-                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-                  </Link>
-                </Button>
-              </motion.div>
+              <Button asChild size="lg" className="group h-16 px-10 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors">
+                <Link href="/try-on" className="flex items-center space-x-3">
+                  <Sparkles className="h-6 w-6" />
+                  <span>Try Virtual Haircuts</span>
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
               
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <Button asChild variant="outline" size="lg" className="group h-16 px-10 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden">
-                  <Link href="/gallery" className="flex items-center space-x-3 relative z-10">
-                    <Zap className="h-6 w-6 group-hover:text-primary transition-colors duration-300" />
-                    <span>Browse Styles</span>
-                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
-                  </Link>
-                </Button>
-              </motion.div>
+              <Button asChild variant="outline" size="lg" className="group h-16 px-10 text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-colors">
+                <Link href="/gallery" className="flex items-center space-x-3">
+                  <Zap className="h-6 w-6" />
+                  <span>Browse Styles</span>
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
             </motion.div>
 
-            {/* Additional encouragement */}
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}

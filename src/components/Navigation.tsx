@@ -97,25 +97,13 @@ export function Navigation() {
                     relative px-4 py-2 rounded-lg text-sm font-medium cursor-pointer
                     ${isActive 
                       ? 'text-primary' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors duration-150'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors'
                     }
                   `}
-                  style={{ willChange: isActive ? 'auto' : 'color, background-color' }}
                 >
                   {item.name}
                   {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 bg-primary/10 rounded-lg border border-primary/20"
-                      transition={{ 
-                        type: "spring", 
-                        stiffness: 500, 
-                        damping: 30,
-                        mass: 1,
-                        duration: 0.3
-                      }}
-                      style={{ willChange: 'transform' }}
-                    />
+                    <div className="absolute inset-0 bg-primary/10 rounded-lg border border-primary/20" />
                   )}
                 </button>
               );
@@ -127,7 +115,7 @@ export function Navigation() {
             <UserProfile />
             <Button 
               onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Sparkles className="h-4 w-4 mr-2" />
               Get Started
@@ -140,20 +128,15 @@ export function Navigation() {
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 hover:bg-accent/50 transition-colors duration-200"
+              className="p-2 hover:bg-accent/50 transition-colors"
               aria-label={isOpen ? "Close menu" : "Open menu"}
               aria-expanded={isOpen}
             >
-              <motion.div
-                animate={{ rotate: isOpen ? 180 : 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                {isOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </motion.div>
+              {isOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
@@ -193,45 +176,31 @@ export function Navigation() {
               >
                 <div className="container mx-auto px-4 sm:px-6 py-6">
                   <div className="flex flex-col space-y-1">
-                    {navigation.map((item, index) => {
+                    {navigation.map((item) => {
                       const isActive = pathname === item.href;
                       return (
-                        <motion.div
-                          key={item.name}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ 
-                            delay: index * 0.1,
-                            duration: 0.3,
-                            ease: "easeOut"
-                          }}
-                        >
+                        <div key={item.name}>
                           <button
                             onClick={() => {
                               setIsOpen(false);
                               navigateWithLoading(item.href);
                             }}
                             className={`
-                              block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-all duration-200
+                              block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-colors
                               ${isActive 
-                                ? 'text-primary bg-primary/10 border border-primary/20 shadow-sm' 
+                                ? 'text-primary bg-primary/10 border border-primary/20' 
                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                               }
                             `}
                           >
                             {item.name}
                           </button>
-                        </motion.div>
+                        </div>
                       );
                     })}
                     
                     {/* Mobile Auth & CTA */}
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4, duration: 0.3 }}
-                      className="pt-6 border-t border-border/40 mt-4 space-y-4"
-                    >
+                    <div className="pt-6 border-t border-border/40 mt-4 space-y-4">
                       <UserProfile />
                       <Button 
                         onClick={() => {
@@ -244,7 +213,7 @@ export function Navigation() {
                         <Sparkles className="h-4 w-4 mr-2" />
                         Get Started
                       </Button>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </motion.div>

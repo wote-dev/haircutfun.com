@@ -29,7 +29,7 @@ export default function Home() {
           </p>
           <button
             onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
-            className="group h-16 px-10 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 relative overflow-hidden rounded-2xl hover:scale-105 hover:-translate-y-1"
+            className="group h-16 px-10 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl rounded-2xl transition-colors"
           >
             <div className="flex items-center space-x-3 relative z-10">
               <span>Start Your Virtual Try-On</span>

@@ -34,7 +34,7 @@ export function GenderSelection({ onGenderSelect, onBack }: GenderSelectionProps
         </div>
         <button
           onClick={onBack}
-          className="flex items-center px-4 py-2 text-muted-foreground hover:text-foreground hover:scale-105 transition-all duration-300"
+          className="flex items-center px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -48,10 +48,10 @@ export function GenderSelection({ onGenderSelect, onBack }: GenderSelectionProps
         {/* Male Option */}
         <div
           onClick={() => handleGenderClick('male')}
-          className={`group cursor-pointer p-8 rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
-            selectedGender === 'male'
-              ? 'border-primary bg-primary/5 shadow-lg'
-              : 'border-border bg-background hover:border-primary/50 hover:shadow-md'
+          className={`group cursor-pointer p-8 rounded-2xl border-2 transition-colors ${
+            selectedGender === 'male' 
+              ? 'border-primary bg-primary/5' 
+              : 'border-border bg-background hover:border-primary/50'
           }`}
         >
           <div className="text-center">
@@ -83,10 +83,10 @@ export function GenderSelection({ onGenderSelect, onBack }: GenderSelectionProps
         {/* Female Option */}
         <div
           onClick={() => handleGenderClick('female')}
-          className={`group cursor-pointer p-8 rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
-            selectedGender === 'female'
-              ? 'border-primary bg-primary/5 shadow-lg'
-              : 'border-border bg-background hover:border-primary/50 hover:shadow-md'
+          className={`group cursor-pointer p-8 rounded-2xl border-2 transition-colors ${
+            selectedGender === 'female' 
+              ? 'border-primary bg-primary/5' 
+              : 'border-border bg-background hover:border-primary/50'
           }`}
         >
           <div className="text-center">
@@ -121,7 +121,7 @@ export function GenderSelection({ onGenderSelect, onBack }: GenderSelectionProps
         <div className="text-center">
           <button
             onClick={handleContinue}
-            className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors hover:scale-105 transform duration-300 shadow-lg"
+            className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
           >
             Continue to Hairstyles
           </button>

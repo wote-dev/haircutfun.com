@@ -180,7 +180,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
         </div>
         <button
           onClick={onBack}
-          className="flex items-center px-4 py-2 text-muted-foreground hover:text-foreground hover:scale-105 transition-all duration-300"
+          className="flex items-center px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -242,10 +242,10 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
               onHaircutSelect(style.id);
             }}
           >
-            <div className={`bg-background border rounded-2xl overflow-hidden transition-all duration-200 ${
+            <div className={`bg-background border rounded-2xl overflow-hidden transition-colors ${
               style.isPremium && !hasPremium 
                 ? 'opacity-75 hover:opacity-90' 
-                : 'hover:shadow-lg hover:scale-105'
+                : 'hover:border-primary/50'
             }`}>
               {/* Style Preview */}
               <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden">
