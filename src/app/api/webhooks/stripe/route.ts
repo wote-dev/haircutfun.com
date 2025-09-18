@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { verifyWebhookSignature, updateSubscriptionFromStripe } from '../../../../lib/stripe/service';
 import { createClient } from '../../../../lib/supabase/server';
+import { stripe } from '../../../../lib/stripe/client';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -24,6 +25,68 @@ export async function POST(request: NextRequest) {
 
     // Handle different event types
     switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object;
+        const customerId = session.customer as string;
+        const userId = session.metadata?.userId;
+        
+        console.log('🎉 Checkout session completed:', {
+          sessionId: session.id,
+          customerId,
+          userId,
+          planType: session.metadata?.planType,
+          subscriptionId: session.subscription
+        });
+        
+        if (!userId) {
+          console.error('❌ No userId found in session metadata');
+          break;
+        }
+
+        // Get the subscription from the session
+        if (session.subscription) {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          
+          console.log('📋 Retrieved subscription details:', {
+             subscriptionId: subscription.id,
+             status: subscription.status,
+             priceId: subscription.items.data[0]?.price?.id,
+             currentPeriodStart: (subscription as any).current_period_start,
+             currentPeriodEnd: (subscription as any).current_period_end
+           });
+          
+          const supabase = await createClient();
+          await updateSubscriptionFromStripe({
+            userId,
+            stripeSubscription: subscription,
+            customerId,
+          });
+
+          console.log('✅ Subscription created/updated for user:', userId, 'with plan:', session.metadata?.planType);
+          
+          // Verify the subscription was saved correctly
+          const { data: savedSubscription, error } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+            
+          if (error) {
+            console.error('❌ Error verifying saved subscription:', error);
+          } else {
+            console.log('✅ Verified saved subscription:', {
+              userId: savedSubscription.user_id,
+              status: savedSubscription.status,
+              planType: savedSubscription.plan_type,
+              stripeSubscriptionId: savedSubscription.stripe_subscription_id
+            });
+          }
+        } else {
+          console.error('❌ No subscription found in completed session');
+        }
+        break;
+      }
+
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;

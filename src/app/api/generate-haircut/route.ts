@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
         const { data: subscriptionData, error: subscriptionError } = await supabase
           .from('subscriptions')
-          .select('status')
+          .select('status, plan_type')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -60,8 +60,21 @@ export async function POST(request: NextRequest) {
           }, { status: 503 });
         }
 
-        const isPremium = subscriptionData?.status === 'active';
-      const maxGenerations = isPremium ? 999999 : MAX_FREE_TRIES;
+        // Determine the actual plan type
+        const planType = (subscriptionData?.status === 'active' 
+          ? (subscriptionData.plan_type as 'pro' | 'premium') 
+          : 'free') as 'free' | 'pro' | 'premium';
+        
+        // Set limits based on actual plan type
+        const planLimits = {
+          free: 1,
+          pro: 25,
+          premium: 75
+        };
+        
+        // isPremium should only be true for paid plans (pro/premium), not free plans
+        const isPremium = subscriptionData?.status === 'active' && planType !== 'free';
+        const maxGenerations = planLimits[planType];
 
       currentUsage = usageData;
 

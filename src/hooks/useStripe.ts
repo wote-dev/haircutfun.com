@@ -30,10 +30,13 @@ export function useStripe() {
         // Read body once and try to extract a useful error
         const raw = await response.text();
         let message = 'Failed to create checkout session';
+        let errorCode = null;
+        
         try {
           const parsed = raw ? JSON.parse(raw) : null;
           if (parsed && typeof parsed.error === 'string' && parsed.error.length > 0) {
             message = parsed.error;
+            errorCode = parsed.code;
           }
         } catch {
           // Not JSON, fall back to raw text if present
@@ -43,7 +46,16 @@ export function useStripe() {
             message = `HTTP ${response.status}`;
           }
         }
+        
         console.error('Checkout API error:', { status: response.status, body: raw });
+        
+        // Handle specific subscription conflict errors
+        if (response.status === 409 && errorCode) {
+          const error = new Error(message);
+          (error as any).code = errorCode;
+          throw error;
+        }
+        
         throw new Error(message);
       }
 

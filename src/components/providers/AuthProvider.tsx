@@ -37,8 +37,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const isSigningOutRef = useRef(false);
-  const authSubscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const authSubscriptionRef = useRef<any>(null);
   const router = useRouter();
+
+  // Add logging for loading state changes
+  const loadingRef = useRef(loading);
+  loadingRef.current = loading;
+  
+  const setLoadingWithLog = (newLoading: boolean) => {
+    console.log(`AuthProvider: Setting loading from ${loadingRef.current} to ${newLoading}`);
+    setLoading(newLoading);
+  };
+
+  // Log loading state changes
+  useEffect(() => {
+    console.log(`AuthProvider: Loading state changed to: ${loading}`);
+  }, [loading]);
   
   // Lazy Supabase client initialization
   const getSupabase = () => {
@@ -50,23 +64,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const fetchUserData = async (userId: string) => {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database query timeout after 10 seconds')), 10000);
+    });
+
     try {
       console.log('AuthProvider: Fetching user data for:', userId);
       const supabase = getSupabase();
       
       // Fetch user profile (might not exist for new users)
-      const { data: profileData, error: profileError } = await supabase
+      console.log('AuthProvider: Fetching user profile...');
+      const profilePromise = supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
+      
+      const { data: profileData, error: profileError } = await Promise.race([profilePromise, timeoutPromise]) as any;
+      
+      console.log('AuthProvider: Profile fetch result:', { profileData, profileError });
       
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('AuthProvider: Error fetching profile:', profileError);
       }
       
       // Fetch subscription (might not exist for new users)
-      const { data: subscriptionData, error: subscriptionError } = await supabase
+      console.log('AuthProvider: Fetching subscription...');
+      const subscriptionPromise = supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', userId)
@@ -74,28 +98,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
         .limit(1)
         .maybeSingle();
       
+      const { data: subscriptionData, error: subscriptionError } = await Promise.race([subscriptionPromise, timeoutPromise]) as any;
+      
+      console.log('AuthProvider: Subscription fetch result:', { subscriptionData, subscriptionError });
+      
       if (subscriptionError && subscriptionError.code !== 'PGRST116') {
         console.error('AuthProvider: Error fetching subscription:', subscriptionError);
       }
       
       // Fetch current month usage (might not exist for new users)
+      console.log('AuthProvider: Fetching usage data...');
       const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
-      const { data: usageData, error: usageError } = await supabase
+      console.log('AuthProvider: Current month:', currentMonth);
+      const usagePromise = supabase
         .from('usage_tracking')
         .select('*')
         .eq('user_id', userId)
         .eq('month_year', currentMonth)
         .maybeSingle();
       
+      const { data: usageData, error: usageError } = await Promise.race([usagePromise, timeoutPromise]) as any;
+      
+      console.log('AuthProvider: Usage fetch result:', { usageData, usageError });
+      
       if (usageError && usageError.code !== 'PGRST116') {
         console.error('AuthProvider: Error fetching usage:', usageError);
       }
       
+      console.log('AuthProvider: Setting state with fetched data...');
       setProfile(profileData || null);
       setSubscription(subscriptionData || null);
       setUsage(usageData || null);
+      console.log('AuthProvider: fetchUserData completed successfully');
     } catch (error) {
       console.error('AuthProvider: Error fetching user data:', error);
+      // Set loading to false even on error to prevent infinite loading
+      console.log('AuthProvider: Setting default values due to error');
+      setProfile(null);
+      setSubscription(null);
+      setUsage(null);
     }
   };
 
@@ -257,7 +298,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Check if auth callback is in progress to avoid interference
         if (typeof window !== 'undefined' && localStorage.getItem('auth_callback_in_progress')) {
           console.log('AuthProvider: Auth callback in progress, skipping initial session check')
-          setLoading(false)
+          setLoadingWithLog(false)
           return
         }
         
@@ -269,7 +310,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (error) {
           console.error('AuthProvider: Error getting session:', error);
-          setLoading(false);
+          setLoadingWithLog(false);
           return;
         }
         
@@ -289,7 +330,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (mounted) {
           console.log('AuthProvider: Setting loading to false after initial session check');
-          setLoading(false);
+          setLoadingWithLog(false);
           console.log('AuthProvider: Initial session check complete');
         }
       } catch (error) {
@@ -336,7 +377,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (mounted) {
           console.log('AuthProvider: Setting loading to false after auth state change');
-          setLoading(false);
+          setLoadingWithLog(false);
         }
       }
     );

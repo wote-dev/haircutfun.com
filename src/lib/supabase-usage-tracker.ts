@@ -57,6 +57,14 @@ export async function getUsageData(userId: string): Promise<UsageData> {
       .limit(1)
       .single();
 
+    console.log('🔍 Subscription query result for user:', userId, {
+      subscriptionData,
+      subError,
+      hasSubscription: !!subscriptionData,
+      status: subscriptionData?.status,
+      planType: subscriptionData?.plan_type
+    });
+
     // If no usage record exists for this month, create one
     if (usageError && usageError.code === 'PGRST116') {
       const newUsage: UsageTrackingInsert = {
@@ -77,13 +85,26 @@ export async function getUsageData(userId: string): Promise<UsageData> {
         throw createError;
       }
 
+      // Determine the actual plan type for new users
+      const planType = (subscriptionData?.status === 'active' 
+        ? (subscriptionData.plan_type as 'pro' | 'premium') 
+        : 'free') as 'free' | 'pro' | 'premium';
+      
+      // Set limits based on actual plan type
+      const planLimits = {
+        free: 1,
+        pro: 25,
+        premium: 75
+      };
+      
+      // isPremium should only be true for paid plans (pro/premium), not free plans
+      const isPremium = subscriptionData?.status === 'active' && planType !== 'free';
+
       return {
         freeTriesUsed: 0,
-        maxFreeTries: MAX_FREE_TRIES,
-        isPremium: subscriptionData?.status === 'active',
-        subscriptionType: subscriptionData?.status === 'active' 
-          ? (subscriptionData.plan_type as 'pro' | 'premium') 
-          : 'free',
+        maxFreeTries: planLimits[planType],
+        isPremium,
+        subscriptionType: planType,
         lastUsed: new Date().toISOString(),
         monthYear: currentMonth
       };
@@ -94,16 +115,39 @@ export async function getUsageData(userId: string): Promise<UsageData> {
       throw usageError;
     }
 
-    return {
+    // Determine the actual plan type
+    const planType = (subscriptionData?.status === 'active' 
+      ? (subscriptionData.plan_type as 'pro' | 'premium') 
+      : 'free') as 'free' | 'pro' | 'premium';
+    
+    // Set limits based on actual plan type, not just subscription status
+    const planLimits = {
+      free: 1,
+      pro: 25,
+      premium: 75
+    };
+    
+    // isPremium should only be true for paid plans (pro/premium), not free plans
+    const isPremium = subscriptionData?.status === 'active' && planType !== 'free';
+    
+    const result = {
       freeTriesUsed: usageData.generations_used,
-      maxFreeTries: subscriptionData?.status === 'active' ? 999999 : MAX_FREE_TRIES,
-      isPremium: subscriptionData?.status === 'active',
-      subscriptionType: subscriptionData?.status === 'active' 
-        ? (subscriptionData.plan_type as 'pro' | 'premium') 
-        : 'free',
+      maxFreeTries: planLimits[planType],
+      isPremium,
+      subscriptionType: planType,
       lastUsed: usageData.updated_at,
       monthYear: usageData.month_year
     };
+
+    console.log('📊 Returning usage data for user:', userId, {
+      isPremium,
+      subscriptionStatus: subscriptionData?.status,
+      planType: subscriptionData?.plan_type,
+      freeTriesUsed: result.freeTriesUsed,
+      maxFreeTries: result.maxFreeTries
+    });
+
+    return result;
   } catch (error) {
     console.error('Error in getUsageData:', error);
     // Return default data on error

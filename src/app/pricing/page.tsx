@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Star, Zap, Crown } from "lucide-react";
+import { Check, Star, Zap, Crown, X, AlertCircle } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useStripe } from "@/hooks/useStripe";
 import { SignInButton } from "@/components/auth/SignInButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const pricingTiers = [
   {
@@ -86,12 +86,64 @@ const faqs = [
   }
 ];
 
+// Toast notification component
+function Toast({ message, type, onClose }: { message: string; type: 'error' | 'warning' | 'success'; onClose: () => void }) {
+  const bgColor = type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-green-500';
+  
+  return (
+    <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-md animate-in slide-in-from-right duration-300`}>
+      <div className="flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+        <div className="flex-1">
+          <p className="font-medium text-sm leading-relaxed">{message}</p>
+        </div>
+        <button 
+          onClick={onClose}
+          className="text-white/80 hover:text-white transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function PricingPage() {
-  const { user } = useAuth();
-  const { createCheckoutSession, isLoading } = useStripe();
+  const { user, subscription, loading } = useAuth();
+  const { createCheckoutSession, openCustomerPortal, isLoading } = useStripe();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'warning' | 'success' } | null>(null);
+  const [subscriptionCheckFailed, setSubscriptionCheckFailed] = useState(false);
   const router = useRouter();
   const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/pricing';
+
+  // Check if user has an active subscription
+  const hasActiveSubscription = subscription?.status === 'active';
+  const currentPlan = subscription?.plan_type;
+
+  // Check if subscription data failed to load (e.g., due to database timeout)
+  useEffect(() => {
+    if (user && !loading && !subscription) {
+      // If user is logged in, not loading, but no subscription data, it might be a timeout
+      const timer = setTimeout(() => {
+        setSubscriptionCheckFailed(true);
+        console.log('Subscription check may have failed due to timeout');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, loading, subscription]);
+
+  // Auto-hide toast after 5 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const showToast = (message: string, type: 'error' | 'warning' | 'success') => {
+    setToast({ message, type });
+  };
 
   const handlePlanSelect = async (planType: 'pro' | 'premium') => {
     if (!user) {
@@ -99,8 +151,87 @@ export default function PricingPage() {
       return;
     }
 
+    // Double-check subscription status before proceeding
+    console.log('Subscription check:', { hasActiveSubscription, currentPlan, subscription, subscriptionCheckFailed, loading });
+    
+    // If subscription data failed to load, show warning and try customer portal first
+    if (subscriptionCheckFailed && !hasActiveSubscription) {
+      showToast('⚠️ Unable to verify subscription status. Checking if you have an existing subscription...', 'warning');
+      setLoadingPlan(planType);
+      
+      // Try to open customer portal first - if user has subscription, it will work
+      try {
+        await openCustomerPortal();
+        setLoadingPlan(null);
+        return;
+      } catch (error) {
+        console.log('Customer portal failed, user likely has no subscription, proceeding with checkout...');
+        // If customer portal fails, user likely has no subscription, continue with checkout
+      }
+    }
+    
+    // Immediate visual feedback if user has an active subscription
+    if (hasActiveSubscription) {
+      if (currentPlan === planType) {
+        showToast(`You already have the ${planType.charAt(0).toUpperCase() + planType.slice(1)} plan! Redirecting to manage your subscription...`, 'warning');
+      } else {
+        showToast(`You already have an active subscription! Redirecting to manage your subscription...`, 'warning');
+      }
+      console.log('User has active subscription, opening customer portal...');
+      setLoadingPlan(planType);
+      setTimeout(async () => {
+        await openCustomerPortal();
+        setLoadingPlan(null);
+      }, 1500);
+      return;
+    }
+
+    // Additional check: if user has the same plan they're trying to select
+    if (currentPlan === planType) {
+      showToast(`You already have the ${planType.charAt(0).toUpperCase() + planType.slice(1)} plan! Redirecting to manage your subscription...`, 'warning');
+      console.log('User already has this plan, opening customer portal...');
+      setLoadingPlan(planType);
+      setTimeout(async () => {
+        await openCustomerPortal();
+        setLoadingPlan(null);
+      }, 1500);
+      return;
+    }
+
     setLoadingPlan(planType);
-    await createCheckoutSession(planType);
+    
+    try {
+      await createCheckoutSession(planType);
+    } catch (error: any) {
+      console.error('Checkout error details:', error);
+      
+      // Handle subscription conflict errors from the API
+      if (error.code === 'EXISTING_SUBSCRIPTION_SAME_PLAN') {
+        console.log('User already has this subscription, opening customer portal...');
+        showToast('You already have this subscription plan! Redirecting to manage your subscription...', 'warning');
+        setTimeout(async () => {
+          await openCustomerPortal();
+        }, 1500);
+      } else if (error.code === 'EXISTING_SUBSCRIPTION_DIFFERENT_PLAN') {
+        console.log('User has different subscription, opening customer portal to manage...');
+        showToast('You already have an active subscription! Redirecting to manage your subscription...', 'warning');
+        setTimeout(async () => {
+          await openCustomerPortal();
+        }, 1500);
+      } else if (error.message && error.message.includes('already have an active subscription')) {
+        // Catch any other subscription-related errors
+        console.log('User has active subscription (caught by message), opening customer portal...');
+        showToast('🚨 You already have an active subscription! Redirecting to manage your subscription...', 'error');
+        setTimeout(async () => {
+          await openCustomerPortal();
+        }, 1500);
+      } else {
+        // Handle other errors
+        console.error('Checkout error:', error);
+        showToast(error.message || 'An error occurred while creating your subscription. Please try again.', 'error');
+      }
+    }
+    
     setLoadingPlan(null);
   };
 
@@ -108,6 +239,7 @@ export default function PricingPage() {
     const planType = tier.name.toLowerCase() as 'pro' | 'premium';
     const isPaidPlan = tier.name === 'Pro' || tier.name === 'Premium';
     const isLoadingThisPlan = loadingPlan === planType;
+    const isCurrentPlan = hasActiveSubscription && currentPlan === planType;
 
     if (tier.name === 'Free Trial') {
       return (
@@ -128,6 +260,57 @@ export default function PricingPage() {
         >
           Sign In to Subscribe
         </SignInButton>
+      );
+    }
+
+    // Show current plan status
+    if (isCurrentPlan) {
+      return (
+        <button
+          onClick={async () => {
+            setLoadingPlan(planType);
+            await openCustomerPortal();
+            setLoadingPlan(null);
+          }}
+          disabled={isLoading || isLoadingThisPlan}
+          className="w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors disabled:opacity-50"
+        >
+          {isLoadingThisPlan ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+              <span>Loading...</span>
+            </div>
+          ) : (
+            '✓ Current Plan - Manage'
+          )}
+        </button>
+      );
+    }
+
+    // Show upgrade/change plan for users with different active subscriptions
+    if (hasActiveSubscription && !isCurrentPlan) {
+      const isUpgrade = (currentPlan === 'pro' && planType === 'premium');
+      const isDowngrade = (currentPlan === 'premium' && planType === 'pro');
+      
+      return (
+        <button
+          onClick={async () => {
+            setLoadingPlan(planType);
+            await openCustomerPortal();
+            setLoadingPlan(null);
+          }}
+          disabled={isLoading || isLoadingThisPlan}
+          className="w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200 transition-colors disabled:opacity-50"
+        >
+          {isLoadingThisPlan ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span>Loading...</span>
+            </div>
+          ) : (
+            isUpgrade ? 'Upgrade Plan' : isDowngrade ? 'Change Plan' : 'Change Plan'
+          )}
+        </button>
       );
     }
 
@@ -170,6 +353,51 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
+
+      {/* Subscription Status Banner */}
+      {user && loading && (
+        <section className="py-4 bg-blue-50 border-b border-blue-200">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-center gap-3 text-blue-800">
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-sm font-medium">
+                Loading your subscription status...
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+      
+      {user && subscriptionCheckFailed && !hasActiveSubscription && (
+        <section className="py-4 bg-yellow-50 border-b border-yellow-200">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-center gap-3 text-yellow-800">
+              <AlertCircle className="w-4 h-4" />
+              <p className="text-sm font-medium">
+                ⚠️ Unable to verify subscription status. If you have an existing subscription, clicking a plan will redirect you to manage it.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+      
+      {user && hasActiveSubscription && (
+        <section className="py-8 bg-green-50 border-y border-green-200">
+          <div className="container mx-auto px-4 text-center">
+            <div className="inline-flex items-center space-x-3 bg-green-100 rounded-full px-6 py-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-green-800 font-semibold">
+                  ✓ You're currently subscribed to the {currentPlan?.charAt(0).toUpperCase()}{currentPlan?.slice(1)} plan
+                </span>
+              </div>
+            </div>
+            <p className="text-green-700 text-sm mt-2">
+              Use the "Manage" or "Change Plan" buttons below to modify your subscription
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Pricing Cards */}
       <section className="py-16">
@@ -334,6 +562,15 @@ export default function PricingPage() {
           </div>
         </div>
       </section>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
     </div>
   );
 }
