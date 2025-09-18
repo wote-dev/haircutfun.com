@@ -86,15 +86,16 @@ const haircutData: Record<string, { name: string; category: string; gender: 'mal
     name: 'Buzz Cut',
     category: 'Short',
     gender: 'male',
-    description: 'Clean, minimalist cut that\'s easy to maintain'
+    description: 'Clean, minimalist cut that\'s easy to maintain',
+    isPremium: true,
+    popularity: 85
   },
   'undercut-fade': {
     name: 'Undercut Fade',
     category: 'Short',
     gender: 'male',
     description: 'Edgy cut with faded sides and longer top',
-    isPremium: true,
-    popularity: 88
+    popularity: 82
   },
   'crew-cut': {
     name: 'Crew Cut',

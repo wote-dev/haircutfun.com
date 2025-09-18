@@ -1,10 +1,27 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
 
 interface PhotoUploadProps {
   onPhotoUpload: (photoUrl: string) => void;
 }
+
+// Base images for users to try the tool
+const baseImages = [
+  {
+    id: 'example-1',
+    src: '/base-image-me.jpeg',
+    alt: 'Example Person 1',
+    description: 'Try with this example'
+  },
+  {
+    id: 'example-2',
+    src: '/base-image-me.jpeg', // Placeholder - user will add another image later
+    alt: 'Example Person 2',
+    description: 'Another example (coming soon)'
+  }
+];
 
 export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -15,6 +32,17 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Check for pre-selected base image on component mount
+  useEffect(() => {
+    const selectedBaseImage = localStorage.getItem('selectedBaseImage');
+    if (selectedBaseImage) {
+      // Auto-use the pre-selected base image
+      handleBaseImageSelect(selectedBaseImage);
+      // Clear the selection so it doesn't auto-load next time
+      localStorage.removeItem('selectedBaseImage');
+    }
+  }, []);
 
   const handleFileSelect = (file: File) => {
     if (!file) {
@@ -89,6 +117,15 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
     if (e.target) {
       e.target.value = '';
     }
+  };
+
+  const handleBaseImageSelect = (imageSrc: string) => {
+    setIsProcessing(true);
+    // Simulate processing time for consistency with file upload
+    setTimeout(() => {
+      onPhotoUpload(imageSrc);
+      setIsProcessing(false);
+    }, 1000);
   };
 
   const openFileDialog = () => {
@@ -266,6 +303,54 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
           </button>
         </div>
       </div>
+
+      {/* Base Image Options */}
+      {!cameraMode && (
+        <div className="mb-8">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Or Try With Example Images
+            </h3>
+            <p className="text-muted-foreground">
+              See how our tool works with these example photos
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+            {baseImages.map((image, index) => (
+              <button
+                key={image.id}
+                onClick={() => handleBaseImageSelect(image.src)}
+                className={`relative group bg-background border-2 border-border rounded-xl overflow-hidden hover:border-primary transition-all duration-300 hover:shadow-lg hover:scale-105 ${
+                  index === 1 ? 'opacity-60 cursor-not-allowed' : ''
+                }`}
+                disabled={index === 1} // Disable the second placeholder for now
+              >
+                <div className="aspect-square relative">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <p className="text-sm font-medium">{image.description}</p>
+                  </div>
+                  {index === 1 && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="text-white text-sm font-medium bg-black/60 px-3 py-1 rounded-full">
+                        Coming Soon
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Camera Mode */}
       {cameraMode ? (

@@ -90,7 +90,8 @@ const haircutStyles = [
     category: 'Short',
     gender: 'male' as const,
     description: 'Clean, minimalist cut that\'s easy to maintain',
-    popularity: 78,
+    popularity: 85,
+    isPremium: true,
   },
   {
     id: 'undercut-fade',
@@ -99,7 +100,6 @@ const haircutStyles = [
     gender: 'male' as const,
     description: 'Edgy cut with faded sides and longer top',
     popularity: 82,
-    isPremium: true,
   },
   {
     id: 'crew-cut',

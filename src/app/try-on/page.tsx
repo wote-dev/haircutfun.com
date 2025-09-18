@@ -16,7 +16,7 @@ function TryOnPageContent() {
   // Trending haircuts data to determine gender
   const trendingHaircuts = {
     female: ["Wolf Cut", "Curtain Bangs", "Modern Shag", "Pixie Cut"],
-    male: ["Textured Crop", "Side Part", "Quiff", "Undercut Fade"]
+    male: ["Textured Crop", "Side Part", "Quiff", "Buzz Cut"]
   };
 
   // Determine gender from preselected haircut
