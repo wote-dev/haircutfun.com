@@ -114,7 +114,7 @@ export function HowItWorksSection() {
               <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              100% Free to Use
+              100% Free to Try
             </div>
             <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
               <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
