@@ -69,20 +69,17 @@ export function Navigation() {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
+          <Link href="/" className="flex items-center group">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300" />
               <Image
-                src="/haircuttr.png"
+                src="/new-logo.png"
                 alt="HaircutFun Logo"
-                width={40}
+                width={120}
                 height={40}
-                className="relative rounded-xl"
+                className="relative"
               />
             </div>
-            <span className="text-xl font-bold" style={{color: '#584678'}}>
-              HaircutFun
-            </span>
           </Link>
 
           {/* Desktop Navigation */}
