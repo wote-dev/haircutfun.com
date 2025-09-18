@@ -25,6 +25,12 @@ const baseImages = [
     src: '/base-image-woman2.jpg',
     alt: 'Example Person 3',
     name: 'Emma'
+  },
+  {
+    id: 'example-4',
+    src: '/base-image-guy 2.jpg',
+    alt: 'Example Person 4',
+    name: 'Mike'
   }
 ];
 
@@ -120,7 +126,8 @@ const trendingHaircuts: {
       variations: {
         'example-1': '/textered-top.png',    // Daniel
         'example-2': '/textered-top2.jpg',   // Sarah
-        'example-3': '/textered-top3.jpg'    // Emma
+        'example-3': '/textered-top3.jpg',   // Emma
+        'example-4': '/textured-top2.jpg'    // Mike
       }
     },
     { 
@@ -133,7 +140,8 @@ const trendingHaircuts: {
       variations: {
         'example-1': '/side-part.png',       // Daniel
         'example-2': '/side-part2.jpg',      // Sarah
-        'example-3': '/side-part3.jpg'       // Emma
+        'example-3': '/side-part3.jpg',      // Emma
+        'example-4': '/side-part2.jpg'       // Mike
       }
     },
     { 
@@ -146,7 +154,8 @@ const trendingHaircuts: {
       variations: {
         'example-1': '/quiff.png',           // Daniel
         'example-2': '/quiff2.jpg',          // Sarah
-        'example-3': '/quiff3.jpg'           // Emma
+        'example-3': '/quiff3.jpg',          // Emma
+        'example-4': '/quiff2.jpg'           // Mike
       }
     },
     { 
@@ -160,7 +169,8 @@ const trendingHaircuts: {
       variations: {
         'example-1': '/buzzcut.png',         // Daniel
         'example-2': '/buzzcut2.jpg',        // Sarah
-        'example-3': '/buzzcut3.jpg'         // Emma
+        'example-3': '/buzzcut3.jpg',        // Emma
+        'example-4': '/buzzcut2.jpg'         // Mike
       }
     }
   ]
@@ -396,9 +406,9 @@ export function TrendingHaircuts() {
                           <div className="flex space-x-2">
                             {baseImages
                               .filter((baseImage, baseIndex) => {
-                                // Show male base image for male styles, both female base images for female styles
+                                // Show male base images for male styles, female base images for female styles
                                 if (selectedGender === 'male') {
-                                  return baseIndex === 0; // Only show Daniel's image for male styles
+                                  return baseIndex === 0 || baseIndex === 3; // Show both Daniel's and Mike's images for male styles
                                 } else {
                                   return baseIndex === 1 || baseIndex === 2; // Show both Sarah's and Emma's images for female styles
                                 }

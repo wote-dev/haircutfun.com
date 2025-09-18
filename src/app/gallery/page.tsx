@@ -64,7 +64,7 @@ export default function GalleryPage() {
             Hairstyle Gallery
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Explore hundreds of professional hairstyles and find your perfect match
+            Explore dozens of professional hairstyles and find your perfect match
           </p>
           <Link
             href="/try-on"

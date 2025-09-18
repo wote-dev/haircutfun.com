@@ -88,19 +88,27 @@ export function Navigation() {
                   key={item.name}
                   href={item.href}
                   className={`
-                    relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                    relative px-4 py-2 rounded-lg text-sm font-medium
                     ${isActive 
-                      ? 'text-primary bg-primary/10' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                      ? 'text-primary' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors duration-150'
                     }
                   `}
+                  style={{ willChange: isActive ? 'auto' : 'color, background-color' }}
                 >
                   {item.name}
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
                       className="absolute inset-0 bg-primary/10 rounded-lg border border-primary/20"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 500, 
+                        damping: 30,
+                        mass: 1,
+                        duration: 0.3
+                      }}
+                      style={{ willChange: 'transform' }}
                     />
                   )}
                 </Link>

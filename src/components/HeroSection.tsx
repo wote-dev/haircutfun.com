@@ -55,7 +55,7 @@ export function HeroSection() {
             className="text-xl leading-relaxed text-muted-foreground max-w-3xl mx-auto"
           >
             Experience the future of hair styling with our advanced AI technology. 
-            Try on hundreds of hairstyles instantly and see exactly how you'll look before making any commitment.
+            Try on dozens of hairstyles instantly and see exactly how you'll look before making any commitment.
           </motion.p>
 
           {/* CTA Buttons */}

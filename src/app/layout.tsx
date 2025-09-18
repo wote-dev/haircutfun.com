@@ -6,7 +6,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 export const metadata: Metadata = {
   metadataBase: new URL('https://haircutfun.com'),
   title: "HaircutFun - Virtual Haircut Try-On with AI",
-  description: "Ever wonder what you'd look like with a new hairstyle? Stop wondering and start seeing! With HaircutFun, you can try on hundreds of haircuts virtually using the power of AI. Upload your photo and find your perfect look in seconds. It's fun, fast, and free to try!",
+  description: "Ever wonder what you'd look like with a new hairstyle? Stop wondering and start seeing! With HaircutFun, you can try on dozens of haircuts virtually using the power of AI. Upload your photo and find your perfect look in seconds. It's fun, fast, and free to try!",
   keywords: "haircut, virtual try-on, hairstyle, AI, beauty, salon, haircut simulator, style finder",
   icons: {
     icon: "/haircuttr.png",
