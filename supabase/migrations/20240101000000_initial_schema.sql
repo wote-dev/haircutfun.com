@@ -103,7 +103,7 @@ BEGIN
         NEW.id,
         TO_CHAR(NOW(), 'YYYY-MM'),
         0,
-        2 -- Free plan limit
+        1 -- Free plan limit
     );
     
     RETURN NEW;
@@ -167,7 +167,7 @@ BEGIN
             CASE user_subscription.plan_type
                 WHEN 'pro' THEN 25
                 WHEN 'premium' THEN 75
-                ELSE 2
+                ELSE 1
             END
         )
         RETURNING * INTO usage_record;

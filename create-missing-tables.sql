@@ -68,7 +68,7 @@ BEGIN
         NEW.id,
         TO_CHAR(NOW(), 'YYYY-MM'),
         0,
-        3 -- Default free plan limit
+        1 -- Default free plan limit
     );
     
     RETURN NEW;

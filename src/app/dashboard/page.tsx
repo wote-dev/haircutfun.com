@@ -54,7 +54,16 @@ function DashboardContent() {
 
   const planType = subscription?.plan_type || 'free';
   const isPremiumUser = subscription?.status === 'active' && planType !== 'free';
-  const remainingTries = usage?.plan_limit ? Math.max(0, usage.plan_limit - usage.generations_used) : 0;
+  
+  // Use correct plan limits based on subscription type, not database plan_limit
+  const planLimits = {
+    free: 1,
+    pro: 25,
+    premium: 75
+  };
+  
+  const currentPlanLimit = planLimits[planType as keyof typeof planLimits] || 1;
+  const remainingTries = usage ? Math.max(0, currentPlanLimit - usage.generations_used) : currentPlanLimit;
 
   return (
     <div className="min-h-screen bg-background">

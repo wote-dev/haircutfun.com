@@ -122,7 +122,7 @@ async function createUserRecords() {
             user_id: user.id,
             month_year: currentMonth,
             generations_used: 0,
-            plan_limit: 3 // Default free plan limit
+            plan_limit: 1 // Default free plan limit
           })
           .select()
           .single();
