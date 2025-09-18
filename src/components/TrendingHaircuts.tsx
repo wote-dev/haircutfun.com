@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, Star } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 // Base images for preview
@@ -181,7 +181,68 @@ export function TrendingHaircuts() {
   const [selectedGender, setSelectedGender] = useState<'female' | 'male'>('female');
   const [selectedBaseImage, setSelectedBaseImage] = useState<string>(baseImages[0].id);
   const [previewStates, setPreviewStates] = useState<{[key: string]: {baseImageSrc: string, personId: string, isPreview: boolean}}>({});
+  const [currentPersonIndex, setCurrentPersonIndex] = useState<{[key: string]: number}>({});
   const currentStyles = trendingHaircuts[selectedGender];
+
+  // Auto-cycle through different people every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPersonIndex(prev => {
+        const newIndex = { ...prev };
+        currentStyles.forEach(style => {
+          if (style.variations && !previewStates[style.name]?.isPreview) {
+            // Filter persons based on selected gender
+            const genderAppropriatePersons = Object.keys(style.variations).filter(personId => {
+              if (selectedGender === 'female') {
+                // For female haircuts, only show Sarah (example-2) and Emma (example-3)
+                return personId === 'example-2' || personId === 'example-3';
+              } else {
+                // For male haircuts, only show Daniel (example-1) and Mike (example-4)
+                return personId === 'example-1' || personId === 'example-4';
+              }
+            });
+            
+            if (genderAppropriatePersons.length > 0) {
+              const currentIndex = newIndex[style.name] || 0;
+              newIndex[style.name] = (currentIndex + 1) % genderAppropriatePersons.length;
+            }
+          }
+        });
+        return newIndex;
+      });
+    }, 4000); // 4 seconds
+
+    return () => clearInterval(interval);
+  }, [currentStyles, previewStates, selectedGender]);
+
+  // Reset person indices when gender changes
+  useEffect(() => {
+    setCurrentPersonIndex({});
+  }, [selectedGender]);
+
+  // Helper function to get current cycling person and image
+  const getCurrentPersonImage = (style: HaircutStyle) => {
+    if (!style.variations) return { image: style.image, personId: null };
+    
+    // Filter persons based on selected gender
+    const genderAppropriatePersons = Object.keys(style.variations).filter(personId => {
+      if (selectedGender === 'female') {
+        // For female haircuts, only show Sarah (example-2) and Emma (example-3)
+        return personId === 'example-2' || personId === 'example-3';
+      } else {
+        // For male haircuts, only show Daniel (example-1) and Mike (example-4)
+        return personId === 'example-1' || personId === 'example-4';
+      }
+    });
+    
+    if (genderAppropriatePersons.length === 0) return { image: style.image, personId: null };
+    
+    const currentIndex = currentPersonIndex[style.name] || 0;
+    const personId = genderAppropriatePersons[currentIndex % genderAppropriatePersons.length];
+    const image = style.variations[personId];
+    
+    return { image, personId };
+  };
 
   const handleTryOn = (haircutName: string, baseImageSrc: string) => {
     // Store selected base image source in localStorage for PhotoUpload component
@@ -329,26 +390,50 @@ export function TrendingHaircuts() {
                           </div>
                         </div>
                       ) : (
-                        /* Normal Mode - Show haircut image */
-                        <>
-                          {style.image ? (
-                            <Image
-                              src={style.image}
-                              alt={style.name}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                <svg className="h-6 w-6 sm:h-10 sm:w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                              </div>
-                            </div>
-                          )}
-                        </>
+                        /* Normal Mode - Show cycling haircut images */
+                        <AnimatePresence mode="wait">
+                          {(() => {
+                            const { image, personId } = getCurrentPersonImage(style);
+                            return image ? (
+                              <motion.div
+                                key={`${style.name}-${personId}`}
+                                initial={{ opacity: 0, scale: 1.05 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ 
+                                  duration: 0.8,
+                                  ease: [0.4, 0.0, 0.2, 1],
+                                  opacity: { duration: 0.6 },
+                                  scale: { duration: 0.8 }
+                                }}
+                                className="relative w-full h-full"
+                              >
+                                <Image
+                                  src={image}
+                                  alt={`${style.name}${personId ? ` on ${baseImages.find(p => p.id === personId)?.name || 'person'}` : ''}`}
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                />
+                              </motion.div>
+                            ) : (
+                              <motion.div 
+                                key={`${style.name}-fallback`}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.4 }}
+                                className="absolute inset-0 flex items-center justify-center"
+                              >
+                                <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                  <svg className="h-6 w-6 sm:h-10 sm:w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                </div>
+                              </motion.div>
+                            );
+                          })()}
+                        </AnimatePresence>
                       )}
                       
                       {/* Hover Overlay */}
