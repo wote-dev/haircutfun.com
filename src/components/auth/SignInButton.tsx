@@ -2,14 +2,23 @@
 
 import { useState } from 'react';
 import { useAuth } from '../providers/AuthProvider';
+import { buttonVariants } from '../ui/button';
+import { cn } from '@/lib/utils';
+import type { VariantProps } from 'class-variance-authority';
 
-interface SignInButtonProps {
+interface SignInButtonProps extends VariantProps<typeof buttonVariants> {
   className?: string;
   children?: React.ReactNode;
   redirectTo?: string;
 }
 
-export function SignInButton({ className = '', children, redirectTo }: SignInButtonProps) {
+export function SignInButton({ 
+  className = '', 
+  children, 
+  redirectTo, 
+  variant = 'outline',
+  size = 'default'
+}: SignInButtonProps) {
   const { signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,20 +38,11 @@ export function SignInButton({ className = '', children, redirectTo }: SignInBut
     <button
       onClick={handleSignIn}
       disabled={isLoading}
-      className={`
-        inline-flex items-center justify-center gap-2 px-4 py-2 
-        border border-gray-300 rounded-lg shadow-sm bg-white 
-        text-sm font-medium text-gray-700 
-        hover:bg-gray-50 focus:outline-none focus:ring-2 
-        focus:ring-offset-2 focus:ring-blue-500 
-        disabled:opacity-50 disabled:cursor-not-allowed 
-        transition-colors duration-200
-        ${className}
-      `}
+      className={cn(buttonVariants({ variant, size, className }))}
     >
       {isLoading ? (
         <>
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
           Signing in...
         </>
       ) : (

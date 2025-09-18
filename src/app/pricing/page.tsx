@@ -259,10 +259,10 @@ export default function PricingPage() {
         <SignInButton 
           className="w-full"
           redirectTo={currentPath}
+          variant={tier.popular ? "default" : "outline"}
+          size="lg"
         >
-          <Button className="w-full" variant={tier.popular ? "default" : "outline"} size="lg">
-            Sign In to Subscribe
-          </Button>
+          Sign In to Subscribe
         </SignInButton>
       );
     }
