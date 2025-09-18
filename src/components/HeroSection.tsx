@@ -5,12 +5,58 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Zap, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePageTransitionContext } from "@/components/providers/PageTransitionProvider";
+import { ImageCarousel } from "./ImageCarousel";
 
 export function HeroSection() {
   const { navigateWithLoading } = usePageTransitionContext();
   
+  // Carousel images for left and right sides
+  // Left side: Alternating between Emma and Sarah (female hairstyles)
+  const leftCarouselImages = [
+    "/modern-shag2.jpg",    // Emma
+    "/modern-shag.jpg",     // Sarah
+    "/pixie-cut2.jpg",      // Emma
+    "/pixie-cut.jpg",       // Sarah
+    "/wolf-cut2.jpg",       // Emma
+    "/wolf-cut.jpg",        // Sarah
+    "/curtain-bangs2.jpg",  // Emma
+    "/curtain-bangs.jpg"    // Sarah
+  ];
+  
+  // Right side: Alternating between Daniel and Mike (male hairstyles)
+  const rightCarouselImages = [
+    "/side-part.png",       // Daniel
+    "/side-part2.jpg",      // Mike
+    "/quiff.png",           // Daniel
+    "/quiff2.jpg",          // Mike
+    "/buzzcut.png",         // Daniel
+    "/buzzcut2.jpg",        // Mike
+    "/textered-top.png",    // Daniel
+    "/textured-top2.jpg"    // Mike
+  ];
+  
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/20 min-h-screen flex items-center justify-center pt-24 pb-16">
+      {/* Left Carousel */}
+      <div className="absolute left-16 top-0 w-48 h-full opacity-20 pointer-events-none hidden lg:block">
+        <ImageCarousel 
+          images={leftCarouselImages} 
+          direction="up" 
+          speed={25}
+          className="h-full"
+        />
+      </div>
+      
+      {/* Right Carousel */}
+      <div className="absolute right-16 top-0 w-48 h-full opacity-20 pointer-events-none hidden lg:block">
+        <ImageCarousel 
+          images={rightCarouselImages} 
+          direction="down" 
+          speed={30}
+          className="h-full"
+        />
+      </div>
+      
       {/* Enhanced background decorations */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--primary)_0%,_transparent_50%)] opacity-10"></div>
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
