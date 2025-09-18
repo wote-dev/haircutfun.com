@@ -7,6 +7,9 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useStripe } from "@/hooks/useStripe";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const pricingTiers = [
   {
@@ -243,22 +246,23 @@ export default function PricingPage() {
 
     if (tier.name === 'Free Trial') {
       return (
-        <Link
-          href="/try-on"
-          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold ${tier.buttonStyle}`}
-        >
-          {tier.buttonText}
-        </Link>
+        <Button asChild className="w-full" variant="outline" size="lg">
+          <Link href="/try-on">
+            {tier.buttonText}
+          </Link>
+        </Button>
       );
     }
 
     if (!user) {
       return (
         <SignInButton 
-          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold ${tier.buttonStyle}`}
+          className="w-full"
           redirectTo={currentPath}
         >
-          Sign In to Subscribe
+          <Button className="w-full" variant={tier.popular ? "default" : "outline"} size="lg">
+            Sign In to Subscribe
+          </Button>
         </SignInButton>
       );
     }
@@ -266,24 +270,26 @@ export default function PricingPage() {
     // Show current plan status
     if (isCurrentPlan) {
       return (
-        <button
+        <Button
           onClick={async () => {
             setLoadingPlan(planType);
             await openCustomerPortal();
             setLoadingPlan(null);
           }}
           disabled={isLoading || isLoadingThisPlan}
-          className="w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors disabled:opacity-50"
+          className="w-full bg-green-100 text-green-800 border border-green-300 hover:bg-green-200"
+          variant="outline"
+          size="lg"
         >
           {isLoadingThisPlan ? (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
               <span>Loading...</span>
             </div>
           ) : (
             '✓ Current Plan - Manage'
           )}
-        </button>
+        </Button>
       );
     }
 
@@ -293,64 +299,66 @@ export default function PricingPage() {
       const isDowngrade = (currentPlan === 'premium' && planType === 'pro');
       
       return (
-        <button
+        <Button
           onClick={async () => {
             setLoadingPlan(planType);
             await openCustomerPortal();
             setLoadingPlan(null);
           }}
           disabled={isLoading || isLoadingThisPlan}
-          className="w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200 transition-colors disabled:opacity-50"
+          className="w-full bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200"
+          variant="outline"
+          size="lg"
         >
           {isLoadingThisPlan ? (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
               <span>Loading...</span>
             </div>
           ) : (
             isUpgrade ? 'Upgrade Plan' : isDowngrade ? 'Change Plan' : 'Change Plan'
           )}
-        </button>
+        </Button>
       );
     }
 
     return (
-        <button
-          onClick={() => handlePlanSelect(planType)}
-          disabled={isLoading || isLoadingThisPlan}
-          className={`w-full flex items-center justify-center px-6 py-4 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${tier.buttonStyle}`}
-        >
+      <Button
+        onClick={() => handlePlanSelect(planType)}
+        disabled={isLoading || isLoadingThisPlan}
+        className="w-full"
+        variant={tier.popular ? "default" : "outline"}
+        size="lg"
+      >
         {isLoadingThisPlan ? (
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
             <span>Processing...</span>
           </div>
         ) : (
           tier.buttonText
         )}
-      </button>
+      </Button>
     );
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 pt-32 pb-16">
+      <section className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 pt-32 pb-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-4 sm:text-5xl">
-            Choose Your Perfect Plan
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Start with 1 free try, then choose from 25 or 75 monthly generations with premium features
-          </p>
+          <Badge variant="secondary" className="mb-6">
+            <Zap className="h-4 w-4 mr-2" />
+            1 Free Try - No Credit Card Required
+          </Badge>
           
-          {/* Free Trial Highlight */}
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-6 py-3 mb-8">
-            <Zap className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium text-foreground">
-              🎉 1 Free Try - No Credit Card Required
-            </span>
-          </div>
+          <h1 className="text-5xl font-bold text-foreground mb-6 sm:text-6xl lg:text-7xl">
+            Simple, transparent pricing
+          </h1>
+          <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+            Start with a free trial, then choose the plan that fits your needs. 
+            All plans include access to our AI-powered hairstyling technology.
+          </p>
         </div>
       </section>
 
@@ -400,164 +408,182 @@ export default function PricingPage() {
       )}
 
       {/* Pricing Cards */}
-      <section className="py-16">
+      <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {pricingTiers.map((tier, index) => (
-              <div
+              <Card
                 key={tier.name}
-                className={`relative bg-background border rounded-2xl p-8 transition-all duration-300 hover:shadow-lg ${
-                  tier.popular ? 'border-primary shadow-lg scale-105' : 'border-border hover:border-primary/50'
+                className={`relative transition-all duration-300 hover:shadow-xl ${
+                  tier.popular 
+                    ? 'border-primary shadow-lg ring-2 ring-primary/20 scale-105' 
+                    : 'hover:border-primary/50'
                 }`}
               >
                 {tier.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center space-x-1">
-                      <Star className="h-4 w-4" />
-                      <span>Most Popular</span>
-                    </div>
-                  </div>
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
+                    <Star className="h-3 w-3 mr-1" />
+                    Most Popular
+                  </Badge>
                 )}
                 
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-foreground mb-2 flex items-center justify-center space-x-2">
+                <CardHeader className="text-center pb-8">
+                  <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
                     {tier.name === 'Premium' && <Crown className="h-6 w-6 text-accent" />}
-                    <span>{tier.name}</span>
-                  </h3>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold text-foreground">{tier.price}</span>
-                    <span className="text-muted-foreground">/{tier.period}</span>
+                    {tier.name}
+                  </CardTitle>
+                  <div className="mt-4">
+                    <span className="text-5xl font-bold text-foreground">{tier.price}</span>
+                    <span className="text-muted-foreground text-lg">/{tier.period}</span>
                   </div>
-                  <p className="text-muted-foreground">{tier.description}</p>
-                </div>
+                  <CardDescription className="text-base mt-4">
+                    {tier.description}
+                  </CardDescription>
+                </CardHeader>
                 
-                {/* Features */}
-                <div className="mb-8">
-                  <h4 className="font-semibold text-foreground mb-4">What&apos;s included:</h4>
-                  <ul className="space-y-3">
-                    {tier.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start space-x-3">
-                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  {tier.limitations.length > 0 && (
-                    <div className="mt-6">
-                      <h4 className="font-semibold text-muted-foreground mb-3 text-sm">Limitations:</h4>
-                      <ul className="space-y-2">
-                        {tier.limitations.map((limitation, limitIndex) => (
-                          <li key={limitIndex} className="flex items-start space-x-3">
-                            <div className="h-2 w-2 bg-muted-foreground rounded-full mt-2 flex-shrink-0" />
-                            <span className="text-xs text-muted-foreground">{limitation}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-4">Everything included:</h4>
+                    <ul className="space-y-3">
+                      {tier.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-start gap-3">
+                          <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-muted-foreground">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    {tier.limitations.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-border">
+                        <h4 className="font-medium text-muted-foreground mb-3 text-sm">Limitations:</h4>
+                        <ul className="space-y-2">
+                          {tier.limitations.map((limitation, limitIndex) => (
+                            <li key={limitIndex} className="flex items-start gap-3">
+                              <X className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <span className="text-xs text-muted-foreground">{limitation}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
                 
-                <PricingButton tier={tier} />
-              </div>
+                <CardFooter>
+                  <PricingButton tier={tier} />
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       {/* Features Comparison */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Why Upgrade to Pro or Premium?
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-foreground mb-6">
+              Why choose a paid plan?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Unlock the full potential of AI-powered hairstyling with monthly generation allowances and premium features
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                <Zap className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">Monthly Generations</h3>
-              <p className="text-muted-foreground">
-                Get 25 tries with Pro or 75 tries with Premium - plenty for all your styling needs.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="text-center border-0 shadow-lg">
+              <CardContent className="pt-8">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <Zap className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-4">Monthly Generations</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Get 25 tries with Pro or 75 tries with Premium - plenty for all your styling needs.
+                </p>
+              </CardContent>
+            </Card>
             
-            <div className="text-center">
-              <div className="h-16 w-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
-                <Crown className="h-8 w-8 text-accent" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">Premium Styles</h3>
-              <p className="text-muted-foreground">
-                Access premium hairstyles and trending cuts from top stylists.
-              </p>
-            </div>
+            <Card className="text-center border-0 shadow-lg">
+              <CardContent className="pt-8">
+                <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
+                  <Crown className="h-8 w-8 text-accent" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-4">Premium Styles</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Access premium hairstyles and trending cuts from top stylists.
+                </p>
+              </CardContent>
+            </Card>
             
-            <div className="text-center">
-              <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                <Star className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">Priority Support</h3>
-              <p className="text-muted-foreground">
-                Get faster processing and dedicated customer support when you need it.
-              </p>
-            </div>
+            <Card className="text-center border-0 shadow-lg">
+              <CardContent className="pt-8">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <Star className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-4">Priority Support</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Get faster processing and dedicated customer support when you need it.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16">
+      <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-foreground mb-6">
               Frequently Asked Questions
             </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to know about our pricing and plans
+            </p>
           </div>
           
-          <div className="max-w-3xl mx-auto">
-            {faqs.map((faq, index) => (
-              <div key={index} className="mb-8 p-6 bg-background border border-border rounded-lg">
-                <h3 className="text-lg font-semibold text-foreground mb-3">
-                  {faq.question}
-                </h3>
-                <p className="text-muted-foreground">
-                  {faq.answer}
-                </p>
-              </div>
-            ))}
+          <div className="max-w-4xl mx-auto">
+            <div className="grid gap-6">
+              {faqs.map((faq, index) => (
+                <Card key={index} className="border-0 shadow-md">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-left">
+                      {faq.question}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/10 via-background to-accent/10">
+      <section className="py-20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl font-bold text-foreground mb-6 sm:text-5xl">
               Ready to Transform Your Look?
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
               Start with 1 free try and discover your perfect hairstyle today!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/try-on"
-                className="border-glow-primary bg-background text-foreground px-8 py-4 rounded-lg font-semibold transition-all duration-300"
-              >
-                Start Free Trial
-              </Link>
-              <Link
-                href="/gallery"
-                className="border border-border text-foreground px-8 py-4 rounded-lg font-semibold hover:bg-muted transition-colors"
-              >
-                Browse Hairstyles
-              </Link>
+              <Button asChild size="lg" className="px-8">
+                <Link href="/try-on">
+                  Start Free Trial
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="px-8">
+                <Link href="/gallery">
+                  Browse Hairstyles
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

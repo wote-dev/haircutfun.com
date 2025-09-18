@@ -75,7 +75,7 @@ function TryOnPageContent() {
       {/* Hero Section with Progress */}
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl lg:text-6xl font-bold text-foreground mb-4">
             Virtual Haircut Try-On
           </h1>
           <p className="text-muted-foreground text-lg lg:text-xl max-w-2xl mx-auto mb-8">
