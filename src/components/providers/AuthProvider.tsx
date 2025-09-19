@@ -88,22 +88,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('AuthProvider: Error fetching profile:', profileError);
       }
       
-      // Fetch subscription (might not exist for new users)
-      console.log('AuthProvider: Fetching subscription...');
-      const subscriptionPromise = supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Fetch subscription using improved utility with retry logic
+      console.log('AuthProvider: Fetching subscription with enhanced validation...');
+      const { getCachedSubscriptionStatus } = await import('../../lib/subscription-utils');
+      const subscriptionStatus = await getCachedSubscriptionStatus(userId);
       
-      const { data: subscriptionData, error: subscriptionError } = await Promise.race([subscriptionPromise, timeoutPromise]) as any;
+      console.log('AuthProvider: Enhanced subscription status:', subscriptionStatus);
       
-      console.log('AuthProvider: Subscription fetch result:', { subscriptionData, subscriptionError });
-      
-      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
-        console.error('AuthProvider: Error fetching subscription:', subscriptionError);
+      // If there was an error fetching subscription, log it but continue
+      if (subscriptionStatus.error) {
+        console.error('AuthProvider: Subscription status error:', subscriptionStatus.error);
       }
       
       // Fetch current month usage (might not exist for new users)
@@ -127,7 +121,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       console.log('AuthProvider: Setting state with fetched data...');
       setProfile(profileData || null);
-      setSubscription(subscriptionData || null);
+      setSubscription(subscriptionStatus.subscription || null);
       setUsage(usageData || null);
       console.log('AuthProvider: fetchUserData completed successfully');
     } catch (error) {

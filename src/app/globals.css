@@ -120,7 +120,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --animate-border-beam: border-beam calc(var(--duration)*1s) infinite linear;
+  --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
 
   @keyframes border-beam {
     100% {
@@ -140,19 +140,19 @@
     }
   }
   @keyframes border-beam {
-  100% {
-    offset-distance: 100%;
+    100% {
+      offset-distance: 100%;
     }
   }
   @keyframes shine-pulse {
-  0% {
-    background-position: 0% 0%;
+    0% {
+      background-position: 0% 0%;
     }
-  50% {
-    background-position: 100% 100%;
+    50% {
+      background-position: 100% 100%;
     }
-  to {
-    background-position: 0% 0%;
+    to {
+      background-position: 0% 0%;
     }
   }
 }
@@ -215,9 +215,9 @@ body {
 
 /* Smooth animation utilities - Mobile optimized with Safari fixes */
 .smooth-hover {
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
   /* Safari optimizations */
@@ -226,9 +226,9 @@ body {
 }
 
 .smooth-hover-fast {
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
   /* Safari optimizations */
@@ -259,8 +259,8 @@ body {
 .smooth-gradient-hover {
   position: relative;
   overflow: hidden;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
   /* Safari optimizations */
@@ -277,9 +277,9 @@ body {
   bottom: 0;
   background: linear-gradient(
     45deg,
+    rgba(255, 255, 255, 0.05),
     rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.1)
+    rgba(255, 255, 255, 0.05)
   );
   opacity: 0;
   transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -301,8 +301,8 @@ body {
 .border-glow-primary {
   border: 2px solid var(--primary);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
   /* Safari optimizations */
@@ -319,8 +319,8 @@ body {
 .border-glow-accent {
   border: 2px solid var(--accent);
   box-shadow: 0 0 20px rgba(96, 165, 250, 0.3), 0 0 40px rgba(96, 165, 250, 0.1);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
   /* Safari optimizations */
@@ -348,20 +348,20 @@ body {
     -webkit-backface-visibility: hidden;
     -webkit-perspective: 1000;
   }
-  
+
   /* Simplify hover effects on mobile */
   .smooth-scale:hover,
   .smooth-scale-lg:hover {
     transform: scale(1.01);
     -webkit-transform: scale(1.01) translateZ(0);
   }
-  
+
   .smooth-lift:hover,
   .smooth-lift-scale:hover {
     transform: translateY(-1px);
     -webkit-transform: translateY(-1px) translateZ(0);
   }
-  
+
   /* Reduce motion for mobile users who prefer it */
   @media (prefers-reduced-motion: reduce) {
     .smooth-hover,
@@ -373,7 +373,7 @@ body {
       will-change: auto;
       -webkit-transform: none;
     }
-    
+
     .smooth-scale:hover,
     .smooth-scale-lg:hover,
     .smooth-lift:hover,

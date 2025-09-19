@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, Star, Zap, Crown, X, AlertCircle } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useStripe } from "@/hooks/useStripe";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,27 +115,37 @@ function Toast({ message, type, onClose }: { message: string; type: 'error' | 'w
 export default function PricingPage() {
   const { user, subscription, loading } = useAuth();
   const { createCheckoutSession, openCustomerPortal, isLoading } = useStripe();
+  const { 
+    subscriptionStatus, 
+    isLoading: subscriptionLoading, 
+    error: subscriptionError,
+    refreshStatus,
+    refreshFromStripe,
+    isActive,
+    planType,
+    hasValidSubscription 
+  } = useSubscriptionStatus();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'warning' | 'success' } | null>(null);
   const [subscriptionCheckFailed, setSubscriptionCheckFailed] = useState(false);
   const router = useRouter();
   const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/pricing';
 
-  // Check if user has an active subscription
-  const hasActiveSubscription = subscription?.status === 'active';
-  const currentPlan = subscription?.plan_type;
+  // Use the more reliable subscription status from the hook
+  const hasActiveSubscription = isActive || subscription?.status === 'active';
+  const currentPlan = planType || subscription?.plan_type;
 
   // Check if subscription data failed to load (e.g., due to database timeout)
   useEffect(() => {
-    if (user && !loading && !subscription) {
-      // If user is logged in, not loading, but no subscription data, it might be a timeout
+    if (user && !loading && !subscriptionLoading && !hasValidSubscription && subscriptionError) {
+      // If user is logged in, not loading, but subscription check failed
       const timer = setTimeout(() => {
         setSubscriptionCheckFailed(true);
-        console.log('Subscription check may have failed due to timeout');
+        console.log('Subscription check failed:', subscriptionError);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [user, loading, subscription]);
+  }, [user, loading, subscriptionLoading, hasValidSubscription, subscriptionError]);
 
   // Auto-hide toast after 5 seconds
   useEffect(() => {
@@ -155,21 +166,41 @@ export default function PricingPage() {
     }
 
     // Double-check subscription status before proceeding
-    console.log('Subscription check:', { hasActiveSubscription, currentPlan, subscription, subscriptionCheckFailed, loading });
+    console.log('Subscription check:', { 
+      hasActiveSubscription, 
+      currentPlan, 
+      subscription, 
+      subscriptionStatus,
+      subscriptionError,
+      subscriptionCheckFailed, 
+      loading,
+      subscriptionLoading 
+    });
     
-    // If subscription data failed to load, show warning and try customer portal first
+    // If subscription data failed to load, show warning and try to refresh
     if (subscriptionCheckFailed && !hasActiveSubscription) {
-      showToast('⚠️ Unable to verify subscription status. Checking if you have an existing subscription...', 'warning');
+      showToast('⚠️ Unable to verify subscription status. Refreshing subscription data...', 'warning');
       setLoadingPlan(planType);
       
-      // Try to open customer portal first - if user has subscription, it will work
       try {
-        await openCustomerPortal();
-        setLoadingPlan(null);
-        return;
+        // Try to refresh subscription status from Stripe
+        await refreshFromStripe();
+        
+        // If still no valid subscription after refresh, proceed with checkout
+        if (!hasValidSubscription) {
+          console.log('No valid subscription found after refresh, proceeding with checkout...');
+        } else {
+          // If subscription found after refresh, redirect to customer portal
+          showToast('Subscription found! Redirecting to manage your subscription...', 'success');
+          setTimeout(async () => {
+            await openCustomerPortal();
+          }, 1500);
+          setLoadingPlan(null);
+          return;
+        }
       } catch (error) {
-        console.log('Customer portal failed, user likely has no subscription, proceeding with checkout...');
-        // If customer portal fails, user likely has no subscription, continue with checkout
+        console.log('Subscription refresh failed, proceeding with checkout...', error);
+        // If refresh fails, continue with checkout flow
       }
     }
     
@@ -258,7 +289,7 @@ export default function PricingPage() {
     if (!user) {
       return (
         <SignInButton 
-          className="w-full bg-primary hover:bg-primary/90 text-white transition-colors duration-200"
+          className="w-full bg-primary hover:bg-primary/90 text-white hover:text-white transition-colors duration-200"
           redirectTo={currentPath}
           variant="ghost"
           size="lg"
@@ -345,7 +376,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 pt-32 pb-20">
+      <section className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 pt-32 pb-8">
         <div className="container mx-auto px-4 text-center">
           <Badge variant="secondary" className="mb-6">
             <Zap className="h-4 w-4 mr-2" />
@@ -408,7 +439,7 @@ export default function PricingPage() {
       )}
 
       {/* Pricing Cards */}
-      <section className="py-20 relative">
+      <section className="py-8 relative">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {pricingTiers.map((tier, index) => (

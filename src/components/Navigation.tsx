@@ -31,196 +31,174 @@ export function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu when clicking outside or on escape
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
-    };
-    
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Element;
-      if (isOpen && !target.closest('nav')) {
-        setIsOpen(false);
-      }
-    };
-
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.addEventListener('click', handleClickOutside);
-      // Prevent body scroll when menu is open
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('click', handleClickOutside);
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled 
-            ? 'bg-background/95 border-b border-border/40'
-            : 'bg-transparent'
-        }`}
-        style={scrolled ? {
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)'
-        } : {}}>
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-20 py-2">
-          {/* Logo */}
-          <Link href="/" className="flex items-center group">
-            <div className="relative flex items-center justify-center py-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300" />
-              <Image
-                src="/package.png"
-                alt="HaircutFun Logo"
-                width={120}
-                height={40}
-                className="relative object-contain w-auto h-auto"
-                priority
-              />
-            </div>
-          </Link>
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-30 transition-all duration-300 ${
+            scrolled 
+              ? 'bg-background/95 border-b border-border/40'
+              : 'bg-transparent'
+          }`}
+          style={scrolled ? {
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)'
+          } : {}}>
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-20 py-2">
+            {/* Logo */}
+            <Link href="/" className="flex items-center group">
+              <div className="relative flex items-center justify-center py-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300" />
+                <Image
+                  src="/package.png"
+                  alt="HaircutFun Logo"
+                  width={120}
+                  height={40}
+                  className="relative object-contain w-auto h-auto"
+                  priority
+                />
+              </div>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center space-x-1">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => navigateWithLoading(item.href)}
+                    className={`
+                      relative px-4 py-2 rounded-lg text-sm font-medium cursor-pointer
+                      ${isActive 
+                        ? 'text-primary' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors'
+                      }
+                    `}
+                  >
+                    {item.name}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-primary/10 rounded-lg border border-primary/20" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right side - Auth & CTA */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <UserProfile />
+              <Button 
+                onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Get Started
+              </Button>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="lg:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 hover:bg-accent/50 transition-colors"
+                aria-label={isOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isOpen}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <div
+        className={`
+          fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-lg
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "translate-x-full"}
+          lg:hidden
+        `}
+      >
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="text-lg font-semibold">Menu</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsOpen(false)}
+            className="p-2"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="p-4">
+          <div className="flex flex-col space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <button
                   key={item.name}
-                  onClick={() => navigateWithLoading(item.href)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigateWithLoading(item.href);
+                  }}
                   className={`
-                    relative px-4 py-2 rounded-lg text-sm font-medium cursor-pointer
+                    block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-colors
                     ${isActive 
-                      ? 'text-primary' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors'
+                      ? 'text-primary bg-primary/10' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                     }
                   `}
                 >
                   {item.name}
-                  {isActive && (
-                    <div className="absolute inset-0 bg-primary/10 rounded-lg border border-primary/20" />
-                  )}
                 </button>
               );
             })}
           </div>
-
-          {/* Right side - Auth & CTA */}
-          <div className="hidden lg:flex items-center space-x-4">
+          
+          <div className="pt-6 border-t mt-4 space-y-4">
             <UserProfile />
             <Button 
-              onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => {
+                setIsOpen(false);
+                navigateWithLoading("/try-on", "Preparing your virtual try-on...");
+              }}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="lg"
             >
               <Sparkles className="h-4 w-4 mr-2" />
               Get Started
             </Button>
           </div>
-
-          {/* Mobile menu button */}
-          <div className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2 hover:bg-accent/50 transition-colors"
-              aria-label={isOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isOpen}
-            >
-              {isOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
         </div>
-
-        {/* Mobile Navigation */}
-        <AnimatePresence mode="wait">
-          {isOpen && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-                className="fixed inset-0 bg-black/20 lg:hidden"
-                style={{ top: '80px' }}
-                onClick={() => setIsOpen(false)}
-              />
-              
-              {/* Menu Content */}
-              <motion.div
-                initial={{ opacity: 0, transform: "translateY(-10px)" }}
-                animate={{ opacity: 1, transform: "translateY(0px)" }}
-                exit={{ opacity: 0, transform: "translateY(-10px)" }}
-                transition={{ 
-                  duration: 0.2, 
-                  ease: "easeOut"
-                }}
-                className={`lg:hidden absolute top-full left-0 right-0 border-b shadow-lg ${
-                  scrolled 
-                    ? 'bg-background/95 border-border/40' 
-                    : 'bg-background/90 border-border/20'
-                }`}
-                style={{ willChange: 'transform, opacity' }}
-              >
-                <div className="container mx-auto px-4 sm:px-6 py-6">
-                  <div className="flex flex-col space-y-1">
-                    {navigation.map((item) => {
-                      const isActive = pathname === item.href;
-                      return (
-                        <div key={item.name}>
-                          <button
-                            onClick={() => {
-                              setIsOpen(false);
-                              navigateWithLoading(item.href);
-                            }}
-                            className={`
-                              block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-colors
-                              ${isActive 
-                                ? 'text-primary bg-primary/10 border border-primary/20' 
-                                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                              }
-                            `}
-                          >
-                            {item.name}
-                          </button>
-                        </div>
-                      );
-                    })}
-                    
-                    {/* Mobile Auth & CTA */}
-                    <div className="pt-6 border-t border-border/40 mt-4 space-y-4">
-                      <UserProfile />
-                      <Button 
-                        onClick={() => {
-                          setIsOpen(false);
-                          navigateWithLoading("/try-on", "Preparing your virtual try-on...");
-                        }}
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
-                        size="lg"
-                      >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Get Started
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </div>
-    </nav>
+    </>
   );
 }

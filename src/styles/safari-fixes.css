@@ -83,14 +83,14 @@
     -webkit-backdrop-filter: none;
     background-color: rgba(255, 255, 255, 0.8);
   }
-  
+
   /* Simplify animations on mobile Safari */
   .animate-pulse,
   .animate-bounce,
   .animate-spin {
     animation: none;
   }
-  
+
   /* Force hardware acceleration on interactive elements */
   button,
   a,
@@ -109,14 +109,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   /* Fix for iOS Safari scroll issues */
   .overflow-scroll,
   .overflow-y-scroll,
   .overflow-x-scroll {
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Fix for iOS Safari input zoom */
   input,
   textarea,
