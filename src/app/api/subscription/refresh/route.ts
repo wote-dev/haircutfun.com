@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '../../../lib/supabase/server';
-import { getStripeSubscription } from '../../../lib/stripe/service';
+import { createClient } from '@/lib/supabase/server';
+import { getStripeSubscription } from '@/lib/stripe/service';
 
 export async function POST(request: NextRequest) {
   try {
