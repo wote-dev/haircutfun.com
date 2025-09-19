@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     siteName: "HaircutFun",
     images: [
       {
-        url: "/new-logo.png",
+        url: "/package.png",
         width: 1200,
         height: 630,
         alt: "HaircutFun Logo",
@@ -55,50 +55,106 @@ export default function RootLayout({
             </main>
           </PageTransitionProvider>
         </AuthProvider>
-        <footer className="border-t bg-muted/50 py-8">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center space-y-4">
-              {/* Legal Links */}
-              <div className="flex items-center space-x-6 text-sm">
-                <a 
-                  href="/privacy" 
-                  className="text-muted-foreground hover:text-primary transition-colors duration-200"
-                >
-                  Privacy Policy
-                </a>
-                <span className="text-muted-foreground/50">•</span>
-                <a 
-                  href="/terms" 
-                  className="text-muted-foreground hover:text-primary transition-colors duration-200"
-                >
-                  Terms of Use
-                </a>
+        <footer className="relative border-t bg-gradient-to-br from-background via-secondary/10 to-accent/5 overflow-hidden">
+          {/* Background decorative elements */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--primary)_0%,_transparent_50%)] opacity-5"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--accent)_0%,_transparent_50%)] opacity-5"></div>
+          
+          <div className="container mx-auto px-6 py-16 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+              {/* Brand Section */}
+              <div className="space-y-6">
+                <div className="flex items-center">
+                  <div className="relative flex items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm" />
+                    <img
+                      src="/new-logo.png"
+                      alt="HaircutFun Logo"
+                      className="relative object-contain h-12 w-auto"
+                    />
+                  </div>
+                </div>
+                <p className="text-muted-foreground leading-relaxed max-w-sm">
+                  Transform your look with AI-powered virtual haircut try-ons. See yourself in any style before making the cut.
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>At least 2 users worldwide</span>
+                  </div>
+                </div>
               </div>
-              
-              {/* Copyright */}
-              <p className="text-center text-sm text-muted-foreground">
-                &copy; 2025 HaircutFun. All rights reserved.
-              </p>
-              
-              {/* Built by */}
-              <div className="flex items-center justify-center">
+
+              {/* Quick Links */}
+              <div className="space-y-6">
+                <h4 className="text-lg font-semibold text-foreground">Quick Links</h4>
+                <nav className="flex flex-col space-y-3">
+                  <a 
+                    href="/try-on" 
+                    className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
+                  >
+                    <span>Try Virtual Haircuts</span>
+                    <svg className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                  <a 
+                    href="/gallery" 
+                    className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
+                  >
+                    <span>Style Gallery</span>
+                    <svg className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                  <a 
+                    href="/pricing" 
+                    className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
+                  >
+                    <span>Pricing</span>
+                    <svg className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                  <a 
+                    href="/about" 
+                    className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
+                  >
+                    <span>About Us</span>
+                    <svg className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                </nav>
+              </div>
+            </div>
+
+            {/* Bottom Section */}
+            <div className="border-t border-border/50 pt-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                {/* Copyright */}
+                <p className="text-sm text-muted-foreground">
+                  &copy; 2025 HaircutFun. All rights reserved.
+                </p>
+                
+                {/* Built by Badge */}
                 <a 
                   href="https://x.com/wote_dev" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white font-medium rounded-lg shadow-lg border border-slate-700 transition-colors"
+                  className="group inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 hover:from-primary/20 hover:via-primary/10 hover:to-accent/20 text-foreground font-medium rounded-xl border border-primary/20 hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md"
                 >
-                  <span className="text-sm text-slate-300">Built by</span>
-                  <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-muted-foreground">Built by</span>
+                  <div className="flex items-center gap-2">
                     <svg 
-                      className="h-4 w-4 text-white" 
+                      className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" 
                       fill="currentColor" 
                       viewBox="0 0 24 24" 
                       aria-hidden="true"
                     >
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                     </svg>
-                    <span className="font-semibold text-white">@wote_dev</span>
+                    <span className="font-semibold text-primary">@wote_dev</span>
                   </div>
                 </a>
               </div>

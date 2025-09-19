@@ -73,7 +73,7 @@ export function Navigation() {
             <div className="relative flex items-center justify-center py-1">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300" />
               <Image
-                src="/new-logo.png"
+                src="/package.png"
                 alt="HaircutFun Logo"
                 width={120}
                 height={40}

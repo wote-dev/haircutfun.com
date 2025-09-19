@@ -74,7 +74,7 @@ export function HowItWorksSection() {
                     {/* Icon with Gradient Background */}
                     <div className={`relative mb-6 ${step.bgColor} rounded-2xl p-4 w-fit mx-auto`}>
                       <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-10 rounded-2xl`} />
-                      <Icon className={`relative h-8 w-8 bg-gradient-to-br ${step.color} bg-clip-text text-transparent`} />
+                      <Icon className={`relative h-8 w-8 text-foreground`} />
                     </div>
                     
                     {/* Content */}

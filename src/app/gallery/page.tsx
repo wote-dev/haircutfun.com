@@ -240,7 +240,7 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 pt-32 pb-16">
+      <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 pt-24 pb-8">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-6 py-3 mb-6">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -249,7 +249,7 @@ export default function GalleryPage() {
           <h1 className="text-4xl font-bold text-foreground mb-4 sm:text-5xl">
             Hairstyle Gallery
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
             Explore all available hairstyles and see how they'll look on you with our AI-powered virtual try-on
           </p>
           
@@ -258,7 +258,7 @@ export default function GalleryPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="inline-flex items-center bg-muted/50 rounded-full p-1 mb-8"
+            className="inline-flex items-center bg-muted/50 rounded-full p-1 mb-6"
           >
             <button
               onClick={() => setSelectedGender('female')}
@@ -285,7 +285,7 @@ export default function GalleryPage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="py-16 bg-gradient-to-br from-muted/30 via-background to-secondary/20">
+      <section className="py-8 bg-gradient-to-br from-muted/30 via-background to-secondary/20">
         <div className="container mx-auto px-4">
           <motion.div 
             key={selectedGender}
@@ -302,7 +302,7 @@ export default function GalleryPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-primary/10 to-accent/10">
+      <section className="py-16 bg-gradient-to-br from-muted/30 via-background to-secondary/20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">
             Ready to Try Your Perfect Style?
