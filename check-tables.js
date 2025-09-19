@@ -68,7 +68,7 @@ async function checkTables() {
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
       month_year TEXT NOT NULL,
-      haircut_generations INTEGER DEFAULT 0,
+      generations_used INTEGER DEFAULT 0,
       plan_limit INTEGER DEFAULT 3,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

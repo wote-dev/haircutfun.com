@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service-client';
 
 console.log("GEMINI_API_KEY check:", process.env.GEMINI_API_KEY ? `Loaded, starting with ${process.env.GEMINI_API_KEY.substring(0, 8)}...` : "!!!!!!!! NOT LOADED !!!!!!!");
 
@@ -79,7 +80,9 @@ export async function POST(request: NextRequest) {
       currentUsage = usageData;
 
       if (usageError && usageError.code === 'PGRST116') { // "No rows found"
-        const { data: newUsage, error: createError } = await supabase
+        // Use service client for creating usage records to bypass RLS
+        const serviceSupabase = createServiceClient();
+        const { data: newUsage, error: createError } = await serviceSupabase
           .from('usage_tracking')
           .insert({
             user_id: user.id,
@@ -111,7 +114,9 @@ export async function POST(request: NextRequest) {
 
       // Update plan_limit if it has changed (e.g., user upgraded)
       if (currentUsage && currentUsage.plan_limit !== maxGenerations) {
-        const { data: updatedUsage, error: updateLimitError } = await supabase
+        // Use service client for updating plan limits to bypass RLS
+        const serviceSupabase = createServiceClient();
+        const { data: updatedUsage, error: updateLimitError } = await serviceSupabase
           .from('usage_tracking')
           .update({ plan_limit: maxGenerations })
           .eq('user_id', user.id)
@@ -215,15 +220,29 @@ export async function POST(request: NextRequest) {
 
     // Increment usage counter on success
     if (user && currentUsage) {
-      const { error: updateError } = await supabase
-        .from('usage_tracking')
-        .update({ generations_used: currentUsage.generations_used + 1 })
-        .eq('user_id', user.id)
-        .eq('month_year', currentMonth);
+      try {
+        // Use service client to bypass RLS for usage tracking
+        const serviceSupabase = createServiceClient();
+        const { error: updateError } = await serviceSupabase
+          .from('usage_tracking')
+          .update({ generations_used: currentUsage.generations_used + 1 })
+          .eq('user_id', user.id)
+          .eq('month_year', currentMonth);
 
-      if (updateError) {
-        console.error('CRITICAL: Failed to update usage count for user:', user.id, updateError);
-        // Decide if we should still return the image. For now, we will.
+        if (updateError) {
+          console.error('CRITICAL: Failed to update usage count for user:', user.id, updateError);
+          console.error('Error details:', {
+            code: updateError.code,
+            message: updateError.message,
+            details: updateError.details,
+            hint: updateError.hint
+          });
+          // Continue with image generation even if usage tracking fails
+        } else {
+          console.log('Successfully updated usage count for user:', user.id);
+        }
+      } catch (error) {
+        console.error('Exception during usage update:', error);
       }
     }
 

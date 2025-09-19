@@ -1,14 +1,19 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// You'll need to replace these with your actual Supabase credentials
+// Using the Supabase URL from your error logs
 const SUPABASE_URL = 'https://qwurjoehwlvxlijlizdg.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'your_service_role_key_here';
 
-if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === 'your_service_role_key_here') {
-  console.error('❌ Please set SUPABASE_SERVICE_ROLE_KEY environment variable');
-  console.log('You can find this in your Supabase dashboard under Settings > API');
-  console.log('Run: SUPABASE_SERVICE_ROLE_KEY=your_key node fix-database-issues.js');
-  process.exit(1);
+// Try to get the service role key from environment or prompt user
+let SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// If no service role key, try to use anon key for basic operations
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+  console.log('⚠️ No service role key found. Attempting with limited permissions...');
+  console.log('For full fixes, get your service role key from Supabase Dashboard > Settings > API');
+  console.log('Then run: SUPABASE_SERVICE_ROLE_KEY=your_key node fix-database-issues.js');
+  
+  // Try with a basic client first to see what we can access
+  SUPABASE_SERVICE_ROLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'limited_access';
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
