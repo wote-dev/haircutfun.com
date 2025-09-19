@@ -1,0 +1,126 @@
+/* Safari-specific fixes for mobile performance */
+
+/* Force hardware acceleration on all interactive elements */
+* {
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+}
+
+/* Optimize backdrop filters for Safari */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Optimize transforms for Safari */
+.transform {
+  -webkit-transform: translateZ(0);
+}
+
+/* Optimize gradients for Safari */
+.bg-gradient-to-r,
+.bg-gradient-to-l,
+.bg-gradient-to-t,
+.bg-gradient-to-b,
+.bg-gradient-to-br,
+.bg-gradient-to-bl,
+.bg-gradient-to-tr,
+.bg-gradient-to-tl {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Optimize animations for Safari */
+@keyframes safari-fade-in {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(10px) translateZ(0);
+    transform: translateY(10px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0) translateZ(0);
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes safari-scale-in {
+  from {
+    opacity: 0;
+    -webkit-transform: scale(0.95) translateZ(0);
+    transform: scale(0.95) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: scale(1) translateZ(0);
+    transform: scale(1) translateZ(0);
+  }
+}
+
+/* Mobile Safari specific optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+  /* Disable expensive effects on mobile Safari */
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Simplify animations on mobile Safari */
+  .animate-pulse,
+  .animate-bounce,
+  .animate-spin {
+    animation: none;
+  }
+  
+  /* Force hardware acceleration on interactive elements */
+  button,
+  a,
+  .cursor-pointer {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Fix for iOS Safari viewport issues */
+  body {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Fix for iOS Safari scroll issues */
+  .overflow-scroll,
+  .overflow-y-scroll,
+  .overflow-x-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Fix for iOS Safari input zoom */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

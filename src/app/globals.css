@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/safari-fixes.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -162,6 +163,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  /* Safari-specific optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
 }
 
 /* Enhanced gradient utilities */
@@ -182,6 +187,8 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  /* Safari fallback */
+  color: transparent;
 }
 
 .text-gradient-secondary {
@@ -189,6 +196,8 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  /* Safari fallback */
+  color: transparent;
 }
 
 .text-gradient-accent {
@@ -196,19 +205,24 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  /* Safari fallback */
+  color: transparent;
 }
 
 * {
   border-color: var(--border);
 }
 
-/* Smooth animation utilities - Mobile optimized */
+/* Smooth animation utilities - Mobile optimized with Safari fixes */
 .smooth-hover {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
               box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
               opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
+  /* Safari optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
 
 .smooth-hover-fast {
@@ -217,22 +231,29 @@ body {
               opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
+  /* Safari optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
 
 .smooth-scale:hover {
   transform: scale(1.02);
+  -webkit-transform: scale(1.02) translateZ(0);
 }
 
 .smooth-scale-lg:hover {
   transform: scale(1.05);
+  -webkit-transform: scale(1.05) translateZ(0);
 }
 
 .smooth-lift:hover {
   transform: translateY(-2px);
+  -webkit-transform: translateY(-2px) translateZ(0);
 }
 
 .smooth-lift-scale:hover {
   transform: translateY(-2px) scale(1.02);
+  -webkit-transform: translateY(-2px) scale(1.02) translateZ(0);
 }
 
 .smooth-gradient-hover {
@@ -242,6 +263,9 @@ body {
               box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
+  /* Safari optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
 
 .smooth-gradient-hover::before {
@@ -268,11 +292,12 @@ body {
 
 .smooth-gradient-hover:hover {
   transform: translateY(-1px) scale(1.02);
+  -webkit-transform: translateY(-1px) scale(1.02) translateZ(0);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
     0 20px 40px -10px rgba(0, 0, 0, 0.1);
 }
 
-/* Border glow utilities with improved smoothness */
+/* Border glow utilities with improved smoothness and Safari fixes */
 .border-glow-primary {
   border: 2px solid var(--primary);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
@@ -280,11 +305,15 @@ body {
               box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
+  /* Safari optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
 
 .border-glow-primary:hover {
   box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
   transform: translateY(-2px) scale(1.02);
+  -webkit-transform: translateY(-2px) scale(1.02) translateZ(0);
 }
 
 .border-glow-accent {
@@ -294,21 +323,43 @@ body {
               box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
   will-change: transform;
+  /* Safari optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
 
 .border-glow-accent:hover {
   box-shadow: 0 0 30px rgba(96, 165, 250, 0.5), 0 0 60px rgba(96, 165, 250, 0.2);
   transform: translateY(-2px) scale(1.02);
+  -webkit-transform: translateY(-2px) scale(1.02) translateZ(0);
 }
 
-/* Mobile-specific optimizations */
+/* Mobile-specific optimizations with aggressive Safari fixes */
 @media (max-width: 768px) {
+  /* Disable expensive effects on mobile Safari */
   .smooth-hover,
   .smooth-hover-fast,
   .smooth-gradient-hover,
   .border-glow-primary,
   .border-glow-accent {
-    transition-duration: 0.15s;
+    transition-duration: 0.1s;
+    /* Force hardware acceleration on Safari */
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+  }
+  
+  /* Simplify hover effects on mobile */
+  .smooth-scale:hover,
+  .smooth-scale-lg:hover {
+    transform: scale(1.01);
+    -webkit-transform: scale(1.01) translateZ(0);
+  }
+  
+  .smooth-lift:hover,
+  .smooth-lift-scale:hover {
+    transform: translateY(-1px);
+    -webkit-transform: translateY(-1px) translateZ(0);
   }
   
   /* Reduce motion for mobile users who prefer it */
@@ -320,6 +371,7 @@ body {
     .border-glow-accent {
       transition: none;
       will-change: auto;
+      -webkit-transform: none;
     }
     
     .smooth-scale:hover,
@@ -327,6 +379,7 @@ body {
     .smooth-lift:hover,
     .smooth-lift-scale:hover {
       transform: none;
+      -webkit-transform: none;
     }
   }
 }

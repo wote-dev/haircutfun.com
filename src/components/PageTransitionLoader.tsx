@@ -17,7 +17,11 @@ export function PageTransitionLoader({ isLoading, message = "Loading..." }: Page
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
-          className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-md flex items-center justify-center"
+          className="fixed inset-0 z-[9999] bg-background/80 flex items-center justify-center"
+          style={{ 
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}

@@ -79,13 +79,23 @@ const ModernGallery: React.FC<ModernGalleryProps> = ({ styles, selectedGender })
             placeholder="Search hairstyles..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-background/50 backdrop-blur-sm border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+            className="w-full pl-10 pr-4 py-3 bg-background/50 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+          style={{
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)'
+          }}
           />
         </div>
 
         <div className="flex items-center gap-4">
           {/* Category Filter */}
-          <div className="flex items-center gap-2 bg-background/50 backdrop-blur-sm rounded-xl p-1 border border-border/50">
+          <div 
+          className="flex items-center gap-2 bg-background/50 rounded-xl p-1 border border-border/50"
+          style={{
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)'
+          }}
+        >
             {categories.map((category) => (
               <button
                 key={category}
@@ -102,7 +112,13 @@ const ModernGallery: React.FC<ModernGalleryProps> = ({ styles, selectedGender })
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 bg-background/50 backdrop-blur-sm rounded-xl p-1 border border-border/50">
+          <div 
+          className="flex items-center gap-1 bg-background/50 rounded-xl p-1 border border-border/50"
+          style={{
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)'
+          }}
+        >
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg transition-all ${
@@ -263,10 +279,14 @@ const HaircutCard: React.FC<HaircutCardProps> = ({
       className={viewMode === 'masonry' ? 'break-inside-avoid mb-6' : ''}
     >
       <animated.div
-        style={springProps}
+        style={{
+          ...springProps,
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)'
+        }}
         onMouseEnter={() => onHover(style.name)}
         onMouseLeave={() => onHover(null)}
-        className="group relative bg-background/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-border/50 cursor-pointer"
+        className="group relative bg-background/80 rounded-2xl overflow-hidden border border-border/50 cursor-pointer"
         onClick={handleTryOn}
       >
         {/* Image Container */}
