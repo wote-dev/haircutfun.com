@@ -274,11 +274,7 @@ export function TrendingHaircuts() {
   };
 
   return (
-    <section className="relative py-16 sm:py-20 overflow-hidden bg-gradient-to-br from-muted/30 via-background to-secondary/20">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent"></div>
-      <div className="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
-      <div className="absolute bottom-10 right-10 w-32 h-32 bg-accent/10 rounded-full blur-2xl"></div>
+    <section className="relative pt-0 pb-16 sm:pb-20 overflow-hidden bg-white">
       
       <div className="container mx-auto px-4 sm:px-6">
         <div className="relative mx-auto max-w-6xl">

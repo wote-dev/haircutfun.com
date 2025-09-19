@@ -28,7 +28,7 @@ export function ImageCarousel({
       <motion.div
         className="flex flex-col gap-6"
         animate={{
-          y: direction === "up" ? ["0%", "-33.33%"] : ["-33.33%", "0%"]
+          transform: direction === "up" ? ["translateY(0%)", "translateY(-33.33%)"] : ["translateY(-33.33%)", "translateY(0%)"]
         }}
         transition={{
           duration: speed,
@@ -37,15 +37,14 @@ export function ImageCarousel({
           repeatType: "loop"
         }}
         initial={{
-          y: direction === "up" ? "0%" : "-33.33%"
+          transform: direction === "up" ? "translateY(0%)" : "translateY(-33.33%)"
         }}
+        style={{ willChange: 'transform' }}
       >
         {duplicatedImages.map((image, index) => (
-          <motion.div
+          <div
             key={`${image}-${index}`}
             className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg"
-
-            transition={{ duration: 0.3 }}
           >
             <img
               src={image}
@@ -54,7 +53,7 @@ export function ImageCarousel({
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
-          </motion.div>
+          </div>
         ))}
       </motion.div>
     </div>

@@ -246,20 +246,21 @@ export default function PricingPage() {
 
     if (tier.name === 'Free Trial') {
       return (
-        <Button asChild className="w-full" variant="outline" size="lg">
-          <Link href="/try-on">
-            {tier.buttonText}
-          </Link>
-        </Button>
+        <Link 
+          href="/try-on" 
+          className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors duration-200"
+        >
+          {tier.buttonText}
+        </Link>
       );
     }
 
     if (!user) {
       return (
         <SignInButton 
-          className="w-full"
+          className="w-full bg-primary hover:bg-primary/90 text-white transition-colors duration-200"
           redirectTo={currentPath}
-          variant={tier.popular ? "default" : "outline"}
+          variant="ghost"
           size="lg"
         >
           Sign In to Subscribe
@@ -277,17 +278,16 @@ export default function PricingPage() {
             setLoadingPlan(null);
           }}
           disabled={isLoading || isLoadingThisPlan}
-          className="w-full bg-green-100 text-green-800 border border-green-300 hover:bg-green-200"
-          variant="outline"
+          className="w-full bg-green-500 hover:bg-green-600 text-white transition-colors duration-200"
           size="lg"
         >
           {isLoadingThisPlan ? (
             <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-              <span>Loading...</span>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span className="font-semibold">Loading...</span>
             </div>
           ) : (
-            '✓ Current Plan - Manage'
+            <span className="font-semibold">✓ Current Plan - Manage</span>
           )}
         </Button>
       );
@@ -306,17 +306,18 @@ export default function PricingPage() {
             setLoadingPlan(null);
           }}
           disabled={isLoading || isLoadingThisPlan}
-          className="w-full bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200"
-          variant="outline"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
           size="lg"
         >
           {isLoadingThisPlan ? (
             <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              <span>Loading...</span>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span className="font-semibold">Loading...</span>
             </div>
           ) : (
-            isUpgrade ? 'Upgrade Plan' : isDowngrade ? 'Change Plan' : 'Change Plan'
+            <span className="font-semibold">
+              {isUpgrade ? 'Upgrade Plan' : isDowngrade ? 'Change Plan' : 'Change Plan'}
+            </span>
           )}
         </Button>
       );
@@ -326,17 +327,16 @@ export default function PricingPage() {
       <Button
         onClick={() => handlePlanSelect(planType)}
         disabled={isLoading || isLoadingThisPlan}
-        className="w-full"
-        variant={tier.popular ? "default" : "outline"}
+        className="w-full bg-primary hover:bg-primary/90 text-white transition-colors duration-200"
         size="lg"
       >
         {isLoadingThisPlan ? (
           <div className="flex items-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-            <span>Processing...</span>
+            <span className="font-semibold">Processing...</span>
           </div>
         ) : (
-          tier.buttonText
+          <span className="font-semibold">{tier.buttonText}</span>
         )}
       </Button>
     );
@@ -408,70 +408,71 @@ export default function PricingPage() {
       )}
 
       {/* Pricing Cards */}
-      <section className="py-20">
+      <section className="py-20 relative">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {pricingTiers.map((tier, index) => (
               <Card
                 key={tier.name}
-                className={`relative transition-all duration-300 hover:shadow-xl ${
+                className={`relative transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
                   tier.popular 
-                    ? 'border-primary shadow-lg ring-2 ring-primary/20 scale-105' 
-                    : 'hover:border-primary/50'
+                    ? 'border-2 border-primary shadow-md' 
+                    : 'border border-border hover:border-primary/50'
                 }`}
               >
                 {tier.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
-                    <Star className="h-3 w-3 mr-1" />
+                  <Badge className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white shadow-md z-10 px-4 py-2 text-sm font-semibold">
+                    <Star className="h-4 w-4 mr-2 fill-current" />
                     Most Popular
                   </Badge>
                 )}
                 
                 <CardHeader className="text-center pb-8">
-                  <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-                    {tier.name === 'Premium' && <Crown className="h-6 w-6 text-accent" />}
-                    {tier.name}
-                  </CardTitle>
-                  <div className="mt-4">
-                    <span className="text-5xl font-bold text-foreground">{tier.price}</span>
-                    <span className="text-muted-foreground text-lg">/{tier.period}</span>
+                  <div className="flex justify-center mb-4">
+                    {tier.name === 'Free Trial' && <Zap className="h-12 w-12 text-primary" />}
+                    {tier.name === 'Pro' && <Star className="h-12 w-12 text-primary" />}
+                    {tier.name === 'Premium' && <Crown className="h-12 w-12 text-primary" />}
                   </div>
-                  <CardDescription className="text-base mt-4">
-                    {tier.description}
-                  </CardDescription>
+                  <CardTitle className="text-2xl font-bold mb-2">{tier.name}</CardTitle>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold text-foreground">
+                      {tier.price}
+                    </span>
+                    {tier.period && <span className="text-muted-foreground ml-1">/{tier.period}</span>}
+                  </div>
+                  <p className="text-muted-foreground">{tier.description}</p>
                 </CardHeader>
                 
-                <CardContent className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-4">Everything included:</h4>
-                    <ul className="space-y-3">
-                      {tier.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-start gap-3">
-                          <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-muted-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    {tier.limitations.length > 0 && (
-                      <div className="mt-6 pt-6 border-t border-border">
-                        <h4 className="font-medium text-muted-foreground mb-3 text-sm">Limitations:</h4>
-                        <ul className="space-y-2">
-                          {tier.limitations.map((limitation, limitIndex) => (
-                            <li key={limitIndex} className="flex items-start gap-3">
-                              <X className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <span className="text-xs text-muted-foreground">{limitation}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                <CardContent className="px-6 pb-6">
+                  <ul className="space-y-3 mb-6">
+                    {tier.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                          <Check className="h-3 w-3 text-primary" />
+                        </div>
+                        <span className="text-sm text-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  {tier.limitations.length > 0 && (
+                    <div className="border-t pt-4 mt-4">
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Limitations:</p>
+                      <ul className="space-y-1">
+                        {tier.limitations.map((limitation, limitIndex) => (
+                          <li key={limitIndex} className="flex items-center gap-2">
+                            <X className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <span className="text-xs text-muted-foreground">{limitation}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </CardContent>
                 
-                <CardFooter>
-                  <PricingButton tier={tier} />
-                </CardFooter>
+                <CardFooter className="px-6 pb-6">
+                   <PricingButton tier={tier} />
+                 </CardFooter>
               </Card>
             ))}
           </div>

@@ -16,35 +16,32 @@ export function PageTransitionLoader({ isLoading, message = "Loading..." }: Page
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
           className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-md flex items-center justify-center"
         >
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
+            exit={{ scale: 0.9, opacity: 0 }}
             transition={{ 
-              duration: 0.3, 
-              ease: [0.4, 0.0, 0.2, 1],
-              type: "spring",
-              stiffness: 300,
-              damping: 30
+              duration: 0.2, 
+              ease: "easeOut"
             }}
             className="text-center max-w-sm mx-auto px-6"
+            style={{ willChange: 'transform, opacity' }}
           >
             {/* Animated Logo/Icon */}
             <div className="relative mb-6">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-xl animate-pulse" />
               <motion.div
                 animate={{ 
-                  rotate: 360,
-                  scale: [1, 1.1, 1]
+                  rotate: 360
                 }}
                 transition={{ 
-                  rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+                  rotate: { duration: 2, repeat: Infinity, ease: "linear" }
                 }}
                 className="relative w-16 h-16 mx-auto bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg"
+                style={{ willChange: 'transform' }}
               >
                 <Sparkles className="w-8 h-8 text-primary-foreground" />
               </motion.div>
@@ -75,30 +72,31 @@ export function PageTransitionLoader({ isLoading, message = "Loading..." }: Page
               />
             </div>
 
-            {/* Floating Particles */}
+            {/* Floating Particles - Simplified for mobile */}
             <div className="absolute inset-0 pointer-events-none">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(3)].map((_, i) => (
                 <motion.div
                   key={i}
                   initial={{ 
                     opacity: 0,
                     scale: 0,
-                    x: Math.random() * 200 - 100,
-                    y: Math.random() * 200 - 100
+                    x: Math.random() * 100 - 50,
+                    y: Math.random() * 100 - 50
                   }}
                   animate={{ 
                     opacity: [0, 1, 0],
                     scale: [0, 1, 0],
-                    x: Math.random() * 400 - 200,
-                    y: Math.random() * 400 - 200
+                    x: Math.random() * 200 - 100,
+                    y: Math.random() * 200 - 100
                   }}
                   transition={{
-                    duration: 3,
+                    duration: 2,
                     repeat: Infinity,
-                    delay: i * 0.5,
+                    delay: i * 0.7,
                     ease: "easeInOut"
                   }}
                   className="absolute w-2 h-2 bg-primary/30 rounded-full"
+                  style={{ willChange: 'transform, opacity' }}
                 />
               ))}
             </div>

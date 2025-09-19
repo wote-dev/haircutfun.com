@@ -20,7 +20,7 @@ export default function Home() {
         <FAQSection />
         
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5">
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-6">
               Ready to Transform Your Look?

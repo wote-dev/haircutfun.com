@@ -148,29 +148,27 @@ export function Navigation() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden"
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="fixed inset-0 bg-black/20 lg:hidden"
                 style={{ top: '80px' }}
                 onClick={() => setIsOpen(false)}
               />
               
               {/* Menu Content */}
               <motion.div
-                initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                initial={{ opacity: 0, transform: "translateY(-10px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                exit={{ opacity: 0, transform: "translateY(-10px)" }}
                 transition={{ 
-                  duration: 0.3, 
-                  ease: [0.4, 0.0, 0.2, 1],
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30
+                  duration: 0.2, 
+                  ease: "easeOut"
                 }}
-                className={`lg:hidden absolute top-full left-0 right-0 backdrop-blur-xl border-b shadow-xl ${
+                className={`lg:hidden absolute top-full left-0 right-0 border-b shadow-lg ${
                   scrolled 
-                    ? 'bg-background/98 border-border/40' 
+                    ? 'bg-background/95 border-border/40' 
                     : 'bg-background/90 border-border/20'
                 }`}
+                style={{ willChange: 'transform, opacity' }}
               >
                 <div className="container mx-auto px-4 sm:px-6 py-6">
                   <div className="flex flex-col space-y-1">

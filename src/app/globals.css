@@ -119,6 +119,41 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-border-beam: border-beam calc(var(--duration)*1s) infinite linear;
+
+  @keyframes border-beam {
+    100% {
+      offset-distance: 100%;
+    }
+  }
+
+  @keyframes shine-pulse {
+    0% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+    to {
+      background-position: 0% 0%;
+    }
+  }
+  @keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+    }
+  }
+  @keyframes shine-pulse {
+  0% {
+    background-position: 0% 0%;
+    }
+  50% {
+    background-position: 100% 100%;
+    }
+  to {
+    background-position: 0% 0%;
+    }
+  }
 }
 
 body {
@@ -167,17 +202,21 @@ body {
   border-color: var(--border);
 }
 
-/* Smooth animation utilities */
+/* Smooth animation utilities - Mobile optimized */
 .smooth-hover {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
-  will-change: transform, box-shadow, opacity;
+  will-change: transform;
 }
 
 .smooth-hover-fast {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
-  will-change: transform, box-shadow, opacity;
+  will-change: transform;
 }
 
 .smooth-scale:hover {
@@ -199,9 +238,10 @@ body {
 .smooth-gradient-hover {
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
-  will-change: transform, box-shadow;
+  will-change: transform;
 }
 
 .smooth-gradient-hover::before {
@@ -218,7 +258,7 @@ body {
     rgba(255, 255, 255, 0.1)
   );
   opacity: 0;
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 
@@ -236,9 +276,10 @@ body {
 .border-glow-primary {
   border: 2px solid var(--primary);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
-  will-change: transform, box-shadow;
+  will-change: transform;
 }
 
 .border-glow-primary:hover {
@@ -249,14 +290,45 @@ body {
 .border-glow-accent {
   border: 2px solid var(--accent);
   box-shadow: 0 0 20px rgba(96, 165, 250, 0.3), 0 0 40px rgba(96, 165, 250, 0.1);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
-  will-change: transform, box-shadow;
+  will-change: transform;
 }
 
 .border-glow-accent:hover {
   box-shadow: 0 0 30px rgba(96, 165, 250, 0.5), 0 0 60px rgba(96, 165, 250, 0.2);
   transform: translateY(-2px) scale(1.02);
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .smooth-hover,
+  .smooth-hover-fast,
+  .smooth-gradient-hover,
+  .border-glow-primary,
+  .border-glow-accent {
+    transition-duration: 0.15s;
+  }
+  
+  /* Reduce motion for mobile users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    .smooth-hover,
+    .smooth-hover-fast,
+    .smooth-gradient-hover,
+    .border-glow-primary,
+    .border-glow-accent {
+      transition: none;
+      will-change: auto;
+    }
+    
+    .smooth-scale:hover,
+    .smooth-scale-lg:hover,
+    .smooth-lift:hover,
+    .smooth-lift-scale:hover {
+      transform: none;
+    }
+  }
 }
 
 .border-glow-multi {

@@ -34,6 +34,20 @@ export function HeroSection() {
     "/quiff.png",
     "/textered-top.png"
   ];
+
+  // Mobile carousel images - mix of both men's and women's styles
+  const mobileCarouselImages = [
+    "/FILLER-IMAGES-WOMEN/modernshag.png",
+    "/FILLER-IMAGES-MALE/sidepart.png",
+    "/FILLER-IMAGES-WOMEN/pixiecut.png",
+    "/FILLER-IMAGES-MALE/texturedcrop.png",
+    "/FILLER-IMAGES-WOMEN/curtainbangs.png",
+    "/FILLER-IMAGES-MALE/Pompadour.png",
+    "/FILLER-IMAGES-WOMEN/bluntbob.png",
+    "/FILLER-IMAGES-MALE/buzzcut.png",
+    "/FILLER-IMAGES-WOMEN/classicbob.png",
+    "/FILLER-IMAGES-MALE/crewcut.jpg"
+  ];
   
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/20 min-h-screen flex items-center justify-center pt-24 pb-16">
@@ -96,12 +110,59 @@ export function HeroSection() {
             </motion.span>
           </motion.h1>
 
+          {/* Mobile Carousel - Only visible on mobile, positioned right after h1 */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+            className="block lg:hidden py-6"
+          >
+            <div className="relative overflow-hidden">
+              <motion.div
+                className="flex gap-4"
+                animate={{
+                  x: [0, -1200]
+                }}
+                transition={{
+                  duration: 20,
+                  repeat: Infinity,
+                  ease: "linear",
+                  repeatType: "loop"
+                }}
+              >
+                {/* Duplicate images for seamless loop */}
+                {[...mobileCarouselImages, ...mobileCarouselImages].map((image, index) => (
+                  <motion.div
+                    key={`mobile-${image}-${index}`}
+                    className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shadow-lg"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <img
+                      src={image}
+                      alt={`Hairstyle ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60" />
+                    <div className="absolute inset-0 bg-primary/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+            
+            {/* Mobile carousel subtitle */}
+            <p className="text-center text-xs text-muted-foreground mt-3 opacity-75">
+              Popular hairstyles you can try
+            </p>
+          </motion.div>
+
           {/* Subtitle */}
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-            className="text-xl leading-relaxed text-muted-foreground max-w-3xl mx-auto"
+            className="text-lg sm:text-xl leading-relaxed text-muted-foreground max-w-md sm:max-w-3xl mx-auto px-4 sm:px-0"
           >
             Experience the future of hair styling with our advanced AI technology. 
             Try on dozens of hairstyles instantly and see exactly how you'll look before making any commitment.
