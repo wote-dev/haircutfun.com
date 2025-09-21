@@ -24,6 +24,7 @@ const haircutStyles = [
     description: 'A chic, short hairstyle that frames the face beautifully',
     popularity: 95,
     isPremium: true,
+    image: '/FILLER-IMAGES-WOMEN/pixiecut.png',
   },
   {
     id: 'bob-classic',
@@ -32,6 +33,7 @@ const haircutStyles = [
     gender: 'female' as const,
     description: 'Timeless bob that works for any face shape',
     popularity: 88,
+    image: '/FILLER-IMAGES-WOMEN/classicbob.png',
   },
   {
     id: 'long-layers',
@@ -41,6 +43,7 @@ const haircutStyles = [
     description: 'Flowing layers that add movement and volume',
     popularity: 92,
     isPremium: true,
+    image: '/wolf-cut.png', // Using wolf-cut as a long layered style
   },
   {
     id: 'shag-modern',
@@ -50,6 +53,7 @@ const haircutStyles = [
     description: 'Trendy shag with textured layers and bangs',
     popularity: 85,
     isPremium: true,
+    image: '/FILLER-IMAGES-WOMEN/modernshag.png',
   },
   {
     id: 'lob-wavy',
@@ -59,6 +63,7 @@ const haircutStyles = [
     description: 'Long bob with natural waves for a relaxed look',
     popularity: 90,
     isPremium: true,
+    image: '/modern-shag.png', // Using as wavy lob alternative
   },
   {
     id: 'curtain-bangs',
@@ -67,6 +72,7 @@ const haircutStyles = [
     gender: 'female' as const,
     description: 'Face-framing bangs that part in the middle',
     popularity: 87,
+    image: '/FILLER-IMAGES-WOMEN/curtainbangs.png',
   },
   {
     id: 'beach-waves',
@@ -75,6 +81,7 @@ const haircutStyles = [
     gender: 'female' as const,
     description: 'Effortless waves for a natural, beachy look',
     popularity: 89,
+    image: '/curtain-bangs.png', // Using as beach waves alternative
   },
   {
     id: 'blunt-bob',
@@ -83,6 +90,7 @@ const haircutStyles = [
     gender: 'female' as const,
     description: 'Sharp, clean lines for a modern sophisticated look',
     popularity: 84,
+    image: '/FILLER-IMAGES-WOMEN/bluntbob.png',
   },
   // Male hairstyles
   {
@@ -93,6 +101,7 @@ const haircutStyles = [
     description: 'Clean, minimalist cut that\'s easy to maintain',
     popularity: 85,
     isPremium: true,
+    image: '/FILLER-IMAGES-MALE/buzzcut.png',
   },
   {
     id: 'undercut-fade',
@@ -101,6 +110,7 @@ const haircutStyles = [
     gender: 'male' as const,
     description: 'Edgy cut with faded sides and longer top',
     popularity: 82,
+    image: '/buzzcut.png', // Using as undercut fade alternative
   },
   {
     id: 'crew-cut',
@@ -109,6 +119,7 @@ const haircutStyles = [
     gender: 'male' as const,
     description: 'Classic military-inspired short cut',
     popularity: 85,
+    image: '/FILLER-IMAGES-MALE/crewcut.jpg',
   },
   {
     id: 'pompadour',
@@ -118,6 +129,7 @@ const haircutStyles = [
     description: 'Vintage-inspired style with volume on top',
     popularity: 79,
     isPremium: true,
+    image: '/FILLER-IMAGES-MALE/Pompadour.png',
   },
   {
     id: 'quiff',
@@ -127,6 +139,7 @@ const haircutStyles = [
     description: 'Modern style with textured volume at the front',
     popularity: 88,
     isPremium: true,
+    image: '/quiff.png',
   },
   {
     id: 'side-part',
@@ -135,6 +148,7 @@ const haircutStyles = [
     gender: 'male' as const,
     description: 'Professional look with a clean side part',
     popularity: 91,
+    image: '/FILLER-IMAGES-MALE/sidepart.png',
   },
   {
     id: 'man-bun',
@@ -143,6 +157,7 @@ const haircutStyles = [
     gender: 'male' as const,
     description: 'Long hair styled into a trendy top knot',
     popularity: 76,
+    image: '/side-part.png', // Using as man bun alternative (closest available)
   },
   {
     id: 'textured-crop',
@@ -151,6 +166,7 @@ const haircutStyles = [
     gender: 'male' as const,
     description: 'Modern crop with textured styling on top',
     popularity: 86,
+    image: '/FILLER-IMAGES-MALE/texturedcrop.png',
   },
 ];
 
@@ -253,24 +269,34 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
                 {/* Premium Badge */}
                 {style.isPremium && (
                   <div className="absolute top-3 right-3 z-10">
-                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                    <div className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-primary/20">
                       PRO
                     </div>
                   </div>
                 )}
-                {/* Placeholder for haircut preview */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="h-16 w-16 rounded-full bg-primary/20 mx-auto mb-3 flex items-center justify-center">
-                      <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                {/* Hairstyle Image */}
+                {style.image ? (
+                  <Image
+                    src={style.image}
+                    alt={style.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="h-16 w-16 rounded-full bg-primary/20 mx-auto mb-3 flex items-center justify-center">
+                        <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Preview
+                      </p>
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Preview
-                    </p>
                   </div>
-                </div>
+                )}
                 
                 {/* Hover overlay */}
                 {hoveredStyle === style.id && (

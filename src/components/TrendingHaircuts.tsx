@@ -347,7 +347,7 @@ export function TrendingHaircuts() {
                     {/* Premium Badge */}
                     {style.isPremium && (
                       <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
-                        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                        <div className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-primary/20">
                           PRO
                         </div>
                       </div>

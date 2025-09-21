@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Zap, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,7 @@ export function HeroSection() {
           direction="up" 
           speed={25}
           className="h-full"
+          priorityCount={8}
         />
       </div>
       
@@ -68,6 +70,7 @@ export function HeroSection() {
           direction="down" 
           speed={30}
           className="h-full"
+          priorityCount={8}
         />
       </div>
       
@@ -138,11 +141,15 @@ export function HeroSection() {
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <img
+                    <Image
                       src={image}
                       alt={`Hairstyle ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 20vw, 24vw"
+                      quality={80}
+                      priority={index < 6}
+                      loading={index < 6 ? "eager" : "lazy"}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60" />
                     <div className="absolute inset-0 bg-primary/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
@@ -214,12 +221,18 @@ export function HeroSection() {
             <div className="flex items-center space-x-2">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <img
-                    key={i}
-                    className="w-8 h-8 rounded-full border-2 border-background"
-                    src={`https://i.pravatar.cc/32?img=${i}`}
-                    alt={`User ${i}`}
-                  />
+                  <div key={i} className="relative w-8 h-8 rounded-full border-2 border-background overflow-hidden">
+                    <Image
+                      src={`https://i.pravatar.cc/32?img=${i}`}
+                      alt={`User ${i}`}
+                      fill
+                      className="object-cover"
+                      sizes="32px"
+                      quality={80}
+                      priority={i <= 2}
+                      loading={i <= 2 ? "eager" : "lazy"}
+                    />
+                  </div>
                 ))}
               </div>
               <span className="font-medium">50+ happy customers</span>

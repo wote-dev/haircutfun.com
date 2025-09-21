@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Camera, Palette, Sparkles, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ const steps = [
     id: "01",
     name: "Upload Your Photo",
     description: "Take a selfie or upload a clear photo of yourself. Our AI works best with front-facing photos in good lighting.",
-    icon: Camera,
+    image: "/base-image-woman.png",
     color: "from-blue-500 to-cyan-500",
     bgColor: "bg-blue-50 dark:bg-blue-950/20",
     borderColor: "border-blue-200 dark:border-blue-800",
@@ -18,7 +19,7 @@ const steps = [
     id: "02", 
     name: "Choose Your Style",
     description: "Browse our extensive gallery of hairstyles or let our AI recommend styles based on your face shape and preferences.",
-    icon: Palette,
+    image: "/pixie-cut.png",
     color: "from-purple-500 to-pink-500",
     bgColor: "bg-purple-50 dark:bg-purple-950/20",
     borderColor: "border-purple-200 dark:border-purple-800",
@@ -27,7 +28,7 @@ const steps = [
     id: "03",
     name: "See the Magic",
     description: "Watch as our advanced AI technology applies your chosen hairstyle to your photo in real-time with stunning accuracy.",
-    icon: Sparkles,
+    image: "/modern-shag.png",
     color: "from-amber-500 to-orange-500", 
     bgColor: "bg-amber-50 dark:bg-amber-950/20",
     borderColor: "border-amber-200 dark:border-amber-800",
@@ -53,9 +54,7 @@ export function HowItWorksSection() {
         
         {/* Steps Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
+          {steps.map((step, index) => (
               <div key={step.id} className="relative group">
                 {/* Connection Line (Desktop) */}
                 {index < steps.length - 1 && (
@@ -71,10 +70,21 @@ export function HowItWorksSection() {
                       </Badge>
                     </div>
                     
-                    {/* Icon with Gradient Background */}
+                    {/* Image with Gradient Background */}
                     <div className={`relative mb-6 ${step.bgColor} rounded-2xl p-4 w-fit mx-auto`}>
                       <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-10 rounded-2xl`} />
-                      <Icon className={`relative h-8 w-8 text-foreground`} />
+                      <div className="relative h-24 w-24 rounded-xl overflow-hidden">
+                        <Image
+                          src={step.image}
+                          alt={step.name}
+                          fill
+                          className="object-cover"
+                          sizes="96px"
+                          quality={85}
+                          priority={index === 0}
+                          loading={index === 0 ? "eager" : "lazy"}
+                        />
+                      </div>
                     </div>
                     
                     {/* Content */}
@@ -89,8 +99,7 @@ export function HowItWorksSection() {
                   </CardContent>
                 </Card>
               </div>
-            );
-          })}
+          ))}
         </div>
         
         {/* Bottom Features */}

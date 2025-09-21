@@ -307,9 +307,9 @@ const HaircutCard: React.FC<HaircutCardProps> = ({
 
           {/* Premium Badge */}
           {style.isPremium && (
-            <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+            <div className="absolute top-3 left-3 bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg border border-primary/20">
               <Crown className="h-3 w-3" />
-              Premium
+              PRO
             </div>
           )}
 

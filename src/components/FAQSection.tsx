@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, HelpCircle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { HelpCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const faqs = [
   {
@@ -49,15 +53,6 @@ const faqs = [
 ];
 
 export function FAQSection() {
-  const [openItems, setOpenItems] = useState<number[]>([]);
-
-  const toggleItem = (id: number) => {
-    setOpenItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
-  };
 
   return (
     <section className="py-20 bg-background">
@@ -78,38 +73,18 @@ export function FAQSection() {
 
         {/* FAQ Grid */}
         <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 gap-4">
+          <Accordion type="multiple" className="space-y-4">
             {faqs.map((faq) => (
-              <Card key={faq.id} className="overflow-hidden">
-                <CardContent className="p-0">
-                  <button
-                    onClick={() => toggleItem(faq.id)}
-                    className="w-full p-6 text-left hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-foreground pr-4">
-                        {faq.question}
-                      </h3>
-                      <ChevronDown 
-                        className={`h-5 w-5 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
-                          openItems.includes(faq.id) ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </div>
-                  </button>
-                  {openItems.includes(faq.id) && (
-                    <div className="px-6 pb-6">
-                      <div className="border-t pt-4">
-                        <p className="text-muted-foreground leading-relaxed">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <AccordionItem key={faq.id} value={`item-${faq.id}`} className="border rounded-lg px-6">
+                <AccordionTrigger className="text-lg font-semibold text-foreground hover:no-underline">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pt-2">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         </div>
 
         {/* Bottom CTA */}
@@ -123,7 +98,7 @@ export function FAQSection() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a 
-                href="mailto:support@haircutfun.com" 
+                href="mailto:admin@blackcubesolutions.com" 
                 className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
               >
                 Contact Support

@@ -2,19 +2,22 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface ImageCarouselProps {
   images: string[];
   direction?: "up" | "down";
   speed?: number;
   className?: string;
+  priorityCount?: number; // Number of images to load with priority
 }
 
 export function ImageCarousel({ 
   images, 
   direction = "up", 
   speed = 30,
-  className = "" 
+  className = "",
+  priorityCount = 6 // Load first 6 images with priority for better perceived performance
 }: ImageCarouselProps) {
   const [duplicatedImages, setDuplicatedImages] = useState<string[]>([]);
 
@@ -46,11 +49,15 @@ export function ImageCarousel({
             key={`${image}-${index}`}
             className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg"
           >
-            <img
+            <Image
               src={image}
               alt={`Hairstyle ${index + 1}`}
-              className="w-full h-full object-cover"
-              loading="lazy"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 25vw, (max-width: 1200px) 20vw, 15vw"
+              quality={85}
+              priority={index < priorityCount}
+              loading={index < priorityCount ? "eager" : "lazy"}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
           </div>

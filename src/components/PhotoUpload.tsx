@@ -11,33 +11,7 @@ interface PhotoUploadProps {
   onPhotoUpload: (photoUrl: string) => void;
 }
 
-// Base images for users to try the tool
-const baseImages = [
-  {
-    id: 'example-1',
-    src: '/base-image-me.jpeg',
-    alt: 'Example Person 1',
-    description: 'Try with Daniel'
-  },
-  {
-    id: 'example-2',
-    src: '/base-image-woman.png',
-    alt: 'Example Person 2',
-    description: 'Try with Sarah'
-  },
-  {
-    id: 'example-3',
-    src: '/base-image-woman2.jpg',
-    alt: 'Example Person 3',
-    description: 'Try with Emma'
-  },
-  {
-    id: 'example-4',
-    src: '/base-image-guy 2.jpg',
-    alt: 'Example Person 4',
-    description: 'Try with Mike'
-  }
-];
+
 
 export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -49,16 +23,7 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Check for pre-selected base image on component mount
-  useEffect(() => {
-    const selectedBaseImage = localStorage.getItem('selectedBaseImage');
-    if (selectedBaseImage) {
-      // Auto-use the pre-selected base image
-      handleBaseImageSelect(selectedBaseImage);
-      // Clear the selection so it doesn't auto-load next time
-      localStorage.removeItem('selectedBaseImage');
-    }
-  }, []);
+
 
   const handleFileSelect = (file: File) => {
     if (!file) {
@@ -135,14 +100,7 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
     }
   };
 
-  const handleBaseImageSelect = (imageSrc: string) => {
-    setIsProcessing(true);
-    // Simulate processing time for consistency with file upload
-    setTimeout(() => {
-      onPhotoUpload(imageSrc);
-      setIsProcessing(false);
-    }, 1000);
-  };
+
 
   const openFileDialog = () => {
     console.log('File dialog button clicked');
@@ -316,43 +274,7 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
         </div>
       </div>
 
-      {/* Base Image Options */}
-      {!cameraMode && (
-        <div>
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold mb-2">
-              Or Try With Example Images
-            </h3>
-            <p className="text-muted-foreground">
-              See how our tool works with these example photos
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {baseImages.map((image) => (
-              <Card
-                key={image.id}
-                className="group cursor-pointer overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 border-2 hover:border-primary"
-                onClick={() => handleBaseImageSelect(image.src)}
-              >
-                <div className="aspect-square relative">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, 50vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <p className="text-sm font-medium">{image.description}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* Camera Mode */}
       {cameraMode ? (
