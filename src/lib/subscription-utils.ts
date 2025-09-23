@@ -124,11 +124,15 @@ function validateSubscription(subscription: Subscription) {
     }
   }
   
-  // Check if Stripe IDs are present (indicates real subscription)
+  // Check if Stripe IDs are present (indicates real subscription or test subscription)
   const hasStripeData = !!(subscription.stripe_customer_id && subscription.stripe_subscription_id);
   
-  // Subscription is valid if it's active, not expired, and has Stripe data
-  const isValid = isStatusActive && !isExpired && hasStripeData;
+  // Check if this is a test subscription (for development/testing without webhooks)
+  const isTestSubscription = (subscription.stripe_customer_id?.startsWith('test_') ?? false) || 
+                             (subscription.stripe_subscription_id?.startsWith('test_') ?? false);
+  
+  // Subscription is valid if it's active, not expired, and has either real Stripe data or is a test subscription
+  const isValid = isStatusActive && !isExpired && (hasStripeData || isTestSubscription);
   const isActive = isValid;
   
   return {
@@ -213,6 +217,73 @@ export async function getCachedSubscriptionStatus(userId: string, forceRefresh =
   });
   
   return status;
+}
+
+/**
+ * Create a test subscription for development/testing purposes
+ * This bypasses Stripe webhooks and directly creates a subscription in the database
+ */
+export async function createTestSubscription(
+  userId: string, 
+  planType: 'pro' | 'premium'
+): Promise<{ success: boolean; error?: string; subscription?: Subscription }> {
+  try {
+    const supabase = createClient();
+    
+    const subscriptionData = {
+      user_id: userId,
+      stripe_customer_id: 'test_customer_' + Date.now(),
+      stripe_subscription_id: 'test_sub_' + Date.now(),
+      status: 'active' as const,
+      plan_type: planType,
+      current_period_start: new Date().toISOString(),
+      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .upsert(subscriptionData, {
+        onConflict: 'user_id'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Update usage limits
+    const limits = {
+      pro: 25,
+      premium: 75,
+    };
+
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    
+    const { error: usageError } = await supabase
+      .from('usage_tracking')
+      .upsert({
+        user_id: userId,
+        month_year: currentMonth,
+        plan_limit: limits[planType],
+        generations_used: 0,
+      }, {
+        onConflict: 'user_id,month_year'
+      });
+
+    if (usageError) {
+      console.warn('Usage update failed:', usageError.message);
+    }
+
+    return { success: true, subscription: data };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
 }
 
 /**
