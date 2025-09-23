@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ThreeDotLoader } from '@/components/ui/three-dot-loader';
+import { clearSubscriptionCache } from '@/lib/subscription-utils';
 
 // Component that handles search params
 function DashboardContent() {
@@ -33,6 +34,28 @@ function DashboardContent() {
       return () => clearTimeout(timer);
     }
   }, [success, plan, router]);
+
+  // After successful checkout, proactively refresh subscription from server/Stripe
+  useEffect(() => {
+    const doRefresh = async () => {
+      if (success === 'true' && user?.id) {
+        try {
+          // Clear any cached status so UI re-computes
+          clearSubscriptionCache(user.id);
+          const resp = await fetch('/api/subscription/refresh', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.id })
+          });
+          const json = await resp.json();
+          console.log('🔄 Post-checkout subscription refresh result:', json);
+        } catch (e) {
+          console.error('Failed to refresh subscription after checkout:', e);
+        }
+      }
+    };
+    doRefresh();
+  }, [success, user?.id]);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -251,114 +274,52 @@ function DashboardContent() {
                         });
                     }}
                   >
-                    <div className="flex items-center space-x-2">
-                      <Crown className="h-4 w-4" />
-                      <span className="font-medium">Manage Subscription</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4" />
+                    Manage Subscription
                   </Button>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Tips Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-yellow-500" />
+                  Tips to get best results
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Use a clear, well-lit photo of your face</li>
+                  <li>• Try different angles for better accuracy</li>
+                  <li>• Experiment with multiple styles</li>
+                </ul>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Upgrade Prompt */}
-        {!isPremiumUser && remainingTries === 0 && (
-          <Card className="border-2 border-dashed border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
-            <CardContent className="p-8 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-r from-primary to-accent mx-auto mb-6 flex items-center justify-center">
-                  <Crown className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">
-                  Ready for More?
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  You've used your free try! Upgrade to Pro or Premium to continue creating amazing haircuts.
-                </p>
-                <Button asChild size="lg" className="h-12">
-                  <Link href="/pricing">
-                    <span>View Plans</span>
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Debug Section - Only in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <Card className="mt-8 border-yellow-200 bg-yellow-50">
+        {/* Premium Benefits */}
+        {!isPremiumUser && (
+          <Card className="bg-background/50">
             <CardHeader>
-              <CardTitle className="text-yellow-800 flex items-center gap-2">
-                🔧 Debug Information
-              </CardTitle>
-              <CardDescription className="text-yellow-700">
-                Development environment debugging data
-              </CardDescription>
+              <CardTitle>Why go Premium?</CardTitle>
+              <CardDescription>Unlock advanced features and more generations</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <Card className="bg-white">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-yellow-800">User Info</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="text-xs overflow-auto">
-                      {JSON.stringify({
-                        id: user.id,
-                        email: user.email,
-                        created_at: user.created_at
-                      }, null, 2)}
-                    </pre>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-yellow-800">Subscription</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="text-xs overflow-auto">
-                      {JSON.stringify(subscription || 'No subscription', null, 2)}
-                    </pre>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-yellow-800">Usage Data</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="text-xs overflow-auto">
-                      {JSON.stringify(usage || 'No usage data', null, 2)}
-                    </pre>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-yellow-800">Computed Values</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="text-xs overflow-auto">
-                      {JSON.stringify({
-                        isPremiumUser,
-                        planType,
-                        remainingTries,
-                        hasSubscription: !!subscription,
-                        subscriptionStatus: subscription?.status || 'none'
-                      }, null, 2)}
-                    </pre>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="mt-6 pt-4 border-t border-yellow-200">
-                <Button asChild variant="outline" className="bg-yellow-600 text-white hover:bg-yellow-700 border-yellow-600">
-                  <Link href="/test-subscription">
-                    <span>🧪 Test Subscription Tools</span>
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Link>
-                </Button>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-1">More Tries</h4>
+                  <p className="text-sm text-muted-foreground">Get 25-75 tries per month to find your perfect look.</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Premium Styles</h4>
+                  <p className="text-sm text-muted-foreground">Access exclusive, trending haircut styles updated weekly.</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Priority Processing</h4>
+                  <p className="text-sm text-muted-foreground">Faster results and priority support for subscribers.</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -368,18 +329,21 @@ function DashboardContent() {
   );
 }
 
-// Main component with Suspense boundary
-export default function DashboardPage() {
+function DashboardPageInner() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <ThreeDotLoader size="lg" className="mb-4" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     }>
       <DashboardContent />
     </Suspense>
   );
+}
+
+export default function DashboardPage() {
+  return <DashboardPageInner />;
 }

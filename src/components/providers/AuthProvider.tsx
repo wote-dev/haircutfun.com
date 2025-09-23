@@ -65,7 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUserData = async (userId: string) => {
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Database query timeout after 10 seconds')), 10000);
+      setTimeout(() => reject(new Error('Database query timeout after 15 seconds')), 15000);
     });
 
     try {
@@ -88,20 +88,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('AuthProvider: Error fetching profile:', profileError);
       }
       
-      // Fetch subscription using improved utility with retry logic
-      console.log('AuthProvider: Fetching subscription with enhanced validation...');
-      const { getCachedSubscriptionStatus, clearSubscriptionCache } = await import('../../lib/subscription-utils');
+      // Fetch subscription with simpler approach to avoid timeout
+      console.log('AuthProvider: Fetching subscription directly...');
+      const subscriptionPromise = supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       
-      // Clear cache to ensure fresh data
-      clearSubscriptionCache(userId);
+      const { data: subscriptionData, error: subscriptionError } = await Promise.race([subscriptionPromise, timeoutPromise]) as any;
       
-      const subscriptionStatus = await getCachedSubscriptionStatus(userId, true); // Force refresh
+      console.log('AuthProvider: Subscription fetch result:', { subscriptionData, subscriptionError });
       
-      console.log('AuthProvider: Enhanced subscription status:', subscriptionStatus);
-      
-      // If there was an error fetching subscription, log it but continue
-      if (subscriptionStatus.error) {
-        console.error('AuthProvider: Subscription status error:', subscriptionStatus.error);
+      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+        console.error('AuthProvider: Error fetching subscription:', subscriptionError);
       }
       
       // Fetch current month usage (might not exist for new users)
@@ -125,7 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       console.log('AuthProvider: Setting state with fetched data...');
       setProfile(profileData || null);
-      setSubscription(subscriptionStatus.subscription || null);
+      setSubscription(subscriptionData || null);
       setUsage(usageData || null);
       console.log('AuthProvider: fetchUserData completed successfully');
     } catch (error) {

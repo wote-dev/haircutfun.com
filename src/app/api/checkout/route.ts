@@ -24,12 +24,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already has an active subscription
+    // Check if user already has an active PAID subscription (exclude free and null)
     const { data: existingSubscription, error: subscriptionError } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('user_id', user.id)
       .eq('status', 'active')
+      .in('plan_type', ['pro', 'premium'])
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -42,12 +43,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (existingSubscription) {
+    if (existingSubscription && (existingSubscription.plan_type === 'pro' || existingSubscription.plan_type === 'premium')) {
+      // Get the origin for redirect URL
+      const { origin } = new URL(request.url);
+      const customerPortalUrl = `${origin}/api/customer-portal`;
+      
       if (existingSubscription.plan_type === planType) {
         return NextResponse.json(
           { 
             error: 'You already have an active subscription to this plan',
-            code: 'EXISTING_SUBSCRIPTION_SAME_PLAN'
+            code: 'EXISTING_SUBSCRIPTION_SAME_PLAN',
+            redirectUrl: customerPortalUrl
           },
           { status: 409 }
         );
@@ -55,7 +61,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             error: 'You already have an active subscription. Please manage your subscription to change plans.',
-            code: 'EXISTING_SUBSCRIPTION_DIFFERENT_PLAN'
+            code: 'EXISTING_SUBSCRIPTION_DIFFERENT_PLAN',
+            redirectUrl: customerPortalUrl
           },
           { status: 409 }
         );

@@ -17,7 +17,7 @@ interface PaymentGateProps {
 
 export function PaymentGate({ feature, description, children, showUpgrade = true }: PaymentGateProps) {
   const { user } = useAuth();
-  const { hasPremium, remainingTries } = useUsageTracker();
+  const { hasPremium, remainingTries, usageData } = useUsageTracker();
   const { createCheckoutSession, isLoading } = useStripe();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const router = useRouter();
@@ -28,7 +28,9 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
     return <>{children}</>;
   }
 
-  // If user still has free tries remaining, render children (allow free usage)
+  // Hard paywall: Only allow access if user has remaining tries
+  // For authenticated users: check database usage
+  // For non-authenticated users: check localStorage
   if (remainingTries > 0) {
     return <>{children}</>;
   }
@@ -60,16 +62,17 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
           {description}
         </p>
 
-        {/* Free Trial Info - Only show for users who have used their free generation */}
-        {remainingTries === 0 && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-blue-800 text-sm">
-              <span className="font-semibold">🎉 Ready for more?</span>
-              <br />
-              You've tried our free generation! Upgrade now to unlock unlimited styling possibilities.
-            </p>
-          </div>
-        )}
+        {/* Hard Paywall Message - No Free Trial */}
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-800 text-sm">
+            <span className="font-semibold">🚫 Generation Limit Reached</span>
+            <br />
+            {user 
+              ? "You've used your free generation. Upgrade to continue creating amazing hairstyles!"
+              : "You've used your free generation. Sign in and upgrade to continue!"
+            }
+          </p>
+        </div>
 
         {/* Pro Features */}
         <div className="bg-background border rounded-xl p-6 mb-6">

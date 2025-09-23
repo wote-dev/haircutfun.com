@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getStripeSubscription } from '@/lib/stripe/service';
+import { getStripeSubscription, updateSubscriptionFromStripe } from '@/lib/stripe/service';
+import { stripe } from '@/lib/stripe/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,8 +42,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If no subscription or no Stripe subscription ID, return current state
-    if (!subscription || !subscription.stripe_subscription_id) {
+    // If no subscription at all, nothing to refresh
+    if (!subscription) {
+      return NextResponse.json({
+        success: true,
+        subscription: null,
+        message: 'No subscription found for user'
+      });
+    }
+
+    // If we don't have a Stripe subscription ID yet but do have a customer ID,
+    // recover it by looking up the latest subscription for this customer in Stripe
+    if (!subscription.stripe_subscription_id && subscription.stripe_customer_id) {
+      try {
+        const list = await stripe.subscriptions.list({
+          customer: subscription.stripe_customer_id,
+          status: 'all',
+          limit: 1,
+        });
+
+        const latest = list.data[0];
+        if (latest) {
+          await updateSubscriptionFromStripe({
+            userId,
+            stripeSubscription: latest,
+            customerId: subscription.stripe_customer_id,
+          });
+
+          const { data: updated, error: verifyError } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+
+          if (verifyError) {
+            console.error('Error verifying updated subscription after recovery:', verifyError);
+          }
+
+          return NextResponse.json({
+            success: true,
+            subscription: updated || subscription,
+            message: 'Subscription recovered from Stripe by customer ID',
+          });
+        }
+      } catch (e) {
+        console.error('Error recovering subscription by customer ID:', e);
+        // fall through to default no-subscription-to-refresh response
+      }
+
+      return NextResponse.json({
+        success: true,
+        subscription,
+        message: 'No Stripe subscription found for this customer',
+      });
+    }
+
+    // If no subscription or no Stripe subscription ID and no customer ID, return current state
+    if (!subscription.stripe_subscription_id) {
       return NextResponse.json({
         success: true,
         subscription: subscription || null,

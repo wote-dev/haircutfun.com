@@ -132,7 +132,9 @@ export default function PricingPage() {
   const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/pricing';
 
   // Use the more reliable subscription status from the hook
-  const hasActiveSubscription = isActive || subscription?.status === 'active';
+  // Check both the subscription status hook and the auth provider subscription
+  const hasActiveSubscription = (isActive && subscriptionStatus?.isActive) || 
+                                (subscription?.status === 'active');
   const currentPlan = planType || subscription?.plan_type;
 
   // Check if subscription data failed to load (e.g., due to database timeout)
@@ -171,47 +173,28 @@ export default function PricingPage() {
       currentPlan, 
       subscription, 
       subscriptionStatus,
+      isActive,
+      planType,
       subscriptionError,
       subscriptionCheckFailed, 
       loading,
       subscriptionLoading 
     });
     
-    // If subscription data failed to load, show warning and try to refresh
-    if (subscriptionCheckFailed && !hasActiveSubscription) {
-      showToast('⚠️ Unable to verify subscription status. Refreshing subscription data...', 'warning');
-      setLoadingPlan(planType);
-      
-      try {
-        // Try to refresh subscription status from Stripe
-        await refreshFromStripe();
-        
-        // If still no valid subscription after refresh, proceed with checkout
-        if (!hasValidSubscription) {
-          console.log('No valid subscription found after refresh, proceeding with checkout...');
-        } else {
-          // If subscription found after refresh, redirect to customer portal
-          showToast('Subscription found! Redirecting to manage your subscription...', 'success');
-          setTimeout(async () => {
-            await openCustomerPortal();
-          }, 1500);
-          setLoadingPlan(null);
-          return;
-        }
-      } catch (error) {
-        console.log('Subscription refresh failed, proceeding with checkout...', error);
-        // If refresh fails, continue with checkout flow
-      }
-    }
+    // Only redirect to customer portal if user has a confirmed active subscription
+    // Be more strict about what constitutes an active subscription
+    const hasConfirmedActiveSubscription = hasActiveSubscription && 
+                                          subscriptionStatus && 
+                                          subscriptionStatus.isActive &&
+                                          subscriptionStatus.planType !== 'free';
     
-    // Immediate visual feedback if user has an active subscription
-    if (hasActiveSubscription) {
+    if (hasConfirmedActiveSubscription) {
       if (currentPlan === planType) {
         showToast(`You already have the ${planType.charAt(0).toUpperCase() + planType.slice(1)} plan! Redirecting to manage your subscription...`, 'warning');
       } else {
         showToast(`You already have an active subscription! Redirecting to manage your subscription...`, 'warning');
       }
-      console.log('User has active subscription, opening customer portal...');
+      console.log('User has confirmed active subscription, opening customer portal...');
       setLoadingPlan(planType);
       setTimeout(async () => {
         await openCustomerPortal();
@@ -220,21 +203,12 @@ export default function PricingPage() {
       return;
     }
 
-    // Additional check: if user has the same plan they're trying to select
-    if (currentPlan === planType) {
-      showToast(`You already have the ${planType.charAt(0).toUpperCase() + planType.slice(1)} plan! Redirecting to manage your subscription...`, 'warning');
-      console.log('User already has this plan, opening customer portal...');
-      setLoadingPlan(planType);
-      setTimeout(async () => {
-        await openCustomerPortal();
-        setLoadingPlan(null);
-      }, 1500);
-      return;
-    }
-
+    // If subscription data failed to load or is unclear, proceed with checkout
+    // The backend API will handle any subscription conflicts
     setLoadingPlan(planType);
     
     try {
+      console.log('Proceeding with checkout session creation...');
       await createCheckoutSession(planType);
     } catch (error: any) {
       console.error('Checkout error details:', error);
@@ -273,7 +247,15 @@ export default function PricingPage() {
     const planType = tier.name.toLowerCase() as 'pro' | 'premium';
     const isPaidPlan = tier.name === 'Pro' || tier.name === 'Premium';
     const isLoadingThisPlan = loadingPlan === planType;
-    const isCurrentPlan = hasActiveSubscription && currentPlan === planType;
+    
+    // More strict check for current plan - ensure we have a confirmed active paid subscription
+    const hasConfirmedActiveSubscription = hasActiveSubscription && 
+                                          subscriptionStatus && 
+                                          subscriptionStatus.isActive &&
+                                          subscriptionStatus.planType !== 'free' &&
+                                          currentPlan && 
+                                          currentPlan !== 'free';
+    const isCurrentPlan = hasConfirmedActiveSubscription && currentPlan === planType;
 
     if (tier.name === 'Free Trial') {
       return (
@@ -325,7 +307,7 @@ export default function PricingPage() {
     }
 
     // Show upgrade/change plan for users with different active subscriptions
-    if (hasActiveSubscription && !isCurrentPlan) {
+    if (hasConfirmedActiveSubscription && !isCurrentPlan) {
       const isUpgrade = (currentPlan === 'pro' && planType === 'premium');
       const isDowngrade = (currentPlan === 'premium' && planType === 'pro');
       
