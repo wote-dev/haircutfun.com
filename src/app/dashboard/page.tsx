@@ -59,6 +59,15 @@ function DashboardContent() {
   const planType = subscription?.plan_type || 'free';
   const isPremiumUser = subscription?.status === 'active' && planType !== 'free';
   
+  // Debug: Log subscription data
+  console.log('Dashboard subscription data:', {
+    subscription,
+    planType,
+    isPremiumUser,
+    status: subscription?.status,
+    user_id: user?.id
+  });
+  
   // Use correct plan limits based on subscription type, not database plan_limit
   const planLimits = {
     free: 1,

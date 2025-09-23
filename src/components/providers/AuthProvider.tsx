@@ -90,8 +90,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Fetch subscription using improved utility with retry logic
       console.log('AuthProvider: Fetching subscription with enhanced validation...');
-      const { getCachedSubscriptionStatus } = await import('../../lib/subscription-utils');
-      const subscriptionStatus = await getCachedSubscriptionStatus(userId);
+      const { getCachedSubscriptionStatus, clearSubscriptionCache } = await import('../../lib/subscription-utils');
+      
+      // Clear cache to ensure fresh data
+      clearSubscriptionCache(userId);
+      
+      const subscriptionStatus = await getCachedSubscriptionStatus(userId, true); // Force refresh
       
       console.log('AuthProvider: Enhanced subscription status:', subscriptionStatus);
       
@@ -136,6 +140,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshUserData = async () => {
     if (user) {
+      console.log('AuthProvider: Manually refreshing user data...');
+      // Clear subscription cache before refreshing
+      const { clearSubscriptionCache } = await import('../../lib/subscription-utils');
+      clearSubscriptionCache(user.id);
       await fetchUserData(user.id);
     }
   };
