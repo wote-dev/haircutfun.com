@@ -84,11 +84,18 @@
     background-color: rgba(255, 255, 255, 0.8);
   }
 
-  /* Simplify animations on mobile Safari */
-  .animate-pulse,
-  .animate-bounce,
-  .animate-spin {
+  /* Simplify animations on mobile Safari - but keep loading animations */
+  .animate-bounce {
     animation: none;
+  }
+  
+  /* Keep loading animations but make them more performant */
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   /* Force hardware acceleration on interactive elements */
