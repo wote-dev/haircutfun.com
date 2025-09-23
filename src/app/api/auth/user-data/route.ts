@@ -21,11 +21,12 @@ export async function GET() {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    // Fetch most recent subscription (no status filter to avoid edge cases)
+    // Fetch most recent subscription: prefer updated_at, then created_at
     const { data: subscription, error: subscriptionError } = await service
       .from('subscriptions')
       .select('*')
       .eq('user_id', user.id)
+      .order('updated_at', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();

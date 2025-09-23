@@ -1,5 +1,6 @@
 import { stripe, getStripePriceId, STRIPE_PRICE_IDS, PlanType } from './client';
 import { createClient } from '../supabase/server';
+import { createServiceClient } from '../supabase/service-client';
 import { Database } from '../types/database';
 import Stripe from 'stripe';
 
@@ -44,12 +45,13 @@ export async function createCheckoutSession({
   cancelUrl: string;
 }) {
   const supabase = await createClient();
+  const service = createServiceClient();
   
   // Get or create customer
   let customerId: string;
   
   // Check if user already has a subscription record with customer ID
-  const { data: existingSubscription } = await supabase
+  const { data: existingSubscription } = await service
     .from('subscriptions')
     .select('stripe_customer_id')
     .eq('user_id', userId)
@@ -58,7 +60,7 @@ export async function createCheckoutSession({
   if (existingSubscription?.stripe_customer_id) {
     customerId = existingSubscription.stripe_customer_id;
   } else {
-    // Get user email from auth
+    // Get user email from auth (cookie-based client)
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.email) {
       throw new Error('User email not found');
@@ -72,8 +74,8 @@ export async function createCheckoutSession({
     });
     customerId = customer.id;
 
-    // Update subscription record with customer ID
-    await supabase
+    // Update subscription record with customer ID (service role)
+    await service
       .from('subscriptions')
       .update({ stripe_customer_id: customerId })
       .eq('user_id', userId);
@@ -150,7 +152,7 @@ export async function updateSubscriptionFromStripe({
   customerId: string;
   planTypeOverride?: PlanType;
 }) {
-  const supabase = await createClient();
+  const service = createServiceClient();
   
   const priceId = stripeSubscription.items.data[0]?.price?.id as string | undefined;
   if (!priceId) {
@@ -169,7 +171,7 @@ export async function updateSubscriptionFromStripe({
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase
+  const { error } = await service
     .from('subscriptions')
     .update(subscriptionUpdate)
     .eq('user_id', userId);
@@ -220,7 +222,7 @@ async function determinePlanType(priceId: string, override?: PlanType): Promise<
  * Update usage limits based on plan type
  */
 export async function updateUsageLimits(userId: string, planType: PlanType) {
-  const supabase = await createClient();
+  const service = createServiceClient();
   
   const limits = {
     free: 1,
@@ -230,7 +232,7 @@ export async function updateUsageLimits(userId: string, planType: PlanType) {
 
   const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
   
-  const { error } = await supabase
+  const { error } = await service
     .from('usage_tracking')
     .upsert({
       user_id: userId,

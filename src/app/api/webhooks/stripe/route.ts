@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { verifyWebhookSignature, updateSubscriptionFromStripe } from '../../../../lib/stripe/service';
-import { createClient } from '../../../../lib/supabase/server';
+import { createServiceClient } from '../../../../lib/supabase/service-client';
 import { stripe } from '../../../../lib/stripe/client';
 import Stripe from 'stripe';
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object;
+        const session = event.data.object as Stripe.Checkout.Session;
         const customerId = session.customer as string;
         const userId = session.metadata?.userId;
         
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
              currentPeriodEnd: (subscription as any).current_period_end
            });
           
-          const supabase = await createClient();
+          const service = createServiceClient();
           await updateSubscriptionFromStripe({
             userId,
             stripeSubscription: subscription,
@@ -66,21 +66,26 @@ export async function POST(request: NextRequest) {
           console.log('✅ Subscription created/updated for user:', userId, 'with plan:', session.metadata?.planType);
           
           // Verify the subscription was saved correctly
-          const { data: savedSubscription, error } = await supabase
+          const { data: savedSubscription, error } = await service
             .from('subscriptions')
             .select('*')
             .eq('user_id', userId)
-            .single();
+            .order('updated_at', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
             
           if (error) {
             console.error('❌ Error verifying saved subscription:', error);
-          } else {
+          } else if (savedSubscription) {
             console.log('✅ Verified saved subscription:', {
               userId: savedSubscription.user_id,
               status: savedSubscription.status,
               planType: savedSubscription.plan_type,
               stripeSubscriptionId: savedSubscription.stripe_subscription_id
             });
+          } else {
+            console.warn('⚠️ No subscription row found after update');
           }
         } else {
           console.error('❌ No subscription found in completed session');
@@ -93,9 +98,9 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
         
-        // Find user by customer ID
-        const supabase = await createClient();
-        const { data: userSubscription } = await supabase
+        // Find user by customer ID (service client to bypass RLS)
+        const service = createServiceClient();
+        const { data: userSubscription } = await service
           .from('subscriptions')
           .select('user_id')
           .eq('stripe_customer_id', customerId)
@@ -120,12 +125,12 @@ export async function POST(request: NextRequest) {
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object;
+        const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
         
         // Find user by customer ID
-        const supabase = await createClient();
-        const { data: userSubscription } = await supabase
+        const service = createServiceClient();
+        const { data: userSubscription } = await service
           .from('subscriptions')
           .select('user_id')
           .eq('stripe_customer_id', customerId)
@@ -140,7 +145,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Update subscription to canceled and downgrade to free
-        await supabase
+        await service
           .from('subscriptions')
           .update({
             status: 'canceled',
@@ -151,7 +156,7 @@ export async function POST(request: NextRequest) {
 
         // Update usage limits to free tier
         const currentMonth = new Date().toISOString().slice(0, 7);
-        await supabase
+        await service
           .from('usage_tracking')
           .upsert({
             user_id: userSubscription.user_id,
@@ -167,19 +172,19 @@ export async function POST(request: NextRequest) {
       }
 
       case 'invoice.payment_succeeded': {
-        const invoice = event.data.object;
+        const invoice = event.data.object as Stripe.Invoice;
         console.log('Payment succeeded for invoice:', invoice.id);
         // Additional logic for successful payments if needed
         break;
       }
 
       case 'invoice.payment_failed': {
-        const invoice = event.data.object;
+        const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
         
         // Find user by customer ID
-        const supabase = await createClient();
-        const { data: userSubscription } = await supabase
+        const service = createServiceClient();
+        const { data: userSubscription } = await service
           .from('subscriptions')
           .select('user_id')
           .eq('stripe_customer_id', customerId)
@@ -187,7 +192,7 @@ export async function POST(request: NextRequest) {
 
         if (userSubscription) {
           // Update subscription status to past_due
-          await supabase
+          await service
             .from('subscriptions')
             .update({
               status: 'past_due',
