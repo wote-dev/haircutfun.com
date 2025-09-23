@@ -83,6 +83,17 @@ export async function createCheckoutSession({
 
   const priceId = getStripePriceId(planType);
 
+  // Validate that the price exists in the current Stripe mode (test vs live)
+  try {
+    await stripe.prices.retrieve(priceId);
+  } catch (e: any) {
+    const isTestKey = !!process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_');
+    const mode = isTestKey ? 'TEST' : 'LIVE';
+    const underlying = e instanceof Error ? e.message : String(e);
+    const hint = `Your STRIPE_SECRET_KEY is ${mode} mode, but the price ${priceId} likely belongs to the other mode. Ensure STRIPE_PRO_PRICE_ID/STRIPE_PREMIUM_PRICE_ID and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY match the same mode as STRIPE_SECRET_KEY in Vercel for this deployment.`;
+    throw new Error(`Invalid Stripe price for current mode: ${priceId}. ${hint} Underlying: ${underlying}`);
+  }
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     payment_method_types: ['card'],
@@ -93,6 +104,12 @@ export async function createCheckoutSession({
       },
     ],
     mode: 'subscription',
+    // Ensure the resulting Subscription carries planType in its metadata for future updates
+    subscription_data: {
+      metadata: {
+        planType,
+      },
+    },
     success_url: successUrl,
     cancel_url: cancelUrl,
     metadata: {
@@ -159,13 +176,45 @@ export async function updateSubscriptionFromStripe({
     throw new Error('No price ID found in subscription');
   }
   
-  const planType = await determinePlanType(priceId, planTypeOverride);
+  // Prefer explicit override, then metadata embedded on the Subscription, then heuristics
+  const metadataOverride =
+    stripeSubscription.metadata?.planType === 'pro' || stripeSubscription.metadata?.planType === 'premium'
+      ? (stripeSubscription.metadata.planType as PlanType)
+      : undefined;
+
+  const computedPlan = await determinePlanType(priceId, planTypeOverride ?? metadataOverride);
+
+  // Load existing subscription to avoid accidental downgrades when inference fails
+  const { data: existingSub } = await service
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let effectivePlan: PlanType = computedPlan;
+  const stripeStatus = stripeSubscription.status as Subscription['status'];
+  const isStripeActiveish = ['active', 'trialing', 'past_due', 'incomplete'].includes(stripeStatus);
+  const wasPaid = existingSub?.plan_type === 'pro' || existingSub?.plan_type === 'premium';
+
+  if (computedPlan === 'free' && isStripeActiveish && wasPaid) {
+    // Preserve previously paid plan to prevent flicker/downgrade when we can't infer plan confidently
+    effectivePlan = existingSub!.plan_type as PlanType;
+    console.warn('updateSubscriptionFromStripe: Preserving existing paid plan due to ambiguous inference', {
+      userId,
+      preservedPlan: effectivePlan,
+      priceId,
+      stripeStatus,
+    });
+  }
   
   const subscriptionUpdate: SubscriptionUpdate = {
     stripe_customer_id: customerId,
     stripe_subscription_id: stripeSubscription.id,
-    status: stripeSubscription.status as 'active' | 'canceled' | 'incomplete' | 'past_due' | 'trialing',
-    plan_type: planType,
+    status: stripeStatus,
+    plan_type: effectivePlan,
     current_period_start: new Date((stripeSubscription as any).current_period_start * 1000).toISOString(),
     current_period_end: new Date((stripeSubscription as any).current_period_end * 1000).toISOString(),
     updated_at: new Date().toISOString(),
@@ -180,8 +229,8 @@ export async function updateSubscriptionFromStripe({
     throw new Error(`Failed to update subscription: ${error.message}`);
   }
 
-  // Update usage tracking with new plan limits
-  await updateUsageLimits(userId, planType);
+  // Update usage limits with new plan limits
+  await updateUsageLimits(userId, effectivePlan);
 }
 
 /**
