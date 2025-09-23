@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       .from('subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -110,25 +110,23 @@ export async function POST(request: NextRequest) {
       // Fetch latest data from Stripe
       const stripeSubscription = await getStripeSubscription(subscription.stripe_subscription_id);
       
-      // Update subscription in database with latest Stripe data
-      const updatedSubscription = {
-        status: stripeSubscription.status as 'active' | 'canceled' | 'past_due' | 'incomplete' | 'trialing',
-        current_period_start: new Date((stripeSubscription as any).current_period_start * 1000).toISOString(),
-        current_period_end: new Date((stripeSubscription as any).current_period_end * 1000).toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      // Update subscription in database with latest Stripe data, including plan_type
+      await updateSubscriptionFromStripe({
+        userId,
+        stripeSubscription,
+        customerId: subscription.stripe_customer_id || (stripeSubscription.customer as string),
+      });
 
       const { data: updated, error: updateError } = await supabase
         .from('subscriptions')
-        .update(updatedSubscription)
+        .select('*')
         .eq('id', subscription.id)
-        .select()
         .single();
 
       if (updateError) {
-        console.error('Error updating subscription:', updateError);
+        console.error('Error verifying updated subscription:', updateError);
         return NextResponse.json(
-          { error: 'Failed to update subscription' },
+          { error: 'Failed to verify updated subscription' },
           { status: 500 }
         );
       }

@@ -143,19 +143,21 @@ export async function updateSubscriptionFromStripe({
   userId,
   stripeSubscription,
   customerId,
+  planTypeOverride,
 }: {
   userId: string;
   stripeSubscription: Stripe.Subscription;
   customerId: string;
+  planTypeOverride?: PlanType;
 }) {
   const supabase = await createClient();
   
-  const priceId = stripeSubscription.items.data[0]?.price?.id;
+  const priceId = stripeSubscription.items.data[0]?.price?.id as string | undefined;
   if (!priceId) {
     throw new Error('No price ID found in subscription');
   }
   
-  const planType = getPlanTypeFromPriceId(priceId);
+  const planType = await determinePlanType(priceId, planTypeOverride);
   
   const subscriptionUpdate: SubscriptionUpdate = {
     stripe_customer_id: customerId,
@@ -178,6 +180,40 @@ export async function updateSubscriptionFromStripe({
 
   // Update usage tracking with new plan limits
   await updateUsageLimits(userId, planType);
+}
+
+/**
+ * Resolve plan type using multiple strategies for robustness across live/test environments
+ */
+async function determinePlanType(priceId: string, override?: PlanType): Promise<PlanType> {
+  // 1) Trust explicit override (e.g., from Checkout Session metadata)
+  if (override === 'pro' || override === 'premium') return override;
+
+  // 2) Match environment-configured price IDs
+  if (priceId === STRIPE_PRICE_IDS.pro) return 'pro';
+  if (priceId === STRIPE_PRICE_IDS.premium) return 'premium';
+
+  // 3) Try to infer from Price object (lookup_key, nickname)
+  try {
+    const price = await stripe.prices.retrieve(priceId);
+    const keyish = `${price.lookup_key || ''} ${price.nickname || ''}`.toLowerCase();
+    if (keyish.includes('premium')) return 'premium';
+    if (keyish.includes('pro')) return 'pro';
+
+    // 4) Try to infer from Product name/metadata
+    const productId = typeof price.product === 'string' ? price.product : price.product?.id;
+    if (productId) {
+      const product = await stripe.products.retrieve(productId);
+      const nameish = `${product.name || ''} ${JSON.stringify(product.metadata || {})}`.toLowerCase();
+      if (nameish.includes('premium')) return 'premium';
+      if (nameish.includes('pro')) return 'pro';
+    }
+  } catch (e) {
+    // Swallow and fallback to free
+  }
+
+  // 5) Default fallback
+  return 'free';
 }
 
 /**

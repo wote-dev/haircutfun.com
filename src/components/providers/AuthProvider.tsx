@@ -138,6 +138,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setProfile(json.profile ?? null);
         setSubscription(json.subscription ?? null);
         setUsage(json.usage ?? null);
+
+        // If we got active status but planType appears as free, proactively refresh from Stripe
+        try {
+          const planType = (json.subscription?.plan_type as string) || 'free';
+          const status = (json.subscription?.status as string) || 'canceled';
+          if (status === 'active' && planType === 'free' && userId) {
+            console.log('AuthProvider: Detected active subscription with free planType. Triggering refresh...');
+            const refreshRes = await fetch('/api/subscription/refresh', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId }),
+            });
+            if (refreshRes.ok) {
+              const refreshJson = await refreshRes.json();
+              console.log('AuthProvider: Refresh result:', refreshJson);
+              // Re-fetch aggregated data to update UI with corrected plan_type
+              const aggRes = await fetch('/api/auth/user-data', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+              });
+              if (aggRes.ok) {
+                const aggJson = await aggRes.json();
+                console.log('AuthProvider: Aggregated data after refresh received');
+                setProfile(aggJson.profile ?? null);
+                setSubscription(aggJson.subscription ?? null);
+                setUsage(aggJson.usage ?? null);
+              } else {
+                console.warn('AuthProvider: Failed to re-fetch aggregated data after refresh');
+              }
+            } else {
+              console.warn('AuthProvider: Refresh endpoint returned non-OK status');
+            }
+          }
+        } catch (e) {
+          console.warn('AuthProvider: Subscription refresh attempt failed:', e);
+        }
       }
 
       console.log('AuthProvider: fetchUserData completed successfully');

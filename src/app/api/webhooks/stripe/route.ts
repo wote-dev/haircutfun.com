@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
             userId,
             stripeSubscription: subscription,
             customerId,
+            planTypeOverride: (session.metadata?.planType === 'pro' || session.metadata?.planType === 'premium') ? session.metadata?.planType : undefined,
           });
 
           console.log('✅ Subscription created/updated for user:', userId, 'with plan:', session.metadata?.planType);
