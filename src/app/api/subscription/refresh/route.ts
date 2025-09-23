@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (subscriptionError) {
-      console.error('Error fetching subscription:', subscriptionError);
+      console.error('Refresh: Error fetching subscription:', subscriptionError);
       return NextResponse.json(
         { error: 'Failed to fetch subscription' },
         { status: 500 }
@@ -55,13 +55,16 @@ export async function POST(request: NextRequest) {
     // recover it by looking up the latest subscription for this customer in Stripe
     if (!subscription.stripe_subscription_id && subscription.stripe_customer_id) {
       try {
+        console.log('Refresh: Attempting recovery by stored customer ID', {
+          customerId: subscription.stripe_customer_id,
+        });
         const list = await stripe.subscriptions.list({
           customer: subscription.stripe_customer_id,
           status: 'all',
-          limit: 1,
+          limit: 10,
         });
 
-        const latest = list.data[0];
+        const latest = list.data?.[0];
         if (latest) {
           await updateSubscriptionFromStripe({
             userId,
@@ -76,17 +79,58 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (verifyError) {
-            console.error('Error verifying updated subscription after recovery:', verifyError);
+            console.error('Refresh: Error verifying updated subscription after recovery:', verifyError);
           }
 
           return NextResponse.json({
             success: true,
             subscription: updated || subscription,
-            message: 'Subscription recovered from Stripe by customer ID',
+            message: 'Subscription recovered from Stripe by stored customer ID',
           });
         }
+
+        console.warn('Refresh: No subscriptions returned for stored customer ID. Falling back to search by email...');
+
+        // Fallback: search Stripe customers by email and scan their subscriptions
+        if (user.email) {
+          const customers = await stripe.customers.list({ email: user.email, limit: 10 });
+          for (const c of customers.data) {
+            try {
+              const subList = await stripe.subscriptions.list({ customer: c.id, status: 'all', limit: 10 });
+              if (subList.data && subList.data.length > 0) {
+                const found = subList.data[0];
+                console.log('Refresh: Found subscription via email-based customer search', { customerId: c.id, subscriptionId: found.id });
+                await updateSubscriptionFromStripe({
+                  userId,
+                  stripeSubscription: found,
+                  customerId: c.id,
+                });
+
+                const { data: updated, error: verifyError2 } = await supabase
+                  .from('subscriptions')
+                  .select('*')
+                  .eq('user_id', userId)
+                  .single();
+
+                if (verifyError2) {
+                  console.error('Refresh: Error verifying updated subscription after email search:', verifyError2);
+                }
+
+                return NextResponse.json({
+                  success: true,
+                  subscription: updated || subscription,
+                  message: 'Subscription recovered via email-based customer search',
+                });
+              }
+            } catch (inner) {
+              console.warn('Refresh: Failed listing subscriptions for candidate customer', { candidateCustomerId: c.id, error: (inner as Error).message });
+            }
+          }
+        } else {
+          console.warn('Refresh: Cannot search by email because user has no email');
+        }
       } catch (e) {
-        console.error('Error recovering subscription by customer ID:', e);
+        console.error('Refresh: Error during recovery by customer ID:', e);
         // fall through to default no-subscription-to-refresh response
       }
 
@@ -124,7 +168,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (updateError) {
-        console.error('Error verifying updated subscription:', updateError);
+        console.error('Refresh: Error verifying updated subscription:', updateError);
         return NextResponse.json(
           { error: 'Failed to verify updated subscription' },
           { status: 500 }
@@ -138,7 +182,7 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (stripeError) {
-      console.error('Error fetching from Stripe:', stripeError);
+      console.error('Refresh: Error fetching from Stripe:', stripeError);
       
       // If Stripe subscription doesn't exist, mark as canceled
       if (stripeError instanceof Error && stripeError.message.includes('No such subscription')) {
@@ -153,7 +197,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (updateError) {
-          console.error('Error updating canceled subscription:', updateError);
+          console.error('Refresh: Error updating canceled subscription:', updateError);
         }
 
         return NextResponse.json({
