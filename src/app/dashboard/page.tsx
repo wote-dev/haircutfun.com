@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ThreeDotLoader } from '@/components/ui/three-dot-loader';
 
 // Component that handles search params
 function DashboardContent() {
@@ -44,7 +45,7 @@ function DashboardContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <ThreeDotLoader size="lg" className="mb-4" />
           <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
@@ -70,7 +71,7 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-28 pb-8">
         {/* Success Message */}
         {showSuccess && (
           <Card className="mb-6 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
@@ -364,7 +365,7 @@ export default function DashboardPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <ThreeDotLoader size="lg" className="mb-4" />
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>

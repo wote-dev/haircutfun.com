@@ -139,20 +139,66 @@
       background-position: 0% 0%;
     }
   }
-  @keyframes border-beam {
+
+  /* Essential loading animations - ensure they work across all browsers */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
     100% {
-      offset-distance: 100%;
+      transform: rotate(360deg);
     }
   }
-  @keyframes shine-pulse {
-    0% {
-      background-position: 0% 0%;
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
     }
     50% {
-      background-position: 100% 100%;
+      opacity: 0.5;
     }
-    to {
-      background-position: 0% 0%;
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(-25%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+
+  /* Enhanced loading spinner animation */
+  @keyframes loading-spinner {
+    0% {
+      transform: rotate(0deg);
+      border-color: var(--primary) transparent transparent transparent;
+    }
+    25% {
+      border-color: transparent var(--primary) transparent transparent;
+    }
+    50% {
+      transform: rotate(180deg);
+      border-color: transparent transparent var(--primary) transparent;
+    }
+    75% {
+      border-color: transparent transparent transparent var(--primary);
+    }
+    100% {
+      transform: rotate(360deg);
+      border-color: var(--primary) transparent transparent transparent;
+    }
+  }
+
+  /* Progress bar animation */
+  @keyframes progress-indeterminate {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
     }
   }
 }

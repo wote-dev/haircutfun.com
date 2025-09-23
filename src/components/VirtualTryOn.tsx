@@ -305,18 +305,18 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       <div className="max-w-4xl mx-auto">
         <div className="text-center">
           <div className="bg-background border rounded-2xl p-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-6"></div>
-            <h3 className="text-2xl font-bold text-foreground mb-4">
-              Creating Your Virtual Makeover
-            </h3>
-            <p className="text-lg text-muted-foreground mb-6">
-              Our AI is applying the {selectedStyle?.name} to your photo...
-            </p>
-            <div className="w-full bg-muted rounded-full h-2 mb-4">
-              <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
+            {/* Simple Three Dot Loader */}
+            <div className="flex justify-center items-center space-x-2 mb-6">
+              <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
+              <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              This may take 10-30 seconds for the best results
+            
+            <h3 className="text-2xl font-bold text-foreground mb-4">
+              Processing your image...
+            </h3>
+            <p className="text-lg text-muted-foreground">
+              This may take a few moments
             </p>
           </div>
         </div>
