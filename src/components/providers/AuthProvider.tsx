@@ -71,69 +71,78 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       console.log('AuthProvider: Fetching user data for:', userId);
       const supabase = getSupabase();
-      
-      // Fetch user profile (might not exist for new users)
-      console.log('AuthProvider: Fetching user profile...');
-      const profilePromise = supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-      
-      const { data: profileData, error: profileError } = await Promise.race([profilePromise, timeoutPromise]) as any;
-      
-      console.log('AuthProvider: Profile fetch result:', { profileData, profileError });
-      
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('AuthProvider: Error fetching profile:', profileError);
+
+      // Prefer server-side aggregated endpoint to avoid client-side timeouts and RLS issues
+      console.log('AuthProvider: Fetching aggregated user data via /api/auth/user-data');
+      const aggregatedFetch = fetch('/api/auth/user-data', { cache: 'no-store' });
+      const response = await Promise.race([aggregatedFetch, timeoutPromise]) as Response;
+
+      if (!response.ok) {
+        console.warn('AuthProvider: Aggregated endpoint failed, falling back to direct client queries');
+        // Fallback to existing client-side queries
+        // Fetch user profile (might not exist for new users)
+        console.log('AuthProvider: Fetching user profile...');
+        const profilePromise = supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        const { data: profileData, error: profileError } = await Promise.race([profilePromise, timeoutPromise]) as any;
+        console.log('AuthProvider: Profile fetch result:', { profileData, profileError });
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('AuthProvider: Error fetching profile:', profileError);
+        }
+
+        // Fetch subscription with simpler approach to avoid timeout
+        console.log('AuthProvider: Fetching subscription directly...');
+        const subscriptionPromise = supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const { data: subscriptionData, error: subscriptionError } = await Promise.race([subscriptionPromise, timeoutPromise]) as any;
+        console.log('AuthProvider: Subscription fetch result:', { subscriptionData, subscriptionError });
+        if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+          console.error('AuthProvider: Error fetching subscription:', subscriptionError);
+        }
+
+        // Fetch current month usage (might not exist for new users)
+        console.log('AuthProvider: Fetching usage data...');
+        const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+        console.log('AuthProvider: Current month:', currentMonth);
+        const usagePromise = supabase
+          .from('usage_tracking')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('month_year', currentMonth)
+          .maybeSingle();
+
+        const { data: usageData, error: usageError } = await Promise.race([usagePromise, timeoutPromise]) as any;
+        console.log('AuthProvider: Usage fetch result:', { usageData, usageError });
+        if (usageError && usageError.code !== 'PGRST116') {
+          console.error('AuthProvider: Error fetching usage:', usageError);
+        }
+
+        console.log('AuthProvider: Setting state with fetched data (fallback path)...');
+        setProfile(profileData || null);
+        setSubscription(subscriptionData || null);
+        setUsage(usageData || null);
+      } else {
+        const json = await response.json();
+        console.log('AuthProvider: Aggregated user data received');
+        setProfile(json.profile ?? null);
+        setSubscription(json.subscription ?? null);
+        setUsage(json.usage ?? null);
       }
-      
-      // Fetch subscription with simpler approach to avoid timeout
-      console.log('AuthProvider: Fetching subscription directly...');
-      const subscriptionPromise = supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      const { data: subscriptionData, error: subscriptionError } = await Promise.race([subscriptionPromise, timeoutPromise]) as any;
-      
-      console.log('AuthProvider: Subscription fetch result:', { subscriptionData, subscriptionError });
-      
-      if (subscriptionError && subscriptionError.code !== 'PGRST116') {
-        console.error('AuthProvider: Error fetching subscription:', subscriptionError);
-      }
-      
-      // Fetch current month usage (might not exist for new users)
-      console.log('AuthProvider: Fetching usage data...');
-      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
-      console.log('AuthProvider: Current month:', currentMonth);
-      const usagePromise = supabase
-        .from('usage_tracking')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('month_year', currentMonth)
-        .maybeSingle();
-      
-      const { data: usageData, error: usageError } = await Promise.race([usagePromise, timeoutPromise]) as any;
-      
-      console.log('AuthProvider: Usage fetch result:', { usageData, usageError });
-      
-      if (usageError && usageError.code !== 'PGRST116') {
-        console.error('AuthProvider: Error fetching usage:', usageError);
-      }
-      
-      console.log('AuthProvider: Setting state with fetched data...');
-      setProfile(profileData || null);
-      setSubscription(subscriptionData || null);
-      setUsage(usageData || null);
+
       console.log('AuthProvider: fetchUserData completed successfully');
     } catch (error) {
       console.error('AuthProvider: Error fetching user data:', error);
-      // Set loading to false even on error to prevent infinite loading
       console.log('AuthProvider: Setting default values due to error');
       setProfile(null);
       setSubscription(null);
