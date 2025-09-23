@@ -5,7 +5,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 
 export default function TestSubscriptionPage() {
-  const { user } = useAuth();
+  const { user, refreshUserData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string>('');
 
@@ -21,62 +21,34 @@ export default function TestSubscriptionPage() {
     try {
       const supabase = createClient();
       
-      // Create or update subscription
-      const subscriptionData = {
-        user_id: user.id,
-        stripe_customer_id: 'test_customer_' + Date.now(),
-        stripe_subscription_id: 'test_sub_' + Date.now(),
-        status: 'active' as const,
-        plan_type: planType,
-        current_period_start: new Date().toISOString(),
-        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      console.log('Using new database function to update subscription...');
 
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .upsert(subscriptionData, {
-          onConflict: 'user_id'
-        })
-        .select()
-        .single();
+      // Use the new database function to safely update subscription
+      const { data, error } = await supabase.rpc('update_subscription_plan', {
+        p_user_id: user.id,
+        p_plan_type: planType,
+        p_stripe_customer_id: 'test_customer_' + Date.now(),
+        p_stripe_subscription_id: 'test_sub_' + Date.now(),
+        p_status: 'active'
+      });
+        
+      console.log('Database function result:', { data, error });
 
       if (error) {
         setResult(`❌ Error creating subscription: ${error.message}`);
         return;
       }
 
-      // Update usage limits
-      const limits = {
-        pro: 25,
-        premium: 75,
-      };
-
-      const currentMonth = new Date().toISOString().slice(0, 7);
+      setResult(`✅ Test ${planType} subscription created successfully!\n\nSubscription ID: ${data.id}\nStatus: ${data.status}\nPlan: ${data.plan_type}\n\nRefreshing subscription data...`);
       
-      const { error: usageError } = await supabase
-        .from('usage_tracking')
-        .upsert({
-          user_id: user.id,
-          month_year: currentMonth,
-          plan_limit: limits[planType],
-          generations_used: 0,
-        }, {
-          onConflict: 'user_id,month_year'
-        });
-
-      if (usageError) {
-        setResult(`⚠️ Subscription created but usage update failed: ${usageError.message}`);
-        return;
-      }
-
-      setResult(`✅ Test ${planType} subscription created successfully!\n\nSubscription ID: ${data.id}\nStatus: ${data.status}\nPlan: ${data.plan_type}\n\nNow try using the haircut generator to test if pro features are unlocked.`);
+      // Clear subscription cache and refresh AuthProvider data
+      const { clearSubscriptionCache } = await import('@/lib/subscription-utils');
+      clearSubscriptionCache(user.id);
       
-      // Refresh the page after 3 seconds to update auth context
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      // Refresh AuthProvider subscription data using the built-in method
+      await refreshUserData();
+      
+      setResult(`✅ Test ${planType} subscription created successfully!\n\nSubscription ID: ${data.id}\nStatus: ${data.status}\nPlan: ${data.plan_type}\n\nSubscription data refreshed! Check the dashboard to see your updated plan.`);
 
     } catch (error) {
       setResult(`❌ Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);

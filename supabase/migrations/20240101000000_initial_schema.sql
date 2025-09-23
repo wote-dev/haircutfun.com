@@ -1,5 +1,4 @@
--- Enable Row Level Security
-ALTER TABLE auth.users ENABLE ROW LEVEL SECURITY;
+-- Enable Row Level Security (auth.users RLS is managed by Supabase)
 
 -- Create user_profiles table
 CREATE TABLE IF NOT EXISTS public.user_profiles (
