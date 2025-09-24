@@ -137,20 +137,24 @@ export function UserGallery() {
                 {selectedImage.original_image_url && (
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Original</h4>
-                    <img
-                      src={selectedImage.original_image_url}
-                      alt="Original"
-                      className="w-full rounded-lg"
-                    />
+                    <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden">
+                      <img
+                        src={selectedImage.original_image_url}
+                        alt="Original"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
                   </div>
                 )}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Generated</h4>
-                  <img
-                    src={selectedImage.image_url}
-                    alt="Generated hairstyle"
-                    className="w-full rounded-lg"
-                  />
+                  <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden">
+                    <img
+                      src={selectedImage.image_url}
+                      alt="Generated hairstyle"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

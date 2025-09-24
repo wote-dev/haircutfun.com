@@ -460,15 +460,15 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
             </button>
           </div>
           
-          <div className="relative bg-muted rounded-2xl overflow-hidden aspect-square">
+          <div className="relative bg-muted rounded-2xl overflow-hidden min-h-[400px] max-h-[600px]">
             {showComparison ? (
-              <div className="grid grid-cols-2 h-full">
+              <div className="grid grid-cols-2 h-full min-h-[400px]">
                 <div className="relative">
                   <Image
                     src={userPhoto}
                     alt="Before"
                     fill
-                    className="object-cover"
+                    className="object-contain"
                   />
                   <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
                     Before
@@ -480,7 +480,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
                       src={generatedImage}
                       alt="After - with new haircut"
                       fill
-                      className="object-cover"
+                      className="object-contain"
                     />
                   ) : (
                     <div className="bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center h-full p-4">
@@ -503,13 +503,13 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
                 </div>
               </div>
             ) : (
-              <div className="relative h-full">
+              <div className="relative h-full min-h-[400px]">
                 {generatedImage ? (
                   <Image
                     src={generatedImage}
                     alt={`Your new ${selectedStyle?.name} hairstyle`}
                     fill
-                    className="object-cover rounded-2xl"
+                    className="object-contain rounded-2xl"
                   />
                 ) : (
                     <div className="bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center h-full rounded-2xl p-6">
