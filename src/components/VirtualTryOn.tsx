@@ -301,13 +301,25 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
     setIsSaved(true);
     
     try {
+      // Import compression utilities dynamically to avoid SSR issues
+      const { compressToTargetSize, getBase64Size, formatBytes } = await import('@/lib/imageUtils');
+      
+      // Check original size
+      const originalSize = getBase64Size(generatedImage);
+      console.log(`Original image size: ${formatBytes(originalSize)}`);
+      
+      // Compress image to under 500KB to ensure it fits in request body
+      const compressedImage = await compressToTargetSize(generatedImage, 500 * 1024);
+      const compressedSize = getBase64Size(compressedImage);
+      console.log(`Compressed image size: ${formatBytes(compressedSize)}`);
+      
       const response = await fetch('/api/save-generated-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          imageData: generatedImage,
+          imageData: compressedImage,
           originalImageUrl: userPhoto,
           haircutStyle: selectedHaircut,
           gender: selectedStyle?.gender || null,
@@ -315,18 +327,32 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data?.error || 'Failed to save image');
+        // Handle different error types
+        if (response.status === 413) {
+          throw new Error('Image is too large. Please try again with a smaller image.');
+        }
+        
+        let errorMessage = 'Failed to save image';
+        try {
+          const data = await response.json();
+          errorMessage = data?.error || errorMessage;
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = `Server error (${response.status}): ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
+      const data = await response.json();
       console.log('Image saved successfully:', data);
       // Keep the saved state permanently after successful save
     } catch (error) {
       console.error('Error saving image:', error);
       setIsSaved(false);
-      alert('Failed to save image. Please try again.');
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save image. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -516,18 +542,18 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-bold text-foreground mb-2">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+        <div className="text-center lg:text-left">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
             Your Virtual Makeover
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base sm:text-lg text-muted-foreground">
             Here's how you look with the {selectedStyle?.name}
           </p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
           {!hasProAccess && (
-            <div className="bg-muted/50 px-3 py-2 rounded-lg">
+            <div className="bg-muted/50 px-3 py-2 rounded-lg w-full sm:w-auto text-center">
               <p className="text-sm text-muted-foreground">
                 {freeTriesUsed === 0 ? (
                   <span className="text-primary font-medium">1 free try available</span>
@@ -539,7 +565,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
           )}
           <button
             onClick={onBack}
-            className="flex items-center px-4 py-2 text-muted-foreground hover:text-foreground hover:scale-105 transition-all duration-300"
+            className="flex items-center justify-center px-4 py-2 text-muted-foreground hover:text-foreground hover:scale-105 transition-all duration-300 w-full sm:w-auto"
           >
             <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -773,28 +799,6 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
                 </div>
                 <h5 className="font-medium text-foreground mb-1">{style.name}</h5>
                 <p className="text-xs text-muted-foreground">{style.category}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      {/* Recommendations */}
-      <div className="bg-muted/30 rounded-2xl p-8">
-        <h4 className="text-xl font-semibold text-foreground mb-4">
-          You Might Also Like
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {['bob-classic', 'long-layers', 'shag-modern'].filter(id => id !== selectedHaircut).slice(0, 3).map((styleId) => {
-            const style = haircutData[styleId];
-            return (
-              <div key={styleId} className="bg-background border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg mb-3 flex items-center justify-center">
-                  <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <h5 className="font-medium text-foreground text-sm">{style?.name}</h5>
-                <p className="text-xs text-muted-foreground">{style?.category}</p>
               </div>
             );
           })}

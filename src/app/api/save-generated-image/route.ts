@@ -4,7 +4,27 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { imageData, originalImageUrl, haircutStyle, gender, promptUsed } = await request.json();
+    // Parse request body with better error handling
+    let requestData;
+    try {
+      requestData = await request.json();
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
+    const { imageData, originalImageUrl, haircutStyle, gender, promptUsed } = requestData;
+
+    // Validate required fields
+    if (!imageData || !haircutStyle) {
+      return NextResponse.json(
+        { error: 'Missing required fields: imageData and haircutStyle are required' },
+        { status: 400 }
+      );
+    }
 
     // Get the authenticated user
     const supabase = await createClient();
@@ -55,6 +75,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error saving generated image:', error);
+    
+    // Handle specific error types
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { error: 'Invalid request format', details: 'Request body must be valid JSON' },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

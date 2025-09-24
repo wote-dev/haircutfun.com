@@ -382,22 +382,22 @@ function TryOnPageContent() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                   <Button
                     variant="outline"
                     onClick={() => preSelectedHaircut ? setCurrentStep('upload') : setCurrentStep('hairstyle')}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 w-full sm:w-auto justify-center"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     {preSelectedHaircut ? 'Upload Different Photo' : 'Back to Hairstyles'}
                   </Button>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 items-center">
                     {!preSelectedHaircut && (
-                      <Badge variant="secondary" className="px-3 py-1">
+                      <Badge variant="secondary" className="px-3 py-1 w-full sm:w-auto text-center">
                         Step 4 of 4
                       </Badge>
                     )}
-                    <Badge variant="default" className="px-3 py-1">
+                    <Badge variant="default" className="px-3 py-1 w-full sm:w-auto text-center">
                       Complete!
                     </Badge>
                   </div>

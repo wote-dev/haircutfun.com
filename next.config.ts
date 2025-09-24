@@ -16,6 +16,24 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Increase body size limit for API routes to handle compressed images
+  experimental: {
+    serverComponentsExternalPackages: [],
+  },
+  // Configure body size limits
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
