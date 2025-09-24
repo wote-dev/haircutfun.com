@@ -57,65 +57,71 @@ export function Navigation() {
             WebkitBackdropFilter: 'blur(16px)'
           } : {}}>
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-20 py-2">
-            {/* Logo */}
-            <Link href="/" className="flex items-center group">
-              <div className="relative flex items-center justify-center py-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300" />
-                <Image
-                  src="/package.png"
-                  alt="HaircutFun Logo"
-                  width={120}
-                  height={40}
-                  className="relative object-contain w-auto h-auto"
-                  priority
-                />
-              </div>
-            </Link>
+          <div className="flex items-center h-20 py-2">
+            {/* Left side - Logo */}
+            <div className="flex-1 flex justify-start">
+              <Link href="/" className="flex items-center group">
+                <div className="relative flex items-center justify-center py-1">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300" />
+                  <Image
+                    src="/package.png"
+                    alt="HaircutFun Logo"
+                    width={120}
+                    height={40}
+                    className="relative object-contain w-auto h-auto"
+                    priority
+                  />
+                </div>
+              </Link>
+            </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <button
-                    key={item.name}
-                    onClick={() => navigateWithLoading(item.href)}
-                    className={`
-                      relative px-4 py-2 rounded-lg text-sm font-medium cursor-pointer
-                      ${isActive 
-                        ? 'text-primary' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors'
-                      }
-                    `}
-                  >
-                    {item.name}
-                    {isActive && (
-                      <div className="absolute inset-0 bg-primary/10 rounded-lg border border-primary/20" />
-                    )}
-                  </button>
-                );
-              })}
+            {/* Center - Desktop Navigation */}
+            <div className="hidden lg:flex items-center justify-center flex-1">
+              <div className="flex items-center space-x-1">
+                {navigation.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => navigateWithLoading(item.href)}
+                      className={`
+                        relative px-4 py-2 rounded-lg text-sm font-medium cursor-pointer
+                        ${isActive 
+                          ? 'text-primary' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors'
+                        }
+                      `}
+                    >
+                      {item.name}
+                      {isActive && (
+                        <div className="absolute inset-0 bg-primary/10 rounded-lg border border-primary/20" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Right side - Auth & CTA */}
-            <div className="hidden lg:flex items-center space-x-4">
-              <UserProfile />
-              {!user && (
-                <SignInButton 
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-foreground"
+            <div className="flex-1 flex justify-end">
+              <div className="hidden lg:flex items-center space-x-4">
+                <UserProfile />
+                {!user && (
+                  <SignInButton 
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Login
+                  </SignInButton>
+                )}
+                <Button 
+                  onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
-                  Login
-                </SignInButton>
-              )}
-              <Button 
-                onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Get Started
-              </Button>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Get Started
+                </Button>
+              </div>
             </div>
 
             {/* Mobile menu button */}
