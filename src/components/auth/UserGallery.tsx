@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../providers/AuthProvider';
 import { createClient } from '../../lib/supabase/client';
 import { Button } from '@/components/ui/button';
+import { getHaircutDisplayName } from '@/data/haircutStyles';
 
 interface GeneratedImage {
   id: string;
@@ -99,7 +100,7 @@ export function UserGallery() {
             >
               <img
                 src={image.image_url}
-                alt={`${image.haircut_style} hairstyle`}
+                alt={`${getHaircutDisplayName(image.haircut_style)} hairstyle`}
                 className="w-full h-full object-cover"
               />
             </button>
@@ -119,7 +120,7 @@ export function UserGallery() {
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <div>
-                <h3 className="font-medium text-gray-900">{selectedImage.haircut_style}</h3>
+                <h3 className="font-medium text-gray-900">{getHaircutDisplayName(selectedImage.haircut_style)}</h3>
                 <p className="text-sm text-gray-500">{formatDate(selectedImage.created_at)}</p>
               </div>
               <button

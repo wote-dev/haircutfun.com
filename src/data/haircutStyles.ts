@@ -257,3 +257,11 @@ export const getCategoriesByGender = (gender: 'male' | 'female'): string[] => {
   const categories = ['All', ...new Set(haircuts.map(h => h.category))];
   return categories;
 };
+
+// Utility function to get the display name for a haircut ID
+export const getHaircutDisplayName = (haircutId: string): string => {
+  // Search in both male and female haircuts
+  const allHaircuts = [...trendingHaircuts.male, ...trendingHaircuts.female];
+  const haircut = allHaircuts.find(style => style.id === haircutId);
+  return haircut ? haircut.name : haircutId; // Fallback to ID if not found
+};
