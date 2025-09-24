@@ -216,8 +216,12 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
   const haircutKey = mapHaircutNameToKey(selectedHaircut);
   const selectedStyle = haircutData[haircutKey];
 
-  // Removed automatic generation to prevent unwanted API calls
-  // Images will only be generated when explicitly requested by user actions
+  useEffect(() => {
+    // Generate if freemium data is loaded
+    if (!freemiumLoading) {
+      generateHaircutImage();
+    }
+  }, [userPhoto, selectedHaircut, freemiumLoading]);
 
   const generateHaircutImage = async () => {
     setIsProcessing(true);
