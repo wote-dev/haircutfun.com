@@ -7,31 +7,11 @@ import Image from 'next/image';
 interface GeneratedImage {
   id: string;
   image_url: string;
+  original_image_url: string | null;
   haircut_style: string;
+  gender: string | null;
   created_at: string;
 }
-
-// Mock data for testing
-const mockImages: GeneratedImage[] = [
-  {
-    id: '1',
-    image_url: '/haircuttr.png',
-    haircut_style: 'Modern Fade',
-    created_at: '2024-01-15T10:30:00Z'
-  },
-  {
-    id: '2', 
-    image_url: '/haircuttr.png',
-    haircut_style: 'Classic Pompadour',
-    created_at: '2024-01-14T15:45:00Z'
-  },
-  {
-    id: '3',
-    image_url: '/haircuttr.png', 
-    haircut_style: 'Textured Crop',
-    created_at: '2024-01-13T09:20:00Z'
-  }
-];
 
 export function UserGallery() {
   const { user } = useAuth();
@@ -47,11 +27,18 @@ export function UserGallery() {
 
   const fetchUserImages = async () => {
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setImages(mockImages);
+      setLoading(true);
+      const response = await fetch('/api/user-images');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch images');
+      }
+
+      const data = await response.json();
+      setImages(data.images || []);
     } catch (error) {
       console.error('Error fetching user images:', error);
+      setImages([]);
     } finally {
       setLoading(false);
     }

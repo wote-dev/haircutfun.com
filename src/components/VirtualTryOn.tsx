@@ -292,10 +292,42 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!generatedImage || !user) {
+      console.error('Cannot save: missing generated image or user');
+      return;
+    }
+
     setIsSaved(true);
-    // In a real app, this would save to user's profile or local storage
-    setTimeout(() => setIsSaved(false), 2000);
+    
+    try {
+      const response = await fetch('/api/save-generated-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageData: generatedImage,
+          originalImageUrl: userPhoto,
+          haircutStyle: selectedHaircut,
+          gender: selectedStyle?.gender || null,
+          promptUsed: `Generate ${selectedHaircut} hairstyle`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to save image');
+      }
+
+      console.log('Image saved successfully:', data);
+      // Keep the saved state permanently after successful save
+    } catch (error) {
+      console.error('Error saving image:', error);
+      setIsSaved(false);
+      alert('Failed to save image. Please try again.');
+    }
   };
 
   const handleShare = async () => {

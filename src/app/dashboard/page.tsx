@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ThreeDotLoader } from '@/components/ui/three-dot-loader';
+import { UserGallery } from '@/components/UserGallery';
 
 // Component that handles search params
 function DashboardContent() {
@@ -209,6 +210,9 @@ function DashboardContent() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* User Gallery */}
+            <UserGallery />
           </div>
 
           {/* Quick Actions */}
