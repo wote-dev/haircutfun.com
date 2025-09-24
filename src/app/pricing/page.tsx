@@ -481,8 +481,8 @@ export default function PricingPage() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <Card className="max-w-md w-full border-2 border-primary/50 bg-card shadow-2xl animate-in zoom-in-95 duration-300">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-lg">
-                <Crown className="w-8 h-8 text-primary-foreground" />
+              <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-accent-foreground to-accent-foreground/80 rounded-full flex items-center justify-center shadow-lg">
+                <Crown className="w-8 h-8 text-accent" />
               </div>
               <CardTitle className="text-2xl font-bold text-foreground">
                 🎉 Congratulations!
