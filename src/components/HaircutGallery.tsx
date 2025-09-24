@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
@@ -176,6 +176,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
   const [selectedCategory, setSelectedCategory] = useState('All');
   const { hasProAccess, canGenerate } = useFreemiumAccess();
   const [hoveredStyle, setHoveredStyle] = useState<string | null>(null);
+  const userPhotoRef = useRef<HTMLDivElement>(null);
 
   // Filter by gender first, then by category
   const genderFilteredStyles = haircutStyles.filter(style => style.gender === selectedGender);
@@ -207,7 +208,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
       </div>
 
       {/* User Photo Preview */}
-      <div className="mb-8 p-6 bg-muted/30 rounded-2xl">
+      <div ref={userPhotoRef} className="mb-8 p-6 bg-muted/30 rounded-2xl">
         <div className="flex items-center space-x-4">
           <div className="relative h-16 w-16 rounded-full overflow-hidden bg-muted">
             <Image
@@ -257,6 +258,14 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
                 return;
               }
               onHaircutSelect(style.id);
+              
+              // Scroll to the user photo preview section after selection
+              setTimeout(() => {
+                userPhotoRef.current?.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start' 
+                });
+              }, 100);
             }}
           >
             <div className={`bg-background border rounded-2xl overflow-hidden transition-colors ${

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Star, Zap, Crown, X, AlertCircle, Loader2 } from "lucide-react";
+import { Check, Star, Zap, Crown, X, AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SignInButton } from "@/components/auth/SignInButton";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -135,6 +136,7 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
           <CardElement
             onChange={handleCardChange}
             options={{
+              hidePostalCode: true,
               style: {
                 base: {
                   fontSize: '16px',
@@ -182,7 +184,8 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
       <Button 
         type="submit" 
         disabled={!stripe || isProcessing || !cardComplete}
-        className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
+        size="lg"
+        className="w-full h-12 text-base font-semibold bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         {isProcessing ? (
           <>
@@ -215,6 +218,7 @@ export default function PricingPage() {
   const [userProfile, setUserProfile] = useState<{ has_pro_access: boolean; free_tries_used: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showProAccessUnlocked, setShowProAccessUnlocked] = useState(false);
 
   // Fetch user profile and usage
   useEffect(() => {
@@ -241,8 +245,14 @@ export default function PricingPage() {
 
   const handlePaymentSuccess = () => {
     setShowPaymentForm(false);
-    setToast({ message: 'Pro access unlocked! You now have unlimited tries.', type: 'success' });
+    setShowProAccessUnlocked(true);
     fetchUserProfile(); // Refresh profile
+    
+    // Auto-hide the Pro Access message after 8 seconds and redirect
+    setTimeout(() => {
+      setShowProAccessUnlocked(false);
+      router.push('/try-on');
+    }, 8000);
   };
 
   const handlePaymentError = (error: string) => {
@@ -289,7 +299,7 @@ export default function PricingPage() {
       )}
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-32 px-4">
         <div className="container mx-auto text-center max-w-4xl">
           <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
             Try Before You Cut
@@ -311,7 +321,7 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="py-16 px-4">
+      <section className="pt-0 pb-8 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             
@@ -371,13 +381,23 @@ export default function PricingPage() {
             </Card>
 
             {/* Pro Access */}
-            <Card className="relative border-2 border-primary hover:border-primary/80 transition-all duration-300 shadow-lg">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground px-4 py-1">
-                  <Star className="w-4 h-4 mr-1" />
-                  Most Popular
-                </Badge>
-              </div>
+            <div className="relative">
+              <GlowingEffect 
+                disabled={false}
+                blur={0}
+                spread={40}
+                proximity={150}
+                glow={true}
+                variant="purple"
+                className="rounded-lg"
+              />
+              <Card className="relative border-2 border-primary hover:border-primary/80 transition-all duration-300 shadow-lg">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                    <Star className="w-4 h-4 mr-1" />
+                    Most Popular
+                  </Badge>
+                </div>
               
               <CardHeader className="text-center pb-8 pt-8">
                 <CardTitle className="text-2xl font-bold text-foreground">Pro Access</CardTitle>
@@ -437,15 +457,68 @@ export default function PricingPage() {
                     className="w-full"
                     redirectTo="/pricing"
                   >
-                    <Zap className="w-4 h-4 mr-2" />
                     Sign Up & Unlock
                   </SignInButton>
                 )}
               </CardFooter>
             </Card>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Pro Access Unlocked Modal */}
+      {showProAccessUnlocked && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full border-2 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 shadow-2xl">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                <Crown className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-green-800 dark:text-green-200">
+                🎉 Congratulations!
+              </CardTitle>
+              <CardDescription className="text-green-700 dark:text-green-300 text-base">
+                You have now unlocked Pro Access
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-4 text-center">
+              <div className="space-y-3">
+                <div className="flex items-center justify-center gap-3 text-green-800 dark:text-green-200">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <span className="font-medium">Unlimited virtual haircut tries</span>
+                </div>
+                <div className="flex items-center justify-center gap-3 text-green-800 dark:text-green-200">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <span className="font-medium">Access to ALL premium hairstyles</span>
+                </div>
+                <div className="flex items-center justify-center gap-3 text-green-800 dark:text-green-200">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <span className="font-medium">Priority processing speed</span>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-white/50 dark:bg-black/20 rounded-lg border border-green-200 dark:border-green-800">
+                <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                  Redirecting to Try-On page in a few seconds...
+                </p>
+              </div>
+              
+              <Button 
+                onClick={() => {
+                  setShowProAccessUnlocked(false);
+                  router.push('/try-on');
+                }}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Start Creating Now
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Payment Modal */}
       {showPaymentForm && (

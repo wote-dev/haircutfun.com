@@ -73,7 +73,7 @@ export default function TryOnPage() {
 
         {/* Progress Steps */}
         <Card className="mb-12 overflow-hidden">
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-8">
             {/* Desktop Layout */}
             <div className="hidden md:block">
               <div className="grid grid-cols-4 gap-8">
@@ -148,53 +148,77 @@ export default function TryOnPage() {
             
             {/* Mobile Layout */}
             <div className="md:hidden">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between gap-1 px-2">
                 {steps.map((step, index) => {
                   const status = getStepStatus(step.id);
                   const Icon = step.icon;
                   
+                  // Shorter titles for mobile
+                  const mobileTitle = step.title === 'Upload Photo' ? 'Upload' :
+                                    step.title === 'Select Gender' ? 'Gender' :
+                                    step.title === 'Choose Style' ? 'Style' :
+                                    step.title === 'See Result' ? 'Result' : step.title;
+                  
                   return (
-                    <div key={step.id} className="flex items-center">
-                      <div className="flex flex-col items-center">
+                    <div key={step.id} className="flex items-center flex-1">
+                      <div className="flex flex-col items-center text-center w-full">
+                        {/* Step Circle */}
                         <div className={`
-                          relative flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300
+                          relative flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 mb-1
                           ${status === 'completed' 
-                            ? 'bg-primary border-primary text-primary-foreground' 
+                            ? 'bg-primary border-primary text-primary-foreground shadow-sm' 
                             : status === 'current'
                             ? 'bg-primary/10 border-primary text-primary'
                             : 'bg-muted border-muted-foreground/30 text-muted-foreground'
                           }
                         `}>
                           {status === 'completed' ? (
-                            <Check className="h-5 w-5" />
+                            <Check className="h-3 w-3" />
                           ) : (
-                            <Icon className="h-5 w-5" />
+                            <Icon className="h-3 w-3" />
                           )}
+                          
+                          {/* Step Number Badge */}
+                          <div className={`
+                            absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full text-xs font-bold flex items-center justify-center
+                            ${status === 'completed' || status === 'current'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted-foreground/20 text-muted-foreground'
+                            }
+                          `}>
+                            <span className="text-[8px]">{index + 1}</span>
+                          </div>
                         </div>
                         
-                        <div className="mt-3 text-center">
-                          <p className={`text-sm font-medium ${
+                        {/* Step Content */}
+                        <div className="space-y-0.5">
+                          <h3 className={`text-[10px] font-medium leading-tight ${
                             status === 'current' ? 'text-primary' : 
                             status === 'completed' ? 'text-foreground' : 'text-muted-foreground'
                           }`}>
-                            {step.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground hidden sm:block">
-                            {step.description}
-                          </p>
+                            {mobileTitle}
+                          </h3>
+                          
+                          {/* Status Indicator */}
+                          {status === 'completed' && (
+                            <div className="w-1 h-1 bg-primary rounded-full mx-auto"></div>
+                          )}
+                          {status === 'current' && (
+                            <div className="w-1 h-1 bg-primary/60 rounded-full mx-auto animate-pulse"></div>
+                          )}
                         </div>
                       </div>
                       
+                      {/* Horizontal Connection Line */}
                       {index < steps.length - 1 && (
-                        <Separator 
-                          orientation="horizontal" 
-                          className={`w-16 mx-4 ${
-                            getStepStatus(steps[index + 1].id) === 'completed' || 
+                        <div className={`
+                          flex-1 h-0.5 mx-1 mt-[-16px] transition-colors
+                          ${getStepStatus(steps[index + 1].id) === 'completed' || 
                             getStepStatus(steps[index + 1].id) === 'current'
-                              ? 'bg-primary' 
-                              : 'bg-muted-foreground/30'
-                          }`} 
-                        />
+                            ? 'bg-primary' 
+                            : 'bg-muted-foreground/30'
+                          }
+                        `} />
                       )}
                     </div>
                   );

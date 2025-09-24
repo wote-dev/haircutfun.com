@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserProfile } from "./auth/UserProfile";
+import { SignInButton } from "./auth/SignInButton";
+import { useAuth } from "./providers/AuthProvider";
 import { usePageTransitionContext } from "@/components/providers/PageTransitionProvider";
 
 const navigation = [
@@ -22,6 +24,7 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { navigateWithLoading } = usePageTransitionContext();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,6 +101,14 @@ export function Navigation() {
             {/* Right side - Auth & CTA */}
             <div className="hidden lg:flex items-center space-x-4">
               <UserProfile />
+              {!user && (
+                <SignInButton 
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Login
+                </SignInButton>
+              )}
               <Button 
                 onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -185,6 +196,15 @@ export function Navigation() {
           
           <div className="pt-6 border-t mt-4 space-y-4">
             <UserProfile />
+            {!user && (
+              <SignInButton 
+                variant="outline"
+                className="w-full"
+                size="lg"
+              >
+                Login
+              </SignInButton>
+            )}
             <Button 
               onClick={() => {
                 setIsOpen(false);
