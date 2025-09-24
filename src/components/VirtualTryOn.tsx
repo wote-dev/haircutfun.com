@@ -479,7 +479,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
             </p>
             <div className="flex gap-4 justify-center">
               <Button
-                onClick={generateHaircutImage}
+                onClick={() => generateHaircutImage(true)}
                 size="lg"
                 className="px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
