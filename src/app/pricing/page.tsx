@@ -211,11 +211,7 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
         />
       </div>
 
-      {/* Test Card Info */}
-      <div className="text-xs text-muted-foreground text-center space-y-1">
-        <p>Test with card: 4242 4242 4242 4242</p>
-        <p>Use any future date and any 3-digit CVC</p>
-      </div>
+
     </form>
   );
 }
