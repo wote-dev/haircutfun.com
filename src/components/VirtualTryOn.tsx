@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { trendingHaircuts } from "@/data/haircutStyles";
 
 interface VirtualTryOnProps {
   userPhoto: string;
@@ -786,24 +787,25 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
           You Might Also Like
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {Object.entries(haircutData)
-            .filter(([styleId, style]) => 
-              style.gender === selectedGender && 
-              styleId !== mapHaircutNameToKey(selectedHaircut)
-            )
+          {trendingHaircuts[selectedGender]
+            .filter(style => style.name !== selectedHaircut)
             .sort(() => Math.random() - 0.5) // Randomize the order
             .slice(0, 3)
-            .map(([styleId, style]) => {
+            .map((style) => {
               return (
                 <Link 
-                  key={styleId} 
+                  key={style.id} 
                   href={`/try-on?haircut=${encodeURIComponent(style.name)}&gender=${selectedGender}`}
-                  className="bg-background border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer block"
+                  className="bg-background border rounded-xl p-4 hover:shadow-md transition-all duration-200 cursor-pointer block group"
                 >
-                  <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg mb-3 flex items-center justify-center">
-                    <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                  <div className="aspect-square rounded-lg mb-3 overflow-hidden relative">
+                    <Image
+                      src={style.image}
+                      alt={style.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-200"
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                    />
                   </div>
                   <h5 className="font-medium text-foreground mb-1">{style.name}</h5>
                   <p className="text-xs text-muted-foreground">{style.category}</p>
