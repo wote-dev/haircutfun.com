@@ -14,7 +14,7 @@ const stats = [
   { number: "15+", label: "Hairstyles Available" },
   { number: "95%", label: "Accuracy Rate" },
   { number: "24/7", label: "Available" },
-  { number: "1M+", label: "Try-Ons Generated" }
+  { number: "100+", label: "Try-Ons Generated" }
 ];
 
 export default function AboutPage() {
