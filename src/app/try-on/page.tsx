@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { GenderSelection } from "@/components/GenderSelection";
@@ -15,7 +15,7 @@ import { ArrowLeft, Check, Circle, Upload, Users, Scissors, Sparkles } from "luc
 type Step = 'upload' | 'gender' | 'hairstyle' | 'result';
 type Gender = 'male' | 'female';
 
-export default function TryOnPage() {
+function TryOnPageContent() {
   const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>('upload');
   const [uploadedPhoto, setUploadedPhoto] = useState('');
@@ -454,5 +454,20 @@ export default function TryOnPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function TryOnPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading virtual try-on...</p>
+        </div>
+      </div>
+    }>
+      <TryOnPageContent />
+    </Suspense>
   );
 }
