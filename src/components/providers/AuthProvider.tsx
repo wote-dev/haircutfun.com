@@ -79,14 +79,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Create a profile object that matches the expected structure
         const profile: UserProfile = {
-          id: profileData.id || crypto.randomUUID(),
-          user_id: userId,
-          full_name: profileData.full_name || null,
-          avatar_url: profileData.avatar_url || null,
-          email: profileData.email || null,
+          id: profileData.id,
+          user_id: profileData.user_id,
+          full_name: profileData.full_name,
+          avatar_url: profileData.avatar_url,
+          email: profileData.email,
           has_pro_access: profileData.has_pro_access || false,
-          created_at: profileData.created_at || new Date().toISOString(),
-          updated_at: profileData.updated_at || new Date().toISOString()
+          created_at: profileData.created_at,
+          updated_at: profileData.updated_at
         };
         
         setProfile(profile);
