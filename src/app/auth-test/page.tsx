@@ -3,7 +3,7 @@
 import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function AuthTestPage() {
-  const { user, session, profile, subscription, usage, loading } = useAuth();
+  const { user, session, profile, usage, loading } = useAuth();
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -42,9 +42,9 @@ export default function AuthTestPage() {
           </div>
 
           <div className="bg-card p-6 rounded-lg border">
-            <h2 className="text-xl font-semibold mb-4">Subscription</h2>
+            <h2 className="text-xl font-semibold mb-4">Pro Access Status</h2>
             <pre className="text-sm bg-muted p-4 rounded overflow-auto">
-              {subscription ? JSON.stringify(subscription, null, 2) : "null"}
+              {profile ? `Has Pro Access: ${profile.has_pro_access}` : "No profile data"}
             </pre>
           </div>
 

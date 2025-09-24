@@ -202,6 +202,15 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
         )}
       </Button>
 
+      {/* Powered by Stripe */}
+      <div className="flex items-center justify-center">
+        <img 
+          src="/Powered by Stripe/Powered by Stripe - blurple.svg" 
+          alt="Powered by Stripe" 
+          className="h-8 w-auto"
+        />
+      </div>
+
       {/* Test Card Info */}
       <div className="text-xs text-muted-foreground text-center space-y-1">
         <p>Test with card: 4242 4242 4242 4242</p>

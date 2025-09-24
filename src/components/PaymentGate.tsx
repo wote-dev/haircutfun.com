@@ -147,6 +147,15 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
                     'Unlock Pro Access - $4.99 One-Time'
                   )}
                 </button>
+                
+                {/* Powered by Stripe */}
+                <div className="flex items-center justify-center">
+                  <img 
+                    src="/Powered by Stripe/Powered by Stripe - blurple.svg" 
+                    alt="Powered by Stripe" 
+                    className="h-8 w-auto"
+                  />
+                </div>
               </>
             )}
           </div>
