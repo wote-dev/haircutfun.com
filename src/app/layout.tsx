@@ -104,6 +104,18 @@ export default function RootLayout({
                   >
                     About Us
                   </a>
+                  <a 
+                    href="/privacy" 
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    Privacy Policy
+                  </a>
+                  <a 
+                    href="/terms" 
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    Terms of Service
+                  </a>
                 </nav>
               </div>
             </div>

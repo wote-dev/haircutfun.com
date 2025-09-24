@@ -564,9 +564,11 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
             <div className="bg-muted/50 px-3 py-2 rounded-lg w-full sm:w-auto text-center">
               <p className="text-sm text-muted-foreground">
                 {freeTriesUsed === 0 ? (
-                  <span className="text-primary font-medium">1 free try available</span>
+                  <span className="text-primary font-medium">2 free tries available</span>
+                ) : freeTriesUsed === 1 ? (
+                  <span className="text-orange-500 font-medium">1 free try remaining</span>
                 ) : (
-                  <span className="text-orange-500 font-medium">Free try used</span>
+                  <span className="text-orange-500 font-medium">Free tries used</span>
                 )}
               </p>
             </div>

@@ -311,7 +311,7 @@ export default function PricingPage() {
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             See how you'd look with any hairstyle using our AI-powered virtual try-on technology. 
-            Start with 1 free try, then unlock unlimited access.
+            Start with 2 free tries, then unlock unlimited access.
           </p>
           
           {user && userProfile?.has_pro_access && (
@@ -346,7 +346,7 @@ export default function PricingPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-500" />
-                    <span>1 free virtual haircut try</span>
+                    <span>2 free virtual haircut tries</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-500" />
@@ -365,7 +365,7 @@ export default function PricingPage() {
                 {user && userProfile && (
                   <div className="mt-4 p-3 bg-muted rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                      Free tries used: {userProfile.free_tries_used}/1
+                      Free tries used: {userProfile.free_tries_used}/2
                     </p>
                   </div>
                 )}
@@ -376,11 +376,11 @@ export default function PricingPage() {
                   onClick={handleGetStarted}
                   className="w-full"
                   variant="outline"
-                  disabled={Boolean(user && userProfile && userProfile.free_tries_used >= 1 && !userProfile.has_pro_access)}
+                  disabled={Boolean(user && userProfile && userProfile.free_tries_used >= 2 && !userProfile.has_pro_access)}
                 >
                    {!user ? 'Try It Free' : 
                     userProfile?.has_pro_access ? 'Start Creating' :
-                    (userProfile?.free_tries_used ?? 0) >= 1 ? 'Free Try Used' : 'Start Free Trial'}
+                    (userProfile?.free_tries_used ?? 0) >= 2 ? 'Free Tries Used' : 'Start Free Trial'}
                 </Button>
               </CardFooter>
             </Card>
@@ -567,8 +567,8 @@ export default function PricingPage() {
             <div className="border-b border-border pb-6">
               <h3 className="font-semibold text-lg mb-2 text-foreground">How does the free trial work?</h3>
               <p className="text-muted-foreground">
-                You get 1 completely free virtual haircut try with no credit card required. 
-                After using your free generation, you can unlock unlimited access for just $4.99.
+                You get 2 completely free virtual haircut tries with no credit card required. 
+                After using your free generations, you can unlock unlimited access for just $4.99.
               </p>
             </div>
             
