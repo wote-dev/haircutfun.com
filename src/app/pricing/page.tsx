@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SignInButton } from "@/components/auth/SignInButton";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -356,14 +357,22 @@ export default function PricingPage() {
                     <Crown className="w-4 h-4 mr-2" />
                     Start Creating
                   </Button>
-                ) : (
+                ) : user ? (
                   <Button 
-                    onClick={() => user ? setShowPaymentForm(true) : router.push('/auth/signin')}
+                    onClick={() => setShowPaymentForm(true)}
                     className="w-full"
                   >
                     <Zap className="w-4 h-4 mr-2" />
-                    {user ? 'Unlock Pro Access' : 'Sign Up & Unlock'}
+                    Unlock Pro Access
                   </Button>
+                ) : (
+                  <SignInButton 
+                    className="w-full"
+                    redirectTo="/pricing"
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Sign Up & Unlock
+                  </SignInButton>
                 )}
               </CardFooter>
             </Card>

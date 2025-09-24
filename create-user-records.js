@@ -31,7 +31,7 @@ async function createUserRecords() {
     console.log(`✅ Found ${users.length} users in auth.users`);
     
     if (users.length === 0) {
-      console.log('⚠️  No users found. Please sign up first at http://localhost:3000/auth/signin');
+      console.log('⚠️  No users found. Please sign up first at http://localhost:3000/');
       return;
     }
     
