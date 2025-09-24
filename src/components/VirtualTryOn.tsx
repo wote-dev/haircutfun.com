@@ -348,6 +348,36 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
     }
   };
 
+  const handleDownload = () => {
+    if (!generatedImage || !selectedStyle?.name) {
+      console.error('Cannot download: missing generated image or style name');
+      return;
+    }
+
+    try {
+      // Create a temporary anchor element for download
+      const link = document.createElement('a');
+      link.href = generatedImage;
+      
+      // Create filename using the haircut name, removing spaces and special characters
+      const sanitizedName = selectedStyle.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      
+      link.download = `${sanitizedName}-haircut.jpg`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      alert('Failed to download image. Please try again.');
+    }
+  };
+
   if (isProcessing) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -665,6 +695,20 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
                     Save This Look
                   </>
                 )}
+              </Button>
+            )}
+
+            {generatedImage && (
+              <Button
+                onClick={handleDownload}
+                variant="outline"
+                size="lg"
+                className="w-full flex items-center justify-center px-6 py-3 border border-border text-foreground hover:bg-muted transition-colors"
+              >
+                <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download Image
               </Button>
             )}
             

@@ -106,8 +106,10 @@ export function TrendingHaircuts() {
   const handleTryOn = (haircutName: string, baseImageSrc: string) => {
     // Store selected base image source in localStorage for PhotoUpload component
     localStorage.setItem('selectedBaseImage', baseImageSrc);
+    // Store the selected gender for the try-on page
+    localStorage.setItem('selectedGender', selectedGender);
     // Navigate to try-on page with haircut parameter
-    window.location.href = `/try-on?haircut=${encodeURIComponent(haircutName)}`;
+    window.location.href = `/try-on?haircut=${encodeURIComponent(haircutName)}&gender=${selectedGender}`;
   };
 
   const handleAvatarPreview = (haircutName: string, baseImageSrc: string, personId: string) => {

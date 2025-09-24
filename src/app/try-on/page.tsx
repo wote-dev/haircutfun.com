@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { GenderSelection } from "@/components/GenderSelection";
 import { HaircutGallery } from "@/components/HaircutGallery";
@@ -15,15 +16,56 @@ type Step = 'upload' | 'gender' | 'hairstyle' | 'result';
 type Gender = 'male' | 'female';
 
 export default function TryOnPage() {
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>('upload');
   const [uploadedPhoto, setUploadedPhoto] = useState('');
   const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [selectedHairstyle, setSelectedHairstyle] = useState('');
+  const [preSelectedHaircut, setPreSelectedHaircut] = useState<string | null>(null);
   const virtualTryOnRef = useRef<HTMLDivElement>(null);
+
+  // Handle URL parameters for pre-selected haircut
+  useEffect(() => {
+    const haircutParam = searchParams.get('haircut');
+    const genderParam = searchParams.get('gender') as Gender | null;
+    
+    if (haircutParam) {
+      setPreSelectedHaircut(haircutParam);
+      setSelectedHairstyle(haircutParam);
+      
+      // Use gender from URL parameter if available, otherwise determine from haircut name
+      if (genderParam && (genderParam === 'male' || genderParam === 'female')) {
+        setSelectedGender(genderParam);
+      } else {
+        // Fallback: Determine gender based on haircut name
+        const femaleHaircuts = ['Wolf Cut', 'Curtain Bangs', 'Modern Shag', 'Pixie Cut'];
+        const maleHaircuts = ['Textured Crop', 'Side Part', 'Quiff', 'Undercut Fade', 'Modern Mullet', 'Textured Quiff', 'Edgar Cut', 'Broccoli Cut', '90s Heartthrob'];
+        
+        if (femaleHaircuts.includes(haircutParam)) {
+          setSelectedGender('female');
+        } else if (maleHaircuts.includes(haircutParam)) {
+          setSelectedGender('male');
+        }
+      }
+    }
+  }, [searchParams]);
 
   const handlePhotoUpload = (photoUrl: string) => {
     setUploadedPhoto(photoUrl);
-    setCurrentStep('gender');
+    
+    // If we have a pre-selected haircut, skip to result
+    if (preSelectedHaircut) {
+      setCurrentStep('result');
+      // Auto-scroll to the VirtualTryOn component after a brief delay
+      setTimeout(() => {
+        virtualTryOnRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100);
+    } else {
+      setCurrentStep('gender');
+    }
   };
 
   const handleGenderSelect = (gender: Gender) => {
@@ -49,6 +91,7 @@ export default function TryOnPage() {
     setUploadedPhoto('');
     setSelectedGender(null);
     setSelectedHairstyle('');
+    setPreSelectedHaircut(null);
   };
 
   const steps = [
@@ -244,10 +287,13 @@ export default function TryOnPage() {
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
                   <Upload className="h-6 w-6 text-primary" />
-                  Step 1: Upload Your Photo
+                  {preSelectedHaircut ? 'Upload Your Photo' : 'Step 1: Upload Your Photo'}
                 </CardTitle>
                 <CardDescription>
-                  Start by uploading a clear photo of yourself or choose from our example images
+                  {preSelectedHaircut 
+                    ? `Upload your photo to see how you'll look with ${preSelectedHaircut}`
+                    : 'Start by uploading a clear photo of yourself or choose from our example images'
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -329,7 +375,7 @@ export default function TryOnPage() {
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
                   <Sparkles className="h-6 w-6 text-primary" />
-                  Step 4: Your New Look
+                  {preSelectedHaircut ? 'Your New Look' : 'Step 4: Your New Look'}
                 </CardTitle>
                 <CardDescription>
                   Here's how you look with your selected hairstyle!
@@ -339,16 +385,18 @@ export default function TryOnPage() {
                 <div className="flex justify-between items-center mb-6">
                   <Button
                     variant="outline"
-                    onClick={() => setCurrentStep('hairstyle')}
+                    onClick={() => preSelectedHaircut ? setCurrentStep('upload') : setCurrentStep('hairstyle')}
                     className="flex items-center gap-2"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Hairstyles
+                    {preSelectedHaircut ? 'Upload Different Photo' : 'Back to Hairstyles'}
                   </Button>
                   <div className="flex gap-2">
-                    <Badge variant="secondary" className="px-3 py-1">
-                      Step 4 of 4
-                    </Badge>
+                    {!preSelectedHaircut && (
+                      <Badge variant="secondary" className="px-3 py-1">
+                        Step 4 of 4
+                      </Badge>
+                    )}
                     <Badge variant="default" className="px-3 py-1">
                       Complete!
                     </Badge>
@@ -359,7 +407,7 @@ export default function TryOnPage() {
                     userPhoto={uploadedPhoto}
                     selectedHaircut={selectedHairstyle}
                     onReset={resetFlow}
-                    onBack={() => setCurrentStep('hairstyle')}
+                    onBack={() => preSelectedHaircut ? setCurrentStep('upload') : setCurrentStep('hairstyle')}
                   />
                 </div>
               </CardContent>
