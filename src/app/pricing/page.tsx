@@ -43,6 +43,8 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [cardComplete, setCardComplete] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -51,7 +53,14 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
       return;
     }
 
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      onError('Card information is required');
+      return;
+    }
+
     setIsProcessing(true);
+    setCardError(null);
 
     try {
       // Create payment intent
@@ -72,7 +81,7 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
       // Confirm payment
       const { error: stripeError } = await stripe.confirmCardPayment(client_secret, {
         payment_method: {
-          card: elements.getElement(CardElement)!,
+          card: cardElement,
         }
       });
 
@@ -106,37 +115,95 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
     }
   };
 
+  const handleCardChange = (event: any) => {
+    setCardComplete(event.complete);
+    setCardError(event.error ? event.error.message : null);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="p-4 border rounded-lg">
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                  color: '#aab7c4',
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Card Input Section */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-foreground">
+          Card Information
+        </label>
+        <div className={`
+          relative p-4 border-2 rounded-xl transition-all duration-200
+          ${cardError ? 'border-red-300 bg-red-50/50' : cardComplete ? 'border-green-300 bg-green-50/50' : 'border-border bg-background'}
+          focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20
+        `}>
+          <CardElement
+            onChange={handleCardChange}
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: 'hsl(var(--foreground))',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  '::placeholder': {
+                    color: 'hsl(var(--muted-foreground))',
+                  },
+                  iconColor: 'hsl(var(--muted-foreground))',
+                },
+                invalid: {
+                  color: 'hsl(var(--destructive))',
+                  iconColor: 'hsl(var(--destructive))',
+                },
+                complete: {
+                  color: 'hsl(var(--foreground))',
+                  iconColor: 'hsl(var(--primary))',
                 },
               },
-            },
-          }}
-        />
+            }}
+          />
+          {cardComplete && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Check className="w-5 h-5 text-green-500" />
+            </div>
+          )}
+        </div>
+        {cardError && (
+          <p className="text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="w-4 h-4" />
+            {cardError}
+          </p>
+        )}
       </div>
+
+      {/* Security Notice */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <span>Your payment information is encrypted and secure</span>
+      </div>
+
+      {/* Submit Button */}
       <Button 
         type="submit" 
-        disabled={!stripe || isProcessing}
-        className="w-full gradient-primary text-white"
+        disabled={!stripe || isProcessing || !cardComplete}
+        className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
       >
         {isProcessing ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Processing...
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            Processing Payment...
           </>
         ) : (
-          'Unlock Pro Access - $4.99'
+          <>
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Complete Payment • $4.99
+          </>
         )}
       </Button>
+
+      {/* Test Card Info */}
+      <div className="text-xs text-muted-foreground text-center space-y-1">
+        <p>Test with card: 4242 4242 4242 4242</p>
+        <p>Use any future date and any 3-digit CVC</p>
+      </div>
     </form>
   );
 }
