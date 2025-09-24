@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
 import { Button } from "@/components/ui/button";
+import { getHaircutsByGender, getCategoriesByGender, type HaircutStyle } from "@/data/haircutStyles";
 
 interface HaircutGalleryProps {
   userPhoto: string;
@@ -13,176 +14,20 @@ interface HaircutGalleryProps {
   onBack: () => void;
 }
 
-// Mock haircut data - in a real app, this would come from an API
-const haircutStyles = [
-  // Female hairstyles
-  {
-    id: 'pixie-cut',
-    name: 'Pixie Cut',
-    category: 'Short',
-    gender: 'female' as const,
-    description: 'A chic, short hairstyle that frames the face beautifully',
-    popularity: 95,
-    isPremium: true,
-    image: '/FILLER-IMAGES-WOMEN/pixiecut.png',
-  },
-  {
-    id: 'bob-classic',
-    name: 'Classic Bob',
-    category: 'Medium',
-    gender: 'female' as const,
-    description: 'Timeless bob that works for any face shape',
-    popularity: 88,
-    image: '/FILLER-IMAGES-WOMEN/classicbob.png',
-  },
-  {
-    id: 'long-layers',
-    name: 'Long Layers',
-    category: 'Long',
-    gender: 'female' as const,
-    description: 'Flowing layers that add movement and volume',
-    popularity: 92,
-    isPremium: true,
-    image: '/wolf-cut.png', // Using wolf-cut as a long layered style
-  },
-  {
-    id: 'shag-modern',
-    name: 'Modern Shag',
-    category: 'Medium',
-    gender: 'female' as const,
-    description: 'Trendy shag with textured layers and bangs',
-    popularity: 85,
-    isPremium: true,
-    image: '/FILLER-IMAGES-WOMEN/modernshag.png',
-  },
-  {
-    id: 'lob-wavy',
-    name: 'Wavy Lob',
-    category: 'Medium',
-    gender: 'female' as const,
-    description: 'Long bob with natural waves for a relaxed look',
-    popularity: 90,
-    isPremium: true,
-    image: '/modern-shag.png', // Using as wavy lob alternative
-  },
-  {
-    id: 'curtain-bangs',
-    name: 'Curtain Bangs',
-    category: 'Long',
-    gender: 'female' as const,
-    description: 'Face-framing bangs that part in the middle',
-    popularity: 87,
-    image: '/FILLER-IMAGES-WOMEN/curtainbangs.png',
-  },
-  {
-    id: 'beach-waves',
-    name: 'Beach Waves',
-    category: 'Long',
-    gender: 'female' as const,
-    description: 'Effortless waves for a natural, beachy look',
-    popularity: 89,
-    image: '/curtain-bangs.png', // Using as beach waves alternative
-  },
-  {
-    id: 'blunt-bob',
-    name: 'Blunt Bob',
-    category: 'Short',
-    gender: 'female' as const,
-    description: 'Sharp, clean lines for a modern sophisticated look',
-    popularity: 84,
-    image: '/FILLER-IMAGES-WOMEN/bluntbob.png',
-  },
-  // Male hairstyles
-  {
-    id: 'buzz-cut',
-    name: 'Buzz Cut',
-    category: 'Short',
-    gender: 'male' as const,
-    description: 'Clean, minimalist cut that\'s easy to maintain',
-    popularity: 85,
-    isPremium: true,
-    image: '/FILLER-IMAGES-MALE/buzzcut.png',
-  },
-  {
-    id: 'undercut-fade',
-    name: 'Undercut Fade',
-    category: 'Short',
-    gender: 'male' as const,
-    description: 'Edgy cut with faded sides and longer top',
-    popularity: 82,
-    image: '/buzzcut.png', // Using as undercut fade alternative
-  },
-  {
-    id: 'crew-cut',
-    name: 'Crew Cut',
-    category: 'Short',
-    gender: 'male' as const,
-    description: 'Classic military-inspired short cut',
-    popularity: 85,
-    image: '/FILLER-IMAGES-MALE/crewcut.jpg',
-  },
-  {
-    id: 'pompadour',
-    name: 'Pompadour',
-    category: 'Medium',
-    gender: 'male' as const,
-    description: 'Vintage-inspired style with volume on top',
-    popularity: 79,
-    isPremium: true,
-    image: '/FILLER-IMAGES-MALE/Pompadour.png',
-  },
-  {
-    id: 'quiff',
-    name: 'Quiff',
-    category: 'Medium',
-    gender: 'male' as const,
-    description: 'Modern style with textured volume at the front',
-    popularity: 88,
-    isPremium: true,
-    image: '/quiff.png',
-  },
-  {
-    id: 'side-part',
-    name: 'Side Part',
-    category: 'Medium',
-    gender: 'male' as const,
-    description: 'Professional look with a clean side part',
-    popularity: 91,
-    image: '/FILLER-IMAGES-MALE/sidepart.png',
-  },
-  {
-    id: 'man-bun',
-    name: 'Man Bun',
-    category: 'Long',
-    gender: 'male' as const,
-    description: 'Long hair styled into a trendy top knot',
-    popularity: 76,
-    image: '/side-part.png', // Using as man bun alternative (closest available)
-  },
-  {
-    id: 'textured-crop',
-    name: 'Textured Crop',
-    category: 'Short',
-    gender: 'male' as const,
-    description: 'Modern crop with textured styling on top',
-    popularity: 86,
-    image: '/FILLER-IMAGES-MALE/texturedcrop.png',
-  },
-];
-
-const categories = ['All', 'Short', 'Medium', 'Long'];
-
 export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onBack }: HaircutGalleryProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const { hasProAccess, canGenerate } = useFreemiumAccess();
   const [hoveredStyle, setHoveredStyle] = useState<string | null>(null);
   const userPhotoRef = useRef<HTMLDivElement>(null);
 
-  // Filter by gender first, then by category
-  const genderFilteredStyles = haircutStyles.filter(style => style.gender === selectedGender);
+  // Get haircuts and categories for the selected gender
+  const haircutStyles = getHaircutsByGender(selectedGender);
+  const categories = getCategoriesByGender(selectedGender);
+
+  // Filter by category
   const filteredStyles = selectedCategory === 'All' 
-    ? genderFilteredStyles 
-    : genderFilteredStyles.filter(style => style.category === selectedCategory);
+    ? haircutStyles 
+    : haircutStyles.filter((style: HaircutStyle) => style.category === selectedCategory);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -229,7 +74,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
 
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2 mb-8">
-        {categories.map((category) => (
+        {categories.map((category: string) => (
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
@@ -246,7 +91,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
 
       {/* Haircut Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredStyles.map((style) => (
+        {filteredStyles.map((style: HaircutStyle) => (
           <div
             key={style.id}
             className={`group ${style.isPremium && !hasProAccess ? 'cursor-not-allowed' : 'cursor-pointer'}`}
@@ -360,15 +205,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
         ))}
       </div>
 
-      {/* Bottom Info */}
-      <div className="mt-12 text-center">
-        <p className="text-muted-foreground mb-4">
-          Can't find the perfect style? Our AI will recommend more options based on your face shape.
-        </p>
-        <Button variant="ghost" className="text-primary hover:text-primary/80 font-medium transition-colors">
-          Get AI Recommendations →
-        </Button>
-      </div>
+
     </div>
   );
 }

@@ -138,6 +138,44 @@ const haircutData: Record<string, { name: string; category: string; gender: 'mal
     gender: 'male',
     description: 'Modern crop with textured styling on top'
   },
+  'modern-mullet': {
+    name: 'Modern Mullet',
+    category: 'Medium',
+    gender: 'male',
+    description: 'Contemporary take on the classic mullet with shorter sides',
+    isPremium: true,
+    popularity: 93
+  },
+  'textured-quiff': {
+    name: 'Textured Quiff',
+    category: 'Medium',
+    gender: 'male',
+    description: 'Bold volume with effortless texture and movement',
+    isPremium: true,
+    popularity: 91
+  },
+  'edgar-cut': {
+    name: 'Edgar Cut',
+    category: 'Short',
+    gender: 'male',
+    description: 'Sharp, defined edges with a straight fringe across the forehead',
+    popularity: 88
+  },
+  'broccoli-cut': {
+    name: 'Broccoli Cut',
+    category: 'Short',
+    gender: 'male',
+    description: 'Layered curls on top with tapered sides, embracing natural texture',
+    popularity: 86
+  },
+  'heartthrob-90s': {
+    name: '90s Heartthrob',
+    category: 'Medium',
+    gender: 'male',
+    description: 'Naturally grown out with clean edges for that old money aesthetic',
+    isPremium: true,
+    popularity: 89
+  },
 };
 
 export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: VirtualTryOnProps) {
@@ -163,7 +201,12 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       'Textured Crop': 'textured-crop',
       'Side Part': 'side-part',
       'Quiff': 'quiff',
-      'Undercut Fade': 'undercut-fade'
+      'Undercut Fade': 'undercut-fade',
+      'Modern Mullet': 'modern-mullet',
+      'Textured Quiff': 'textured-quiff',
+      'Edgar Cut': 'edgar-cut',
+      'Broccoli Cut': 'broccoli-cut',
+      '90s Heartthrob': 'heartthrob-90s'
     };
     
     return nameToKeyMap[name] || selectedHaircut;

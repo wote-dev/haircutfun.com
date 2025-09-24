@@ -222,7 +222,7 @@ const allHaircuts: {
       popularity: 82, 
       trend: "💫", 
       description: "Bold and edgy fade", 
-      image: "/buzzcut.png",
+      image: "/undercut-fade.png",
       variations: {
         'example-1': '/buzzcut.png',
         'example-2': '/FILLER-IMAGES-MALE/buzzcut.png',
