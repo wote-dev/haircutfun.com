@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUsageTracker } from "@/hooks/useUsageTracker";
+import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useStripe } from "@/hooks/useStripe";
 import { SignInButton } from "@/components/auth/SignInButton";
@@ -30,14 +30,13 @@ export function UpgradePrompt({
 }: UpgradePromptProps) {
   const [isVisible, setIsVisible] = useState(true);
   const { user } = useAuth();
-  const { hasPremium, remainingTries } = useUsageTracker();
-  const { createCheckoutSession, isLoading } = useStripe();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { hasProAccess, canGenerate, freeTriesUsed } = useFreemiumAccess();
+  const { isLoading } = useStripe();
   const router = useRouter();
   const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/try-on';
 
-  // Don't show if user already has premium
-  if (hasPremium || !isVisible) {
+  // Don't show if user already has pro access
+  if (hasProAccess || !isVisible) {
     return null;
   }
 
@@ -46,12 +45,11 @@ export function UpgradePrompt({
     onDismiss?.();
   };
 
-  const handleUpgrade = async (planType: 'pro' | 'premium') => {
+  const handleUpgrade = async () => {
     if (!user) return;
     
-    setLoadingPlan(planType);
-    await createCheckoutSession(planType);
-    setLoadingPlan(null);
+    // Redirect to pricing page for one-time payment
+    router.push('/pricing');
   };
 
   // Default content based on trigger
@@ -68,7 +66,7 @@ export function UpgradePrompt({
         return {
           title: title || "You're on Fire! 🔥",
           description: description || "Looks like you love trying new styles! Upgrade to keep the creativity flowing.",
-          subtitle: `All ${remainingTries + 1} free generations used`
+          subtitle: `Free try used - unlock unlimited access`
         };
       case 'premium_feature':
         return {
@@ -153,13 +151,13 @@ export function UpgradePrompt({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Crown className="h-5 w-5 text-primary" />
-              Pro Benefits
+              Pro Access - One-Time Payment
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3">
               <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-              <span className="text-sm">25+ monthly haircut generations</span>
+              <span className="text-sm">Unlimited haircut generations</span>
             </div>
             <div className="flex items-center gap-3">
               <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
@@ -168,6 +166,10 @@ export function UpgradePrompt({
             <div className="flex items-center gap-3">
               <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
               <span className="text-sm">High-resolution downloads</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+              <span className="text-sm">No monthly fees ever</span>
             </div>
           </CardContent>
         </Card>
@@ -184,24 +186,11 @@ export function UpgradePrompt({
           ) : (
             <>
               <Button 
-                onClick={() => handleUpgrade('pro')}
-                disabled={isLoading || loadingPlan === 'pro'}
+                onClick={handleUpgrade}
+                disabled={isLoading}
                 className="w-full"
               >
-                {loadingPlan === 'pro' ? 'Processing...' : 'Upgrade to Pro - $9.99/month'}
-              </Button>
-              <Button 
-                onClick={() => handleUpgrade('premium')}
-                disabled={isLoading || loadingPlan === 'premium'}
-                variant="outline"
-                className="w-full"
-              >
-                {loadingPlan === 'premium' ? 'Processing...' : 'Premium - $19.99/month'}
-              </Button>
-              <Button variant="outline" asChild className="w-full">
-                <Link href="/pricing">
-                  View All Plans
-                </Link>
+                Unlock Pro Access - $4.99 One-Time
               </Button>
             </>
           )}

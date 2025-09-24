@@ -21,16 +21,6 @@ export async function GET() {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    // Fetch most recent subscription: prefer updated_at, then created_at
-    const { data: subscription, error: subscriptionError } = await service
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
     // Fetch usage for current month
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
     const { data: usage, error: usageError } = await service
@@ -42,10 +32,9 @@ export async function GET() {
 
     // Log non-fatal errors server-side for diagnostics (no secrets)
     if (profileError) console.warn('user-data: profileError', profileError.message);
-    if (subscriptionError) console.warn('user-data: subscriptionError', subscriptionError.message);
     if (usageError) console.warn('user-data: usageError', usageError.message);
 
-    return NextResponse.json({ profile: profile ?? null, subscription: subscription ?? null, usage: usage ?? null });
+    return NextResponse.json({ profile: profile ?? null, usage: usage ?? null });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });

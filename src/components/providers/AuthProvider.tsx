@@ -189,9 +189,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshUserData = async () => {
     if (user) {
       console.log('AuthProvider: Manually refreshing user data...');
-      // Clear subscription cache before refreshing
-      const { clearSubscriptionCache } = await import('../../lib/subscription-utils');
-      clearSubscriptionCache(user.id);
       await fetchUserData(user.id);
     }
   };

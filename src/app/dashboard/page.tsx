@@ -3,19 +3,20 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useFreemiumAccess } from '@/hooks/useFreemiumAccess';
 import { Check, Crown, Zap, ArrowRight, Sparkles, TrendingUp, Calendar, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ThreeDotLoader } from '@/components/ui/three-dot-loader';
-import { clearSubscriptionCache } from '@/lib/subscription-utils';
 
 // Component that handles search params
 function DashboardContent() {
-  const { user, subscription, usage, loading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { hasProAccess, freeTriesUsed, canGenerate } = useFreemiumAccess();
   const [showSuccess, setShowSuccess] = useState(false);
   
   const success = searchParams.get('success');
@@ -35,22 +36,20 @@ function DashboardContent() {
     }
   }, [success, plan, router]);
 
-  // After successful checkout, proactively refresh subscription from server/Stripe
+  // After successful checkout, proactively refresh user data
   useEffect(() => {
     const doRefresh = async () => {
       if (success === 'true' && user?.id) {
         try {
-          // Clear any cached status so UI re-computes
-          clearSubscriptionCache(user.id);
-          const resp = await fetch('/api/subscription/refresh', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.id })
+          // Refresh user profile data
+          const resp = await fetch('/api/user/profile', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
           });
           const json = await resp.json();
-          console.log('🔄 Post-checkout subscription refresh result:', json);
+          console.log('🔄 Post-checkout profile refresh result:', json);
         } catch (e) {
-          console.error('Failed to refresh subscription after checkout:', e);
+          console.error('Failed to refresh profile after checkout:', e);
         }
       }
     };
@@ -79,27 +78,17 @@ function DashboardContent() {
     return null; // Will redirect
   }
 
-  const planType = subscription?.plan_type || 'free';
-  const isPremiumUser = subscription?.status === 'active' && planType !== 'free';
+  const isPremiumUser = hasProAccess;
   
-  // Debug: Log subscription data
-  console.log('Dashboard subscription data:', {
-    subscription,
-    planType,
-    isPremiumUser,
-    status: subscription?.status,
+  // Debug: Log freemium data
+  console.log('Dashboard freemium data:', {
+    hasProAccess,
+    freeTriesUsed,
+    canGenerate,
     user_id: user?.id
   });
   
-  // Use correct plan limits based on subscription type, not database plan_limit
-  const planLimits = {
-    free: 1,
-    pro: 25,
-    premium: 75
-  };
-  
-  const currentPlanLimit = planLimits[planType as keyof typeof planLimits] || 1;
-  const remainingTries = usage ? Math.max(0, currentPlanLimit - usage.generations_used) : currentPlanLimit;
+  const remainingTries = hasProAccess ? '∞' : (freeTriesUsed === 0 ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -117,7 +106,7 @@ function DashboardContent() {
                     🎉 Welcome to {plan === 'pro' ? 'Pro' : 'Premium'}!
                   </h3>
                   <p className="text-green-700 mt-1">
-                    Your subscription is now active. Start creating amazing haircuts!
+                    Your Pro access is now active. Start creating amazing haircuts!
                   </p>
                 </div>
               </div>
@@ -145,22 +134,14 @@ function DashboardContent() {
           </h1>
           <div className="flex items-center gap-2">
             <Badge variant={isPremiumUser ? "default" : "secondary"} className="text-sm">
-              {isPremiumUser 
-                ? `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`
-                : 'Free Plan'
-              }
+              {isPremiumUser ? 'Pro Plan' : 'Free Plan'}
             </Badge>
-            {isPremiumUser && subscription?.current_period_end && (
-              <span className="text-muted-foreground text-sm">
-                • Active until {new Date(subscription.current_period_end).toLocaleDateString()}
-              </span>
-            )}
           </div>
         </div>
 
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Subscription Status Card */}
+          {/* Pro Status Card */}
           <div className="lg:col-span-2">
             <Card className={isPremiumUser ? 'border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5' : ''}>
               <CardHeader>
@@ -173,7 +154,7 @@ function DashboardContent() {
                     )}
                     <div>
                       <CardTitle className="text-xl">
-                        {isPremiumUser ? `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan` : 'Free Plan'}
+                        {isPremiumUser ? 'Pro Plan' : 'Free Plan'}
                       </CardTitle>
                       <CardDescription>
                         {isPremiumUser 
@@ -216,10 +197,10 @@ function DashboardContent() {
                         <Activity className="h-5 w-5 text-accent" />
                         <div>
                           <div className="text-2xl font-bold text-foreground">
-                            {usage?.generations_used || 0}
+                            {freeTriesUsed}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            Tries used this month
+                            Free tries used
                           </div>
                         </div>
                       </div>
@@ -259,24 +240,6 @@ function DashboardContent() {
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                
-                {isPremiumUser && (
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between h-12"
-                    size="lg"
-                    onClick={() => {
-                      // This would open customer portal
-                      fetch('/api/customer-portal', { method: 'POST' })
-                        .then(res => res.json())
-                        .then(data => {
-                          if (data.url) window.location.href = data.url;
-                        });
-                    }}
-                  >
-                    Manage Subscription
-                  </Button>
-                )}
               </CardContent>
             </Card>
 

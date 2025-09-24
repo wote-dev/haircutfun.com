@@ -14,17 +14,33 @@ export function ThreeDotLoader({ className = '', size = 'md' }: ThreeDotLoaderPr
 
   return (
     <div className={`flex items-center justify-center space-x-1 ${className}`}>
+      <style jsx>{`
+        @keyframes dot-flashing {
+          0% {
+            opacity: 0.2;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0.2;
+          }
+        }
+        .dot-flashing {
+          animation: dot-flashing 1.4s infinite linear;
+        }
+      `}</style>
       <div 
-        className={`${dotSize} bg-primary rounded-full animate-pulse`}
-        style={{ animationDelay: '0ms', animationDuration: '1.4s' }}
+        className={`${dotSize} bg-primary rounded-full dot-flashing`}
+        style={{ animationDelay: '0s' }}
       />
       <div 
-        className={`${dotSize} bg-primary rounded-full animate-pulse`}
-        style={{ animationDelay: '200ms', animationDuration: '1.4s' }}
+        className={`${dotSize} bg-primary rounded-full dot-flashing`}
+        style={{ animationDelay: '0.2s' }}
       />
       <div 
-        className={`${dotSize} bg-primary rounded-full animate-pulse`}
-        style={{ animationDelay: '400ms', animationDuration: '1.4s' }}
+        className={`${dotSize} bg-primary rounded-full dot-flashing`}
+        style={{ animationDelay: '0.4s' }}
       />
     </div>
   );

@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useUsageTracker } from "@/hooks/useUsageTracker";
-import { LimitReachedPrompt, PremiumFeaturePrompt, CompactUpgradePrompt } from "@/components/UpgradePrompt";
+import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 interface VirtualTryOnProps {
 
@@ -148,11 +148,9 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
   const [description, setDescription] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
-  const [showLimitPrompt, setShowLimitPrompt] = useState(false);
-  const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
-  const [premiumFeatureName, setPremiumFeatureName] = useState('');
   
-  const { canUseFree, hasPremium, remainingTries, needsUpgrade, useFreeTry, isAuthenticated, isLoading: usageLoading } = useUsageTracker();
+  const { user } = useAuth();
+  const { hasProAccess, freeTriesUsed, canGenerate, isLoading: freemiumLoading } = useFreemiumAccess();
   const resultSectionRef = useRef<HTMLDivElement>(null);
 
   // Map trending haircut names to haircutData keys
@@ -175,61 +173,36 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
   const selectedStyle = haircutData[haircutKey];
 
   useEffect(() => {
-    // Generate if usage data is loaded (for both authenticated and non-authenticated users)
-    if (!usageLoading) {
+    // Generate if freemium data is loaded
+    if (!freemiumLoading) {
       generateHaircutImage();
     }
-  }, [userPhoto, selectedHaircut, usageLoading]);
+  }, [userPhoto, selectedHaircut, freemiumLoading]);
 
   const generateHaircutImage = async () => {
-    // Check if haircut is premium and user doesn't have access
-    if (selectedStyle?.isPremium && !hasPremium) {
-      setPremiumFeatureName(selectedStyle.name);
-      setShowPremiumPrompt(true);
-      setIsProcessing(false);
-      return;
-    }
-
-    // Check if user can generate images (both authenticated and non-authenticated users get free tries)
-    if (!canUseFree && !hasPremium) {
-      setShowLimitPrompt(true);
-      setIsProcessing(false);
-      return;
-    }
+    setIsProcessing(true);
+    setError(null);
+    setGeneratedImage(null);
 
     try {
-      setIsProcessing(true);
-      setError(null);
-      
-      // Use a free try if not premium
-      if (!hasPremium) {
-        // TEMPORARY: For testing, allow non-authenticated users to generate unlimited hairstyles
-        if (isAuthenticated) {
-          await useFreeTry();
-        }
-        // Non-authenticated users can proceed without tracking usage
-      }
-      
       const response = await fetch('/api/generate-haircut', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userPhoto: userPhoto,
-          haircutStyle: selectedStyle?.name,
-          haircutDescription: selectedStyle?.description,
-          isFirstTry: !isAuthenticated && remainingTries === 1, // First try for non-authenticated users
+          userPhoto,
+          haircutStyle: selectedHaircut,
+          isFirstTry: !user && freeTriesUsed === 0, // For non-authenticated users, check if it's their first try
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        // Handle specific error cases
         if (response.status === 402 && data?.error === 'Free trial used') {
-          // Non-authenticated user has used their free try
-          setShowLimitPrompt(true);
+          // User has used their free try
+          setShowPaywall(true);
           setIsProcessing(false);
           return;
         }
@@ -244,7 +217,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
         setDescription(''); // Clear any previous description
         
         // Update localStorage for non-authenticated users after successful generation
-        if (!isAuthenticated && !hasPremium) {
+        if (!user && !hasProAccess) {
           try {
             const currentMonth = new Date().toISOString().slice(0, 7);
             const localData = {
@@ -305,11 +278,36 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
       <div className="max-w-4xl mx-auto">
         <div className="text-center">
           <div className="bg-background border rounded-2xl p-12">
-            {/* Simple Three Dot Loader */}
+            {/* Three Dot Loader with proper animation */}
             <div className="flex justify-center items-center space-x-2 mb-6">
-              <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
-              <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-              <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              <style jsx>{`
+                @keyframes dot-flashing {
+                  0% {
+                    opacity: 0.2;
+                  }
+                  50% {
+                    opacity: 1;
+                  }
+                  100% {
+                    opacity: 0.2;
+                  }
+                }
+                .dot-flashing {
+                  animation: dot-flashing 1.4s infinite linear;
+                }
+              `}</style>
+              <div 
+                className="w-3 h-3 bg-primary rounded-full dot-flashing"
+                style={{ animationDelay: '0s' }}
+              />
+              <div 
+                className="w-3 h-3 bg-primary rounded-full dot-flashing"
+                style={{ animationDelay: '0.2s' }}
+              />
+              <div 
+                className="w-3 h-3 bg-primary rounded-full dot-flashing"
+                style={{ animationDelay: '0.4s' }}
+              />
             </div>
             
             <h3 className="text-2xl font-bold text-foreground mb-4">
@@ -375,16 +373,16 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-foreground mb-4">
-              Upgrade to Continue
+              Unlock Pro Access
             </h3>
             <p className="text-lg text-muted-foreground mb-6">
-              You've used all {remainingTries + 2} free tries! Upgrade to Pro for 25 monthly generations or Premium for 75 monthly generations.
+              You've used your free try! Get unlimited haircut generations with Pro Access for just $4.99 one-time.
             </p>
             <div className="bg-muted/50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-muted-foreground mb-2">✨ With Pro you get:</p>
+              <p className="text-sm text-muted-foreground mb-2">✨ With Pro Access you get:</p>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• 25 monthly haircut generations</li>
-                <li>• Access to premium hairstyles</li>
+                <li>• Unlimited haircut generations</li>
+                <li>• Access to all premium hairstyles</li>
                 <li>• High-resolution downloads</li>
                 <li>• Priority processing</li>
               </ul>
@@ -392,7 +390,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="px-8 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
                 <Link href="/pricing">
-                  Upgrade to Pro
+                  Get Pro Access - $4.99
                 </Link>
               </Button>
               <Button
@@ -423,13 +421,13 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
           </p>
         </div>
         <div className="flex items-center space-x-4">
-          {!hasPremium && (
+          {!hasProAccess && (
             <div className="bg-muted/50 px-3 py-2 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                {remainingTries > 0 ? (
-                  <span className="text-primary font-medium">{remainingTries} free tries left</span>
+                {freeTriesUsed === 0 ? (
+                  <span className="text-primary font-medium">1 free try available</span>
                 ) : (
-                  <span className="text-orange-500 font-medium">No free tries left</span>
+                  <span className="text-orange-500 font-medium">Free try used</span>
                 )}
               </p>
             </div>
@@ -645,6 +643,30 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {['bob-classic', 'long-layers', 'shag-modern'].filter(id => id !== selectedHaircut).slice(0, 3).map((styleId) => {
             const style = haircutData[styleId];
+            if (!style) return null;
+            
+            return (
+              <div key={styleId} className="bg-background border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg mb-3 flex items-center justify-center">
+                  <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <h5 className="font-medium text-foreground mb-1">{style.name}</h5>
+                <p className="text-xs text-muted-foreground">{style.category}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {/* Recommendations */}
+      <div className="bg-muted/30 rounded-2xl p-8">
+        <h4 className="text-xl font-semibold text-foreground mb-4">
+          You Might Also Like
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {['bob-classic', 'long-layers', 'shag-modern'].filter(id => id !== selectedHaircut).slice(0, 3).map((styleId) => {
+            const style = haircutData[styleId];
             return (
               <div key={styleId} className="bg-background border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer">
                 <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg mb-3 flex items-center justify-center">
@@ -659,18 +681,6 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
           })}
         </div>
       </div>
-
-      {/* Upgrade Prompts */}
-      {showLimitPrompt && (
-        <LimitReachedPrompt onDismiss={() => setShowLimitPrompt(false)} />
-      )}
-      
-      {showPremiumPrompt && (
-        <PremiumFeaturePrompt 
-          feature={premiumFeatureName}
-          onDismiss={() => setShowPremiumPrompt(false)} 
-        />
-      )}
     </div>
   );
 }

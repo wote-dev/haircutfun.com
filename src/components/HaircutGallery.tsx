@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useUsageTracker } from "@/hooks/useUsageTracker";
+import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
 import { Button } from "@/components/ui/button";
 
 interface HaircutGalleryProps {
@@ -174,7 +174,7 @@ const categories = ['All', 'Short', 'Medium', 'Long'];
 
 export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onBack }: HaircutGalleryProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const { hasPremium, remainingTries } = useUsageTracker();
+  const { hasProAccess, canGenerate } = useFreemiumAccess();
   const [hoveredStyle, setHoveredStyle] = useState<string | null>(null);
 
   // Filter by gender first, then by category
@@ -248,11 +248,11 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
         {filteredStyles.map((style) => (
           <div
             key={style.id}
-            className={`group ${style.isPremium && !hasPremium ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+            className={`group ${style.isPremium && !hasProAccess ? 'cursor-not-allowed' : 'cursor-pointer'}`}
             onMouseEnter={() => setHoveredStyle(style.id)}
             onMouseLeave={() => setHoveredStyle(null)}
             onClick={() => {
-              if (style.isPremium && !hasPremium) {
+              if (style.isPremium && !hasProAccess) {
                 // Don't allow selection of premium styles for free users
                 return;
               }
@@ -260,7 +260,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
             }}
           >
             <div className={`bg-background border rounded-2xl overflow-hidden transition-colors ${
-              style.isPremium && !hasPremium 
+              style.isPremium && !hasProAccess 
                 ? 'opacity-75 hover:opacity-90' 
                 : 'hover:border-primary/50'
             }`}>
@@ -302,7 +302,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
                 {hoveredStyle === style.id && (
                   <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
                     <div className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium">
-                      {style.isPremium && !hasPremium ? (
+                      {style.isPremium && !hasProAccess ? (
                         <Link href="/pricing" className="flex items-center gap-2">
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

@@ -6,9 +6,9 @@ export async function POST(request: NextRequest) {
   try {
     const { planType } = await request.json();
 
-    if (!planType || !['pro', 'premium'].includes(planType)) {
+    if (!planType || planType !== 'pro') {
       return NextResponse.json(
-        { error: 'Invalid plan type' },
+        { error: 'Invalid plan type. Only "pro" is supported.' },
         { status: 400 }
       );
     }
@@ -24,49 +24,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already has an active PAID subscription (exclude free and null)
-    const { data: existingSubscription, error: subscriptionError } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .in('plan_type', ['pro', 'premium'])
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    // Check if user already has pro access
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('has_pro_access')
+      .eq('id', user.id)
+      .single();
 
-    if (subscriptionError) {
-      console.error('Error checking existing subscription:', subscriptionError);
+    if (profileError) {
+      console.error('Error checking existing pro access:', profileError);
       return NextResponse.json(
-        { error: 'Failed to check subscription status' },
+        { error: 'Failed to check pro access status' },
         { status: 500 }
       );
     }
 
-    if (existingSubscription && (existingSubscription.plan_type === 'pro' || existingSubscription.plan_type === 'premium')) {
-      // Get the origin for redirect URL
-      const { origin } = new URL(request.url);
-      const customerPortalUrl = `${origin}/api/customer-portal`;
-      
-      if (existingSubscription.plan_type === planType) {
-        return NextResponse.json(
-          { 
-            error: 'You already have an active subscription to this plan',
-            code: 'EXISTING_SUBSCRIPTION_SAME_PLAN',
-            redirectUrl: customerPortalUrl
-          },
-          { status: 409 }
-        );
-      } else {
-        return NextResponse.json(
-          { 
-            error: 'You already have an active subscription. Please manage your subscription to change plans.',
-            code: 'EXISTING_SUBSCRIPTION_DIFFERENT_PLAN',
-            redirectUrl: customerPortalUrl
-          },
-          { status: 409 }
-        );
-      }
+    if (profile?.has_pro_access) {
+      return NextResponse.json(
+        { 
+          error: 'You already have Pro access',
+          code: 'EXISTING_PRO_ACCESS'
+        },
+        { status: 409 }
+      );
     }
 
     // Get the origin for success/cancel URLs (port-aware)

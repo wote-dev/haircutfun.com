@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUsageTracker } from "@/hooks/useUsageTracker";
+import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useStripe } from "@/hooks/useStripe";
 import { SignInButton } from "@/components/auth/SignInButton";
@@ -17,30 +17,26 @@ interface PaymentGateProps {
 
 export function PaymentGate({ feature, description, children, showUpgrade = true }: PaymentGateProps) {
   const { user } = useAuth();
-  const { hasPremium, remainingTries, usageData } = useUsageTracker();
-  const { createCheckoutSession, isLoading } = useStripe();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { canGenerate, hasProAccess, freeTriesUsed } = useFreemiumAccess();
+  const { isLoading } = useStripe();
   const router = useRouter();
   const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/try-on';
 
-  // If user has premium access, render children
-  if (hasPremium) {
+  // If user has pro access, render children
+  if (hasProAccess) {
     return <>{children}</>;
   }
 
-  // Hard paywall: Only allow access if user has remaining tries
-  // For authenticated users: check database usage
-  // For non-authenticated users: check localStorage
-  if (remainingTries > 0) {
+  // Hard paywall: Only allow access if user can generate
+  if (canGenerate) {
     return <>{children}</>;
   }
 
-  const handleUpgrade = async (planType: 'pro' | 'premium') => {
+  const handleUpgrade = () => {
     if (!user) return;
     
-    setLoadingPlan(planType);
-    await createCheckoutSession(planType);
-    setLoadingPlan(null);
+    // Redirect to pricing page for one-time payment
+    router.push('/pricing');
   };
 
   // Show payment gate for non-premium users
@@ -82,7 +78,7 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
               <svg className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              25+ monthly haircut generations
+              Unlimited haircut generations
             </li>
             <li className="flex items-center">
               <svg className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,6 +104,12 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
               </svg>
               Save and organize your looks
             </li>
+            <li className="flex items-center">
+              <svg className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              No monthly fees ever
+            </li>
           </ul>
         </div>
 
@@ -126,47 +128,25 @@ export function PaymentGate({ feature, description, children, showUpgrade = true
                   href="/pricing"
                   className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  View all pricing options →
+                  View pricing →
                 </Link>
               </>
             ) : (
               <>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => handleUpgrade('pro')}
-                    disabled={isLoading || loadingPlan === 'pro'}
-                    className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl smooth-gradient-hover disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loadingPlan === 'pro' ? (
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Processing...</span>
-                      </div>
-                    ) : (
-                      'Upgrade to Pro ($4.99)'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => handleUpgrade('premium')}
-                    disabled={isLoading || loadingPlan === 'premium'}
-                    className="flex-1 bg-gradient-to-r from-accent to-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl smooth-gradient-hover disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loadingPlan === 'premium' ? (
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Processing...</span>
-                      </div>
-                    ) : (
-                      'Go Premium ($12.99)'
-                    )}
-                  </button>
-                </div>
-                <Link 
-                  href="/pricing"
-                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                <button
+                  onClick={handleUpgrade}
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-3 px-6 rounded-xl smooth-gradient-hover disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Compare all plans →
-                </Link>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Processing...</span>
+                    </div>
+                  ) : (
+                    'Unlock Pro Access - $4.99 One-Time'
+                  )}
+                </button>
               </>
             )}
           </div>

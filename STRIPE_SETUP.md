@@ -1,6 +1,6 @@
 # Stripe Integration Setup Guide
 
-This guide will help you set up Stripe payments for your Next.js application.
+This guide will help you set up Stripe one-time payments for your Next.js application.
 
 ## Prerequisites
 
@@ -36,12 +36,10 @@ STRIPE_SECRET_KEY=sk_test_...
 
 4. For webhook secret, go to Developers > Webhooks
 5. Create a new webhook endpoint: `http://localhost:3000/api/webhooks/stripe`
-6. Select these events:
-   - `customer.subscription.created`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
-   - `invoice.payment_succeeded`
-   - `invoice.payment_failed`
+6. Select these events for one-time payments:
+   - `checkout.session.completed`
+   - `payment_intent.succeeded`
+   - `payment_intent.payment_failed`
 7. Copy the webhook secret to your `.env.local` file:
 
 ```env
@@ -56,40 +54,19 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## Database Setup
 
-Run the following SQL in your Supabase SQL editor to create the necessary tables:
+The application uses a simplified freemium model with one-time payments. The necessary tables are already created through migrations:
 
-```sql
--- Create subscriptions table
-CREATE TABLE IF NOT EXISTS subscriptions (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  stripe_customer_id TEXT UNIQUE,
-  stripe_subscription_id TEXT UNIQUE,
-  status TEXT,
-  plan_type TEXT,
-  current_period_start TIMESTAMPTZ,
-  current_period_end TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+- `user_profiles` - User profile information with `has_pro_access` boolean
+- `user_usage` - Tracks daily usage limits for free users
+- `payments` - Records one-time payment transactions
 
--- Create RLS policies
-ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view own subscription" ON subscriptions
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Service role can manage subscriptions" ON subscriptions
-  FOR ALL USING (auth.role() = 'service_role');
-```
+No additional database setup is required as migrations handle the schema.
 
 ## Stripe Products Setup
 
-1. Go to Stripe dashboard > Products
-2. Create two products:
-   - **Pro Plan**: $9.99/month
-   - **Premium Plan**: $19.99/month
-3. Note down the price IDs and update them in `/src/lib/stripe/config.ts`
+The application uses dynamic pricing for one-time payments. No pre-configured products are needed in Stripe dashboard as the checkout session creates the product dynamically:
+
+- **Pro Access**: $4.99 one-time payment for unlimited generations
 
 ## Testing
 
@@ -105,19 +82,18 @@ CREATE POLICY "Service role can manage subscriptions" ON subscriptions
 - User session management
 
 ### Payment Components
-- **Pricing Page**: `/pricing` - Displays plans with Stripe checkout
+- **Pricing Page**: `/pricing` - Displays one-time payment option
 - **PaymentGate**: Blocks premium features for free users
-- **UpgradePrompt**: Modal prompts for upgrades
+- **UpgradePrompt**: Modal prompts for one-time upgrade
 
 ### API Endpoints
-- `/api/checkout` - Creates Stripe checkout sessions
-- `/api/customer-portal` - Creates customer portal sessions
-- `/api/webhooks/stripe` - Handles Stripe webhook events
+- `/api/checkout` - Creates Stripe checkout sessions for one-time payments
+- `/api/webhooks/stripe` - Handles Stripe webhook events for payments
 
 ### Hooks
 - `useAuth` - Authentication state management
-- `useStripe` - Stripe operations (checkout, portal)
-- `useUsageTracker` - Track user usage and limits
+- `useStripe` - Stripe operations (checkout)
+- `useFreemiumAccess` - Track user access and freemium limits
 
 ## Deployment Notes
 

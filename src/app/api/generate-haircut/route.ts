@@ -45,37 +45,25 @@ export async function POST(request: NextRequest) {
           .eq('month_year', currentMonth)
           .single();
 
-        const { data: subscriptionData, error: subscriptionError } = await supabase
-          .from('subscriptions')
-          .select('status, plan_type')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('has_pro_access')
+          .eq('id', user.id)
           .single();
 
         // Check for database connection issues
-        if (subscriptionError && subscriptionError.code !== 'PGRST116') {
-          console.error('Database connection error (subscriptions):', subscriptionError);
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Database connection error (profiles):', profileError);
           return NextResponse.json({ 
             details: 'Database connection error. Please try again later.' 
           }, { status: 503 });
         }
 
-        // Determine the actual plan type
-        const planType = (subscriptionData?.status === 'active' 
-          ? (subscriptionData.plan_type as 'pro' | 'premium') 
-          : 'free') as 'free' | 'pro' | 'premium';
+        // Determine if user has pro access
+        const hasProAccess = profileData?.has_pro_access || false;
         
-        // Set limits based on actual plan type
-        const planLimits = {
-          free: 1,
-          pro: 25,
-          premium: 75
-        };
-        
-        // isPremium should only be true for paid plans (pro/premium), not free plans
-        const isPremium = subscriptionData?.status === 'active' && planType !== 'free';
-        const maxGenerations = planLimits[planType];
+        // Set limits based on pro access
+        const maxGenerations = hasProAccess ? Infinity : MAX_FREE_TRIES;
 
       currentUsage = usageData;
 
@@ -148,7 +136,7 @@ export async function POST(request: NextRequest) {
         console.log('API: Non-authenticated user has already used their free try');
         return NextResponse.json({ 
           error: 'Free trial used', 
-          details: 'You\'ve used your free try! Sign up for Pro to get 25 monthly generations or Premium for 75 monthly generations.' 
+          details: 'You\'ve used your free try! Upgrade to Pro for unlimited generations with a one-time payment of $4.99.' 
         }, { status: 402 });
       }
       

@@ -36,29 +36,14 @@ export function getStripePublishableKey(): string {
 // Legacy export for backward compatibility
 export const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
 
-// Stripe price IDs (these should be set in your environment variables)
-export const STRIPE_PRICE_IDS = {
-  pro: process.env.STRIPE_PRO_PRICE_ID || '',
-  premium: process.env.STRIPE_PREMIUM_PRICE_ID || '',
-} as const;
-
-// Runtime validation for Stripe price IDs
-export function validateStripePriceIds(): void {
-  if (!process.env.STRIPE_PRO_PRICE_ID) {
-    throw new Error('STRIPE_PRO_PRICE_ID is not set in environment variables');
+// Get validated price ID for a plan (only pro is supported for one-time payments)
+export function getStripePriceId(planType: 'pro'): string {
+  // For one-time payments, we don't use predefined price IDs
+  // The price is created dynamically in the checkout session
+  if (planType !== 'pro') {
+    throw new Error(`Unsupported plan type: ${planType}. Only 'pro' is supported.`);
   }
-  if (!process.env.STRIPE_PREMIUM_PRICE_ID) {
-    throw new Error('STRIPE_PREMIUM_PRICE_ID is not set in environment variables');
-  }
-}
-
-// Get validated price ID for a plan
-export function getStripePriceId(planType: 'pro' | 'premium'): string {
-  const priceId = STRIPE_PRICE_IDS[planType];
-  if (!priceId) {
-    throw new Error(`STRIPE_${planType.toUpperCase()}_PRICE_ID is not set in environment variables`);
-  }
-  return priceId;
+  return 'pro'; // Return the plan type as identifier
 }
 
 // Plan configurations
@@ -78,28 +63,16 @@ export const PLAN_CONFIGS = {
   pro: {
     name: 'Pro',
     price: 4.99,
-    generationsLimit: 25,
+    generationsLimit: Infinity,
     features: [
-      '25 virtual haircut tries per month',
+      'Unlimited virtual haircut generations',
       'Access to ALL premium hairstyles',
       'Priority processing speed',
       'Save & compare results',
-      'Priority customer support'
-    ]
-  },
-  premium: {
-    name: 'Premium',
-    price: 12.99,
-    generationsLimit: 75,
-    features: [
-      '75 virtual haircut tries per month',
-      'Everything in Pro plan',
-      'Personalized style recommendations',
-      'Early access to new features',
-      'White-glove customer support',
-      'Commercial usage rights'
+      'Priority customer support',
+      'No monthly fees ever'
     ]
   }
 } as const;
 
-export type PlanType = keyof typeof PLAN_CONFIGS;
+export type PlanType = 'free' | 'pro';

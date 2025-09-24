@@ -156,9 +156,9 @@ This guide will help you set up Supabase authentication with Google OAuth for yo
 
 Once authentication is working:
 
-1. Set up Stripe for payments (see Stripe setup guide)
-2. Configure webhook endpoints for subscription management
-3. Test the complete user flow from sign-up to premium features
+1. Set up Stripe for one-time payments (see Stripe setup guide)
+2. Configure webhook endpoints for payment processing
+3. Test the complete user flow from sign-up to pro features
 
 ---
 

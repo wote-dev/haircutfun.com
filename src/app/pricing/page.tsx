@@ -2,109 +2,35 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Star, Zap, Crown, X, AlertCircle } from "lucide-react";
+import { Check, Star, Zap, Crown, X, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { useStripe } from "@/hooks/useStripe";
-import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const pricingTiers = [
-  {
-    name: "Free Trial",
-    price: "$0",
-    period: "forever",
-    description: "Perfect for trying out our AI haircut technology",
-    features: [
-      "1 free virtual haircut try",
-      "Basic hairstyle gallery",
-      "Standard photo upload",
-      "Basic hair analysis",
-      "Community support"
-    ],
-    limitations: [
-      "Limited to 1 try total",
-      "No premium hairstyles",
-      "Standard processing speed"
-    ],
-    buttonText: "Start Free Trial",
-    buttonStyle: "border border-primary text-primary hover:bg-primary hover:text-white smooth-hover",
-    popular: false
-  },
-  {
-    name: "Pro",
-    price: "$4.99",
-    period: "month",
-    description: "25 generations per month plus premium features",
-    features: [
-      "25 virtual haircut tries per month",
-      "Access to ALL premium hairstyles",
-      "Priority processing speed",
-      "Save & compare results",
-      "Priority customer support"
-    ],
-    limitations: [],
-    buttonText: "Start Pro Plan",
-    buttonStyle: "gradient-primary text-white smooth-gradient-hover",
-    popular: true
-  },
-  {
-    name: "Premium",
-    price: "$12.99",
-    period: "month",
-    description: "75 generations per month plus premium features",
-    features: [
-      "75 virtual haircut tries per month",
-      "Everything in Pro plan",
-      "Personalized style recommendations",
-      "Early access to new features",
-      "White-glove customer support",
-      "Commercial usage rights"
-    ],
-    limitations: [],
-    buttonText: "Go Premium",
-    buttonStyle: "gradient-accent text-white smooth-gradient-hover",
-    popular: false
-  }
-];
-
-const faqs = [
-  {
-    question: "How does the free trial work?",
-    answer: "You get 1 completely free virtual haircut try with no credit card required. After using your free generation, you'll see upgrade options to continue using our service with Pro or Premium plans."
-  },
-  {
-    question: "Can I cancel my subscription anytime?",
-    answer: "Yes! You can cancel your subscription at any time. You'll continue to have access until the end of your current billing period."
-  },
-  {
-    question: "What's the difference between Pro and Premium?",
-    answer: "Pro gives you 25 generations per month with access to premium hairstyles and priority support, while Premium offers 75 generations per month plus personalized style recommendations, early access to new features, and white-glove customer support."
-  },
-  {
-    question: "Do you offer refunds?",
-    answer: "We offer a 7-day money-back guarantee for all paid plans. If you're not satisfied, contact us for a full refund."
-  }
-];
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // Toast notification component
 function Toast({ message, type, onClose }: { message: string; type: 'error' | 'warning' | 'success'; onClose: () => void }) {
   const bgColor = type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-green-500';
+  
+  useEffect(() => {
+    const timer = setTimeout(onClose, 5000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
   
   return (
     <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-md animate-in slide-in-from-right duration-300`}>
       <div className="flex items-start gap-3">
         <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
         <div className="flex-1">
-          <p className="font-medium text-sm leading-relaxed">{message}</p>
+          <p className="font-medium">{message}</p>
         </div>
-        <button 
-          onClick={onClose}
-          className="text-white/80 hover:text-white transition-colors"
-        >
+        <button onClick={onClose} className="text-white/80 hover:text-white">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -112,505 +38,434 @@ function Toast({ message, type, onClose }: { message: string; type: 'error' | 'w
   );
 }
 
-export default function PricingPage() {
-  const { user, subscription, loading } = useAuth();
-  const { createCheckoutSession, openCustomerPortal, isLoading } = useStripe();
-  const { 
-    subscriptionStatus, 
-    isLoading: subscriptionLoading, 
-    error: subscriptionError,
-    refreshStatus,
-    refreshFromStripe,
-    isActive,
-    planType,
-    hasValidSubscription 
-  } = useSubscriptionStatus();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: 'error' | 'warning' | 'success' } | null>(null);
-  const [subscriptionCheckFailed, setSubscriptionCheckFailed] = useState(false);
-  const router = useRouter();
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/pricing';
+// Payment form component
+function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (error: string) => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Use the more reliable subscription status from the hook
-  // Check both the subscription status hook and the auth provider subscription
-  const hasActiveSubscription = (isActive && subscriptionStatus?.isActive) || 
-                                (subscription?.status === 'active');
-  const currentPlan = planType || subscription?.plan_type;
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-  // Check if subscription data failed to load (e.g., due to database timeout)
-  useEffect(() => {
-    if (user && !loading && !subscriptionLoading && !hasValidSubscription && subscriptionError) {
-      // If user is logged in, not loading, but subscription check failed
-      const timer = setTimeout(() => {
-        setSubscriptionCheckFailed(true);
-        console.log('Subscription check failed:', subscriptionError);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [user, loading, subscriptionLoading, hasValidSubscription, subscriptionError]);
-
-  // Auto-hide toast after 5 seconds
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  const showToast = (message: string, type: 'error' | 'warning' | 'success') => {
-    setToast({ message, type });
-  };
-
-  const handlePlanSelect = async (planType: 'pro' | 'premium') => {
-    if (!user) {
-      // User needs to sign in first
+    if (!stripe || !elements) {
       return;
     }
 
-    // Double-check subscription status before proceeding
-    console.log('Subscription check:', { 
-      hasActiveSubscription, 
-      currentPlan, 
-      subscription, 
-      subscriptionStatus,
-      isActive,
-      planType,
-      subscriptionError,
-      subscriptionCheckFailed, 
-      loading,
-      subscriptionLoading 
-    });
-    
-    // Only redirect to customer portal if user has a confirmed active subscription
-    // Be more strict about what constitutes an active subscription
-    const hasConfirmedActiveSubscription = hasActiveSubscription && 
-                                          subscriptionStatus && 
-                                          subscriptionStatus.isActive &&
-                                          subscriptionStatus.planType !== 'free';
-    
-    if (hasConfirmedActiveSubscription) {
-      if (currentPlan === planType) {
-        showToast(`You already have the ${planType.charAt(0).toUpperCase() + planType.slice(1)} plan! Redirecting to manage your subscription...`, 'warning');
-      } else {
-        showToast(`You already have an active subscription! Redirecting to manage your subscription...`, 'warning');
-      }
-      console.log('User has confirmed active subscription, opening customer portal...');
-      setLoadingPlan(planType);
-      setTimeout(async () => {
-        await openCustomerPortal();
-        setLoadingPlan(null);
-      }, 1500);
-      return;
-    }
+    setIsProcessing(true);
 
-    // If subscription data failed to load or is unclear, proceed with checkout
-    // The backend API will handle any subscription conflicts
-    setLoadingPlan(planType);
-    
     try {
-      console.log('Proceeding with checkout session creation...');
-      await createCheckoutSession(planType);
-    } catch (error: any) {
-      console.error('Checkout error details:', error);
-      
-      // Handle subscription conflict errors from the API
-      if (error.code === 'EXISTING_SUBSCRIPTION_SAME_PLAN') {
-        console.log('User already has this subscription, opening customer portal...');
-        showToast('You already have this subscription plan! Redirecting to manage your subscription...', 'warning');
-        setTimeout(async () => {
-          await openCustomerPortal();
-        }, 1500);
-      } else if (error.code === 'EXISTING_SUBSCRIPTION_DIFFERENT_PLAN') {
-        console.log('User has different subscription, opening customer portal to manage...');
-        showToast('You already have an active subscription! Redirecting to manage your subscription...', 'warning');
-        setTimeout(async () => {
-          await openCustomerPortal();
-        }, 1500);
-      } else if (error.message && error.message.includes('already have an active subscription')) {
-        // Catch any other subscription-related errors
-        console.log('User has active subscription (caught by message), opening customer portal...');
-        showToast('🚨 You already have an active subscription! Redirecting to manage your subscription...', 'error');
-        setTimeout(async () => {
-          await openCustomerPortal();
-        }, 1500);
-      } else {
-        // Handle other errors
-        console.error('Checkout error:', error);
-        showToast(error.message || 'An error occurred while creating your subscription. Please try again.', 'error');
+      // Create payment intent
+      const response = await fetch('/api/payment/create-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const { client_secret, payment_intent_id, error } = await response.json();
+
+      if (error) {
+        onError(error);
+        return;
       }
+
+      // Confirm payment
+      const { error: stripeError } = await stripe.confirmCardPayment(client_secret, {
+        payment_method: {
+          card: elements.getElement(CardElement)!,
+        }
+      });
+
+      if (stripeError) {
+        onError(stripeError.message || 'Payment failed');
+        return;
+      }
+
+      // Confirm with our backend
+      const confirmResponse = await fetch('/api/payment/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ payment_intent_id }),
+      });
+
+      const confirmResult = await confirmResponse.json();
+
+      if (confirmResult.error) {
+        onError(confirmResult.error);
+        return;
+      }
+
+      onSuccess();
+
+    } catch (error) {
+      onError('Payment processing failed');
+    } finally {
+      setIsProcessing(false);
     }
-    
-    setLoadingPlan(null);
-  };
-
-  const PricingButton = ({ tier }: { tier: typeof pricingTiers[0] }) => {
-    const planType = tier.name.toLowerCase() as 'pro' | 'premium';
-    const isPaidPlan = tier.name === 'Pro' || tier.name === 'Premium';
-    const isLoadingThisPlan = loadingPlan === planType;
-    
-    // More strict check for current plan - ensure we have a confirmed active paid subscription
-    const hasConfirmedActiveSubscription = hasActiveSubscription && 
-                                          subscriptionStatus && 
-                                          subscriptionStatus.isActive &&
-                                          subscriptionStatus.planType !== 'free' &&
-                                          currentPlan && 
-                                          currentPlan !== 'free';
-    const isCurrentPlan = hasConfirmedActiveSubscription && currentPlan === planType;
-
-    if (tier.name === 'Free Trial') {
-      return (
-        <Link 
-          href="/try-on" 
-          className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors duration-200"
-        >
-          {tier.buttonText}
-        </Link>
-      );
-    }
-
-    if (!user) {
-      return (
-        <SignInButton 
-          className="w-full bg-primary hover:bg-primary/90 text-white hover:text-white transition-colors duration-200"
-          redirectTo={currentPath}
-          variant="ghost"
-          size="lg"
-        >
-          Sign In to Subscribe
-        </SignInButton>
-      );
-    }
-
-    // Show current plan status
-    if (isCurrentPlan) {
-      return (
-        <Button
-          onClick={async () => {
-            setLoadingPlan(planType);
-            await openCustomerPortal();
-            setLoadingPlan(null);
-          }}
-          disabled={isLoading || isLoadingThisPlan}
-          className="w-full bg-green-500 hover:bg-green-600 text-white transition-colors duration-200"
-          size="lg"
-        >
-          {isLoadingThisPlan ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span className="font-semibold">Loading...</span>
-            </div>
-          ) : (
-            <span className="font-semibold">✓ Current Plan - Manage</span>
-          )}
-        </Button>
-      );
-    }
-
-    // Show upgrade/change plan for users with different active subscriptions
-    if (hasConfirmedActiveSubscription && !isCurrentPlan) {
-      const isUpgrade = (currentPlan === 'pro' && planType === 'premium');
-      const isDowngrade = (currentPlan === 'premium' && planType === 'pro');
-      
-      return (
-        <Button
-          onClick={async () => {
-            setLoadingPlan(planType);
-            await openCustomerPortal();
-            setLoadingPlan(null);
-          }}
-          disabled={isLoading || isLoadingThisPlan}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200"
-          size="lg"
-        >
-          {isLoadingThisPlan ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span className="font-semibold">Loading...</span>
-            </div>
-          ) : (
-            <span className="font-semibold">
-              {isUpgrade ? 'Upgrade Plan' : isDowngrade ? 'Change Plan' : 'Change Plan'}
-            </span>
-          )}
-        </Button>
-      );
-    }
-
-    return (
-      <Button
-        onClick={() => handlePlanSelect(planType)}
-        disabled={isLoading || isLoadingThisPlan}
-        className="w-full bg-primary hover:bg-primary/90 text-white transition-colors duration-200"
-        size="lg"
-      >
-        {isLoadingThisPlan ? (
-          <div className="flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-            <span className="font-semibold">Processing...</span>
-          </div>
-        ) : (
-          <span className="font-semibold">{tier.buttonText}</span>
-        )}
-      </Button>
-    );
   };
 
   return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="p-4 border rounded-lg">
+        <CardElement
+          options={{
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                  color: '#aab7c4',
+                },
+              },
+            },
+          }}
+        />
+      </div>
+      <Button 
+        type="submit" 
+        disabled={!stripe || isProcessing}
+        className="w-full gradient-primary text-white"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          'Unlock Pro Access - $4.99'
+        )}
+      </Button>
+    </form>
+  );
+}
+
+export default function PricingPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'warning' | 'success' } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ has_pro_access: boolean; free_tries_used: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+
+  // Fetch user profile and usage
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    } else {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch('/api/user/profile');
+      if (response.ok) {
+        const data = await response.json();
+        setUserProfile(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentForm(false);
+    setToast({ message: 'Pro access unlocked! You now have unlimited tries.', type: 'success' });
+    fetchUserProfile(); // Refresh profile
+  };
+
+  const handlePaymentError = (error: string) => {
+    setToast({ message: error, type: 'error' });
+  };
+
+  const handleGetStarted = () => {
+    if (!user) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    if (userProfile?.has_pro_access) {
+      router.push('/try-on');
+      return;
+    }
+
+    if (userProfile?.free_tries_used === 0) {
+      router.push('/try-on');
+      return;
+    }
+
+    // User has used their free try, show payment form
+    setShowPaymentForm(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-screen bg-background">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 pt-32 pb-8">
-        <div className="container mx-auto px-4 text-center">
-          <Badge variant="secondary" className="mb-6">
-            <Zap className="h-4 w-4 mr-2" />
-            1 Free Try - No Credit Card Required
-          </Badge>
-          
-          <h1 className="text-5xl font-bold text-foreground mb-6 sm:text-6xl lg:text-7xl">
-            Simple, transparent pricing
+      <section className="py-20 px-4">
+        <div className="container mx-auto text-center max-w-4xl">
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
+            Try Before You Cut
           </h1>
-          <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-            Start with a free trial, then choose the plan that fits your needs. 
-            All plans include access to our AI-powered hairstyling technology.
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            See how you'd look with any hairstyle using our AI-powered virtual try-on technology. 
+            Start with 1 free try, then unlock unlimited access.
           </p>
+          
+          {user && userProfile?.has_pro_access && (
+            <div className="inline-flex items-center space-x-3 bg-green-100 rounded-full px-6 py-3 mb-8">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-green-800 font-semibold">
+                ✓ You have Pro Access - Unlimited tries!
+              </span>
+            </div>
+          )}
         </div>
       </section>
-
-      {/* Subscription Status Banner */}
-      {user && loading && (
-        <section className="py-4 bg-blue-50 border-b border-blue-200">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center gap-3 text-blue-800">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-sm font-medium">
-                Loading your subscription status...
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
-      
-      {user && subscriptionCheckFailed && !hasActiveSubscription && (
-        <section className="py-4 bg-yellow-50 border-b border-yellow-200">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center gap-3 text-yellow-800">
-              <AlertCircle className="w-4 h-4" />
-              <p className="text-sm font-medium">
-                ⚠️ Unable to verify subscription status. If you have an existing subscription, clicking a plan will redirect you to manage it.
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
-      
-      {user && hasActiveSubscription && (
-        <section className="py-8 bg-green-50 border-y border-green-200">
-          <div className="container mx-auto px-4 text-center">
-            <div className="inline-flex items-center space-x-3 bg-green-100 rounded-full px-6 py-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-green-800 font-semibold">
-                  ✓ You're currently subscribed to the {currentPlan?.charAt(0).toUpperCase()}{currentPlan?.slice(1)} plan
-                </span>
-              </div>
-            </div>
-            <p className="text-green-700 text-sm mt-2">
-              Use the "Manage" or "Change Plan" buttons below to modify your subscription
-            </p>
-          </div>
-        </section>
-      )}
 
       {/* Pricing Cards */}
-      <section className="py-8 relative">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {pricingTiers.map((tier, index) => (
-              <Card
-                key={tier.name}
-                className={`relative transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                  tier.popular 
-                    ? 'border-2 border-primary shadow-md' 
-                    : 'border border-border hover:border-primary/50'
-                }`}
-              >
-                {tier.popular && (
-                  <Badge className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white shadow-md z-10 px-4 py-2 text-sm font-semibold">
-                    <Star className="h-4 w-4 mr-2 fill-current" />
-                    Most Popular
-                  </Badge>
+      <section className="py-16 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            
+            {/* Free Trial */}
+            <Card className="relative border-2 border-gray-200 hover:border-purple-300 transition-all duration-300">
+              <CardHeader className="text-center pb-8">
+                <CardTitle className="text-2xl font-bold text-gray-900">Free Trial</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-gray-900">$0</span>
+                </div>
+                <CardDescription className="text-gray-600 mt-2">
+                  Perfect for trying out our technology
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>1 free virtual haircut try</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Access to all hairstyles</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>High-quality AI processing</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>No credit card required</span>
+                  </div>
+                </div>
+                
+                {user && userProfile && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600">
+                      Free tries used: {userProfile.free_tries_used}/1
+                    </p>
+                  </div>
                 )}
-                
-                <CardHeader className="text-center pb-8">
-                  <div className="flex justify-center mb-4">
-                    {tier.name === 'Free Trial' && <Zap className="h-12 w-12 text-primary" />}
-                    {tier.name === 'Pro' && <Star className="h-12 w-12 text-primary" />}
-                    {tier.name === 'Premium' && <Crown className="h-12 w-12 text-primary" />}
+              </CardContent>
+              
+              <CardFooter>
+                <Button 
+                   onClick={handleGetStarted}
+                   className="w-full border border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white transition-colors"
+                   disabled={user && userProfile && userProfile.free_tries_used >= 1 && userProfile.has_pro_access === false}
+                 >
+                   {!user ? 'Sign Up Free' : 
+                    userProfile?.has_pro_access ? 'Start Creating' :
+                    (userProfile?.free_tries_used ?? 0) >= 1 ? 'Free Try Used' : 'Start Free Trial'}
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* Pro Access */}
+            <Card className="relative border-2 border-purple-500 hover:border-purple-600 transition-all duration-300 shadow-lg">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1">
+                  <Star className="w-4 h-4 mr-1" />
+                  Most Popular
+                </Badge>
+              </div>
+              
+              <CardHeader className="text-center pb-8 pt-8">
+                <CardTitle className="text-2xl font-bold text-gray-900">Pro Access</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-purple-600">$4.99</span>
+                  <span className="text-gray-600 ml-2">one-time</span>
+                </div>
+                <CardDescription className="text-gray-600 mt-2">
+                  Unlimited access forever
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span className="font-medium">Unlimited virtual haircut tries</span>
                   </div>
-                  <CardTitle className="text-2xl font-bold mb-2">{tier.name}</CardTitle>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold text-foreground">
-                      {tier.price}
-                    </span>
-                    {tier.period && <span className="text-muted-foreground ml-1">/{tier.period}</span>}
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Access to ALL premium hairstyles</span>
                   </div>
-                  <p className="text-muted-foreground">{tier.description}</p>
-                </CardHeader>
-                
-                <CardContent className="px-6 pb-6">
-                  <ul className="space-y-3 mb-6">
-                    {tier.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-                          <Check className="h-3 w-3 text-primary" />
-                        </div>
-                        <span className="text-sm text-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  {tier.limitations.length > 0 && (
-                    <div className="border-t pt-4 mt-4">
-                      <p className="text-xs text-muted-foreground mb-2 font-medium">Limitations:</p>
-                      <ul className="space-y-1">
-                        {tier.limitations.map((limitation, limitIndex) => (
-                          <li key={limitIndex} className="flex items-center gap-2">
-                            <X className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                            <span className="text-xs text-muted-foreground">{limitation}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="px-6 pb-6">
-                   <PricingButton tier={tier} />
-                 </CardFooter>
-              </Card>
-            ))}
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Priority processing speed</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Save & download results</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>No monthly fees ever</span>
+                  </div>
+                </div>
+              </CardContent>
+              
+              <CardFooter>
+                {user && userProfile?.has_pro_access ? (
+                  <Button 
+                    onClick={() => router.push('/try-on')}
+                    className="w-full gradient-primary text-white"
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    Start Creating
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => user ? setShowPaymentForm(true) : router.push('/auth/signin')}
+                    className="w-full gradient-primary text-white"
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    {user ? 'Unlock Pro Access' : 'Sign Up & Unlock'}
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Features Comparison */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-6">
-              Why choose a paid plan?
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Unlock the full potential of AI-powered hairstyling with monthly generation allowances and premium features
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="pt-8">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <Zap className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-4">Monthly Generations</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Get 25 tries with Pro or 75 tries with Premium - plenty for all your styling needs.
-                </p>
-              </CardContent>
-            </Card>
+      {/* Payment Modal */}
+      {showPaymentForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Unlock Pro Access</h3>
+              <button 
+                onClick={() => setShowPaymentForm(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
             
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="pt-8">
-                <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
-                  <Crown className="h-8 w-8 text-accent" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-4">Premium Styles</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Access premium hairstyles and trending cuts from top stylists.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="pt-8">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <Star className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-4">Priority Support</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Get faster processing and dedicated customer support when you need it.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="mb-6">
+              <p className="text-gray-600 mb-2">One-time payment of $4.99 for:</p>
+              <ul className="space-y-1 text-sm text-gray-700">
+                <li>✓ Unlimited virtual haircut tries</li>
+                <li>✓ Access to all premium hairstyles</li>
+                <li>✓ No monthly fees ever</li>
+              </ul>
+            </div>
+
+            <Elements stripe={stripePromise}>
+              <PaymentForm 
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+              />
+            </Elements>
           </div>
         </div>
-      </section>
+      )}
 
       {/* FAQ Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-6">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to know about our pricing and plans
-            </p>
-          </div>
+      <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto max-w-3xl">
+          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
           
-          <div className="max-w-4xl mx-auto">
-            <div className="grid gap-6">
-              {faqs.map((faq, index) => (
-                <Card key={index} className="border-0 shadow-md">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-left">
-                      {faq.question}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {faq.answer}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+          <div className="space-y-6">
+            <div className="border-b pb-6">
+              <h3 className="font-semibold text-lg mb-2">How does the free trial work?</h3>
+              <p className="text-gray-600">
+                You get 1 completely free virtual haircut try with no credit card required. 
+                After using your free generation, you can unlock unlimited access for just $4.99.
+              </p>
+            </div>
+            
+            <div className="border-b pb-6">
+              <h3 className="font-semibold text-lg mb-2">Is this really a one-time payment?</h3>
+              <p className="text-gray-600">
+                Yes! Unlike subscription services, you pay once and get unlimited access forever. 
+                No monthly fees, no recurring charges.
+              </p>
+            </div>
+            
+            <div className="border-b pb-6">
+              <h3 className="font-semibold text-lg mb-2">What hairstyles are available?</h3>
+              <p className="text-gray-600">
+                We have a comprehensive collection of modern and classic hairstyles for all genders, 
+                including trendy cuts, professional styles, and creative looks.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Do you offer refunds?</h3>
+              <p className="text-gray-600">
+                We offer a 7-day money-back guarantee. If you're not satisfied with the results, 
+                contact us for a full refund.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl font-bold text-foreground mb-6 sm:text-5xl">
-              Ready to Transform Your Look?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
-              Start with 1 free try and discover your perfect hairstyle today!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="px-8">
-                <Link href="/try-on">
-                  Start Free Trial
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="px-8">
-                <Link href="/gallery">
-                  Browse Hairstyles
-                </Link>
-              </Button>
-            </div>
-          </div>
+      <section className="py-16 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+        <div className="container mx-auto text-center max-w-2xl">
+          <h2 className="text-3xl font-bold mb-4">Ready to Find Your Perfect Hairstyle?</h2>
+          <p className="text-xl mb-8 text-purple-100">
+            Join thousands of users who've discovered their ideal look with our AI technology.
+          </p>
+          
+          {!user ? (
+            <SignInButton className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold text-lg">
+              Get Started Free
+            </SignInButton>
+          ) : (
+            <Button 
+              onClick={handleGetStarted}
+              className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold text-lg"
+            >
+              {userProfile?.has_pro_access ? 'Start Creating' : 'Try It Free'}
+            </Button>
+          )}
         </div>
       </section>
-
-      {/* Toast Notification */}
-      {toast && (
-        <Toast 
-          message={toast.message} 
-          type={toast.type} 
-          onClose={() => setToast(null)} 
-        />
-      )}
     </div>
   );
 }
