@@ -187,6 +187,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
   const [description, setDescription] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [hasGeneratedOnce, setHasGeneratedOnce] = useState(false);
   
   const { user } = useAuth();
   const { hasProAccess, freeTriesUsed, canGenerate, isLoading: freemiumLoading } = useFreemiumAccess();
@@ -217,16 +218,21 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
   const selectedStyle = haircutData[haircutKey];
 
   useEffect(() => {
-    // Generate if freemium data is loaded
-    if (!freemiumLoading) {
+    // Only generate if freemium data is loaded AND we haven't generated yet
+    if (!freemiumLoading && !hasGeneratedOnce) {
       generateHaircutImage();
     }
-  }, [userPhoto, selectedHaircut, freemiumLoading]);
+  }, [userPhoto, selectedHaircut, freemiumLoading, hasGeneratedOnce]);
 
-  const generateHaircutImage = async () => {
+  const generateHaircutImage = async (isManualRegeneration = false) => {
     setIsProcessing(true);
     setError(null);
     setGeneratedImage(null);
+    
+    // If it's manual regeneration, reset the flag to allow generation
+    if (isManualRegeneration) {
+      setHasGeneratedOnce(false);
+    }
 
     try {
       const response = await fetch('/api/generate-haircut', {
@@ -259,6 +265,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
       if (data.success && data.imageData) {
         setGeneratedImage(`data:image/jpeg;base64,${data.imageData}`);
         setDescription(''); // Clear any previous description
+        setHasGeneratedOnce(true); // Mark that we've generated an image
         
         // Update localStorage for non-authenticated users after successful generation
         if (!user && !hasProAccess) {
@@ -740,7 +747,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
             )}
             
             <Button
-              onClick={generateHaircutImage}
+              onClick={() => generateHaircutImage(true)}
               disabled={isProcessing}
               variant="outline"
               size="lg"
