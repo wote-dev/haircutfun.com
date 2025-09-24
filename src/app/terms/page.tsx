@@ -132,7 +132,7 @@ export default function TermsOfUse() {
                 If you have any questions about these Terms of Use, please contact us at:
               </p>
               <p className="text-gray-700">
-                Email: legal@haircutfun.com
+                Email: admin@blackcubesolutions.com
               </p>
             </section>
           </div>

@@ -110,7 +110,7 @@ export default function PrivacyPolicy() {
                 If you have any questions about this Privacy Policy, please contact us at:
               </p>
               <p className="text-gray-700">
-                Email: privacy@haircutfun.com
+                Email: admin@blackcubesolutions.com
               </p>
             </section>
           </div>
