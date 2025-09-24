@@ -78,22 +78,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('AuthProvider: Profile data received:', profileData);
         
         // Create a profile object that matches the expected structure
-        const profile = {
+        const profile: UserProfile = {
+          id: profileData.id || crypto.randomUUID(),
           user_id: userId,
+          full_name: profileData.full_name || null,
+          avatar_url: profileData.avatar_url || null,
+          email: profileData.email || null,
           has_pro_access: profileData.has_pro_access || false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          created_at: profileData.created_at || new Date().toISOString(),
+          updated_at: profileData.updated_at || new Date().toISOString()
         };
         
         setProfile(profile);
       } else {
         console.warn('AuthProvider: Profile endpoint failed, setting default profile');
-        setProfile({
+        const defaultProfile: UserProfile = {
+          id: crypto.randomUUID(),
           user_id: userId,
+          full_name: null,
+          avatar_url: null,
+          email: null,
           has_pro_access: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        });
+        };
+        setProfile(defaultProfile);
       }
 
       // Fetch current month usage (might not exist for new users)
@@ -119,12 +128,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error('AuthProvider: Error fetching user data:', error);
       console.log('AuthProvider: Setting default values due to error');
-      setProfile({
+      const errorProfile: UserProfile = {
+        id: crypto.randomUUID(),
         user_id: userId,
+        full_name: null,
+        avatar_url: null,
+        email: null,
         has_pro_access: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      });
+      };
+      setProfile(errorProfile);
       setUsage(null);
     }
   };
@@ -173,7 +187,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
     setSession(null);
     setProfile(null);
-    setSubscription(null);
     setUsage(null);
     
     try {
