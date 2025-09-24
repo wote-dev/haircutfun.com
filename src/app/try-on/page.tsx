@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { GenderSelection } from "@/components/GenderSelection";
 import { HaircutGallery } from "@/components/HaircutGallery";
@@ -16,9 +16,10 @@ type Gender = 'male' | 'female';
 
 export default function TryOnPage() {
   const [currentStep, setCurrentStep] = useState<Step>('upload');
-  const [uploadedPhoto, setUploadedPhoto] = useState<string>('');
+  const [uploadedPhoto, setUploadedPhoto] = useState('');
   const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
-  const [selectedHairstyle, setSelectedHairstyle] = useState<string>('');
+  const [selectedHairstyle, setSelectedHairstyle] = useState('');
+  const virtualTryOnRef = useRef<HTMLDivElement>(null);
 
   const handlePhotoUpload = (photoUrl: string) => {
     setUploadedPhoto(photoUrl);
@@ -30,9 +31,17 @@ export default function TryOnPage() {
     setCurrentStep('hairstyle');
   };
 
-  const handleHairstyleSelect = (hairstyle: string) => {
+  const handleHaircutSelect = (hairstyle: string) => {
     setSelectedHairstyle(hairstyle);
     setCurrentStep('result');
+    
+    // Auto-scroll to the VirtualTryOn component (loader) after a brief delay
+    setTimeout(() => {
+      virtualTryOnRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 100);
   };
 
   const resetFlow = () => {
@@ -308,7 +317,7 @@ export default function TryOnPage() {
                 <HaircutGallery 
                   userPhoto={uploadedPhoto}
                   selectedGender={selectedGender} 
-                  onHaircutSelect={handleHairstyleSelect}
+                  onHaircutSelect={handleHaircutSelect}
                   onBack={() => setCurrentStep('gender')}
                 />
               </CardContent>
@@ -345,12 +354,14 @@ export default function TryOnPage() {
                     </Badge>
                   </div>
                 </div>
-                <VirtualTryOn 
-                  userPhoto={uploadedPhoto}
-                  selectedHaircut={selectedHairstyle}
-                  onReset={resetFlow}
-                  onBack={() => setCurrentStep('hairstyle')}
-                />
+                <div ref={virtualTryOnRef}>
+                  <VirtualTryOn 
+                    userPhoto={uploadedPhoto}
+                    selectedHaircut={selectedHairstyle}
+                    onReset={resetFlow}
+                    onBack={() => setCurrentStep('hairstyle')}
+                  />
+                </div>
               </CardContent>
             </Card>
           )}
