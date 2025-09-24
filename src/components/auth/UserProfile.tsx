@@ -27,27 +27,48 @@ export function UserProfile() {
   const updatePosition = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const dropdownWidth = 320; // 80 * 4 (w-80 in Tailwind)
+      const isMobile = window.innerWidth < 768; // md breakpoint
+      const dropdownWidth = isMobile ? Math.min(320, window.innerWidth - 32) : 320; // Responsive width
       const dropdownHeight = 400; // Approximate height
       const gap = 8;
       
-      // Calculate optimal position
       let top = rect.bottom + gap;
       let left = rect.left;
       
-      // Ensure dropdown doesn't go off-screen horizontally
-      if (left + dropdownWidth > window.innerWidth) {
-        left = window.innerWidth - dropdownWidth - 16; // 16px margin from edge
+      if (isMobile) {
+        // On mobile, center the dropdown horizontally and ensure it fits
+        left = Math.max(16, Math.min(
+          (window.innerWidth - dropdownWidth) / 2, // Center it
+          window.innerWidth - dropdownWidth - 16 // But don't go off-screen
+        ));
+        
+        // On mobile, prefer positioning below the button, but with better spacing
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        if (spaceBelow < dropdownHeight + 32 && spaceAbove > spaceBelow) {
+          // Position above if there's more space above
+          top = Math.max(16, rect.top - dropdownHeight - gap);
+        } else {
+          // Position below with safe margins
+          top = Math.min(rect.bottom + gap, window.innerHeight - dropdownHeight - 16);
+        }
+      } else {
+        // Desktop positioning logic
+        // Ensure dropdown doesn't go off-screen horizontally
+        if (left + dropdownWidth > window.innerWidth) {
+          left = window.innerWidth - dropdownWidth - 16;
+        }
+        
+        // Ensure dropdown doesn't go off-screen vertically
+        if (top + dropdownHeight > window.innerHeight) {
+          top = rect.top - dropdownHeight - gap;
+        }
+        
+        // Ensure minimum distance from edges
+        top = Math.max(16, top);
+        left = Math.max(16, left);
       }
-      
-      // Ensure dropdown doesn't go off-screen vertically
-      if (top + dropdownHeight > window.innerHeight) {
-        top = rect.top - dropdownHeight - gap; // Position above button
-      }
-      
-      // Ensure minimum distance from edges
-      top = Math.max(16, top);
-      left = Math.max(16, left);
       
       setButtonPosition({ top, left });
     }
@@ -171,8 +192,9 @@ export function UserProfile() {
               position: 'fixed',
               top: `${buttonPosition.top}px`,
               left: `${buttonPosition.left}px`,
+              width: window.innerWidth < 768 ? `${Math.min(320, window.innerWidth - 32)}px` : '320px',
             }}
-            className="w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 py-2"
+            className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 py-2 max-h-[80vh] overflow-y-auto"
           >
             {/* User Info Section */}
             <div className="px-4 py-4 border-b border-gray-100/50">
@@ -202,7 +224,7 @@ export function UserProfile() {
                   setIsOpen(false);
                   router.push('/dashboard');
                 }}
-                className="flex items-center w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50/80 transition-colors group"
+                className="flex items-center w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-50/80 transition-colors group touch-manipulation"
               >
                 <svg className="h-4 w-4 mr-3 text-gray-400 group-hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -214,7 +236,7 @@ export function UserProfile() {
               <button
                 onClick={handleSignOut}
                 disabled={isSigningOut}
-                className={`flex items-center w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-colors group ${isSigningOut ? 'opacity-60 cursor-not-allowed' : ''}`}
+                className={`flex items-center w-full text-left px-4 py-4 text-sm text-red-600 hover:bg-red-50/80 transition-colors group touch-manipulation ${isSigningOut ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <svg className="h-4 w-4 mr-3 text-red-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

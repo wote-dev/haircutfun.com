@@ -8,9 +8,9 @@ import { useFreemiumAccess } from "@/hooks/useFreemiumAccess";
 import { useAuth } from "@/components/providers/AuthProvider";
 
 interface VirtualTryOnProps {
-
   userPhoto: string;
   selectedHaircut: string;
+  selectedGender: 'male' | 'female';
   onReset: () => void;
   onBack: () => void;
 }
@@ -178,7 +178,7 @@ const haircutData: Record<string, { name: string; category: string; gender: 'mal
   },
 };
 
-export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: VirtualTryOnProps) {
+export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onReset, onBack }: VirtualTryOnProps) {
   const [isProcessing, setIsProcessing] = useState(true);
   const [showComparison, setShowComparison] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -786,22 +786,30 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, onReset, onBack }: Vi
           You Might Also Like
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {['bob-classic', 'long-layers', 'shag-modern'].filter(id => id !== selectedHaircut).slice(0, 3).map((styleId) => {
-            const style = haircutData[styleId];
-            if (!style) return null;
-            
-            return (
-              <div key={styleId} className="bg-background border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg mb-3 flex items-center justify-center">
-                  <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <h5 className="font-medium text-foreground mb-1">{style.name}</h5>
-                <p className="text-xs text-muted-foreground">{style.category}</p>
-              </div>
-            );
-          })}
+          {Object.entries(haircutData)
+            .filter(([styleId, style]) => 
+              style.gender === selectedGender && 
+              styleId !== mapHaircutNameToKey(selectedHaircut)
+            )
+            .sort(() => Math.random() - 0.5) // Randomize the order
+            .slice(0, 3)
+            .map(([styleId, style]) => {
+              return (
+                <Link 
+                  key={styleId} 
+                  href={`/try-on?haircut=${encodeURIComponent(style.name)}&gender=${selectedGender}`}
+                  className="bg-background border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer block"
+                >
+                  <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg mb-3 flex items-center justify-center">
+                    <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <h5 className="font-medium text-foreground mb-1">{style.name}</h5>
+                  <p className="text-xs text-muted-foreground">{style.category}</p>
+                </Link>
+              );
+            })}
         </div>
       </div>
     </div>

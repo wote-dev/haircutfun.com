@@ -406,6 +406,7 @@ function TryOnPageContent() {
                   <VirtualTryOn 
                     userPhoto={uploadedPhoto}
                     selectedHaircut={selectedHairstyle}
+                    selectedGender={selectedGender!}
                     onReset={resetFlow}
                     onBack={() => preSelectedHaircut ? setCurrentStep('upload') : setCurrentStep('hairstyle')}
                   />
