@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('has_pro_access')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (profileError) {

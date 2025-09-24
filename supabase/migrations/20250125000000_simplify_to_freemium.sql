@@ -5,6 +5,9 @@
 ALTER TABLE public.user_profiles 
 ADD COLUMN IF NOT EXISTS has_pro_access BOOLEAN DEFAULT FALSE;
 
+-- Add index for the new column
+CREATE INDEX IF NOT EXISTS idx_user_profiles_has_pro_access ON public.user_profiles(has_pro_access);
+
 -- Create simple usage tracking table for free users (1 try limit)
 CREATE TABLE IF NOT EXISTS public.user_usage (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -52,6 +55,11 @@ CREATE POLICY "Users can view own payments" ON public.payments
 CREATE POLICY "Users can insert own payments" ON public.payments
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+-- Drop existing functions if they exist (to handle return type changes)
+DROP FUNCTION IF EXISTS public.increment_usage(UUID);
+DROP FUNCTION IF EXISTS public.can_user_generate(UUID);
+DROP FUNCTION IF EXISTS public.grant_pro_access(UUID);
+
 -- Update the handle_new_user function to create user_usage record
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -80,34 +88,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Ensure the trigger exists
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- Function to grant pro access after successful payment
-CREATE OR REPLACE FUNCTION public.grant_pro_access(p_user_id UUID, p_payment_intent_id TEXT)
+CREATE OR REPLACE FUNCTION public.grant_pro_access(p_user_id UUID)
 RETURNS BOOLEAN AS $$
-DECLARE
-    payment_exists BOOLEAN;
 BEGIN
-    -- Check if payment exists and succeeded
-    SELECT EXISTS(
-        SELECT 1 FROM public.payments 
-        WHERE user_id = p_user_id 
-        AND stripe_payment_intent_id = p_payment_intent_id 
-        AND status = 'succeeded'
-    ) INTO payment_exists;
+    UPDATE public.user_profiles
+    SET has_pro_access = TRUE,
+        updated_at = NOW()
+    WHERE user_id = p_user_id;
     
-    IF payment_exists THEN
-        -- Grant pro access
-        UPDATE public.user_profiles 
-        SET has_pro_access = TRUE, updated_at = NOW()
-        WHERE user_id = p_user_id;
-        
-        RETURN TRUE;
-    END IF;
-    
-    RETURN FALSE;
+    RETURN FOUND;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Function to check if user can generate (for free users)
+-- Function to check if user can generate (free users: 1 try, pro users: unlimited)
 CREATE OR REPLACE FUNCTION public.can_user_generate(p_user_id UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -125,7 +125,7 @@ BEGIN
     END IF;
     
     -- Free users get 1 try
-    SELECT COALESCE(free_tries_used, 0) INTO tries_used
+    SELECT free_tries_used INTO tries_used
     FROM public.user_usage
     WHERE user_id = p_user_id;
     

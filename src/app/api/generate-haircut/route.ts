@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/service-client';
 
 console.log("GEMINI_API_KEY check:", process.env.GEMINI_API_KEY ? `Loaded, starting with ${process.env.GEMINI_API_KEY.substring(0, 8)}...` : "!!!!!!!! NOT LOADED !!!!!!!");
 
@@ -13,12 +12,6 @@ const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
-
-const MAX_FREE_TRIES = 1;
-
-function getCurrentMonth(): string {
-  return new Date().toISOString().slice(0, 7);
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,94 +25,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    let currentUsage: { generations_used: number; plan_limit: number; } | null = null;
-    const currentMonth = getCurrentMonth();
-
     // Handle authenticated users
     if (user) {
       try {
-        const { data: usageData, error: usageError } = await supabase
-          .from('usage_tracking')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('month_year', currentMonth)
-          .single();
+        // Check if user can generate using the database function
+        const { data: canGenerate, error: canGenerateError } = await supabase
+          .rpc('can_user_generate', { p_user_id: user.id });
 
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('has_pro_access')
-          .eq('id', user.id)
-          .single();
-
-        // Check for database connection issues
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error('Database connection error (profiles):', profileError);
+        if (canGenerateError) {
+          console.error('Error checking user generation permission:', canGenerateError);
           return NextResponse.json({ 
             details: 'Database connection error. Please try again later.' 
           }, { status: 503 });
         }
 
-        // Determine if user has pro access
-        const hasProAccess = profileData?.has_pro_access || false;
-        
-        // Set limits based on pro access
-        const maxGenerations = hasProAccess ? Infinity : MAX_FREE_TRIES;
-
-      currentUsage = usageData;
-
-      if (usageError && usageError.code === 'PGRST116') { // "No rows found"
-        // Use service client for creating usage records to bypass RLS
-        const serviceSupabase = createServiceClient();
-        const { data: newUsage, error: createError } = await serviceSupabase
-          .from('usage_tracking')
-          .insert({
-            user_id: user.id,
-            month_year: currentMonth,
-            generations_used: 0,
-            plan_limit: maxGenerations, // Use dynamic limit
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating usage record:', createError);
-          return NextResponse.json({ details: 'Failed to initialize user usage data.' }, { status: 500 });
-        }
-        currentUsage = newUsage;
-      } else if (usageError) {
-        console.error('Error fetching usage data:', usageError);
-        console.error('Error code:', usageError.code);
-        console.error('Error message:', usageError.message);
-        console.error('Error details:', usageError.details);
-        // Provide more specific error handling
-        if (usageError.code === 'PGRST301') {
-          return NextResponse.json({ details: 'Database connection error. Please try again.' }, { status: 503 });
-        }
-        return NextResponse.json({ 
-          details: 'Failed to retrieve usage data. Please try again or contact support if the issue persists.' 
-        }, { status: 500 });
-      }
-
-      // Update plan_limit if it has changed (e.g., user upgraded)
-      if (currentUsage && currentUsage.plan_limit !== maxGenerations) {
-        // Use service client for updating plan limits to bypass RLS
-        const serviceSupabase = createServiceClient();
-        const { data: updatedUsage, error: updateLimitError } = await serviceSupabase
-          .from('usage_tracking')
-          .update({ plan_limit: maxGenerations })
-          .eq('user_id', user.id)
-          .eq('month_year', currentMonth)
-          .select()
-          .single();
-        if (updateLimitError) {
-            console.error('Error updating plan limit:', updateLimitError);
-        } else {
-            currentUsage = updatedUsage;
-        }
-      }
-
-        if (currentUsage && currentUsage.generations_used >= maxGenerations) {
-          return NextResponse.json({ details: 'You have reached your generation limit. Please upgrade for more.' }, { status: 402 });
+        if (!canGenerate) {
+          return NextResponse.json({ 
+            error: 'Free trial used',
+            details: 'You\'ve used your free try! Upgrade to Pro for unlimited generations with a one-time payment of $4.99.' 
+          }, { status: 402 });
         }
       } catch (error) {
         console.error('Database error for authenticated user:', error);
@@ -207,30 +131,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Increment usage counter on success
-    if (user && currentUsage) {
+    if (user) {
       try {
-        // Use service client to bypass RLS for usage tracking
-        const serviceSupabase = createServiceClient();
-        const { error: updateError } = await serviceSupabase
-          .from('usage_tracking')
-          .update({ generations_used: currentUsage.generations_used + 1 })
-          .eq('user_id', user.id)
-          .eq('month_year', currentMonth);
+        // Use the database function to increment usage
+        const { error: incrementError } = await supabase
+          .rpc('increment_user_usage', { p_user_id: user.id });
 
-        if (updateError) {
-          console.error('CRITICAL: Failed to update usage count for user:', user.id, updateError);
-          console.error('Error details:', {
-            code: updateError.code,
-            message: updateError.message,
-            details: updateError.details,
-            hint: updateError.hint
-          });
+        if (incrementError) {
+          console.error('CRITICAL: Failed to increment usage count for user:', user.id, incrementError);
           // Continue with image generation even if usage tracking fails
         } else {
-          console.log('Successfully updated usage count for user:', user.id);
+          console.log('Successfully incremented usage count for user:', user.id);
         }
       } catch (error) {
-        console.error('Exception during usage update:', error);
+        console.error('Exception during usage increment:', error);
       }
     }
 

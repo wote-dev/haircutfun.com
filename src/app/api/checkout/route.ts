@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
 
     // Check if user already has pro access
     const { data: profile, error: profileError } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .select('has_pro_access')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (profileError) {

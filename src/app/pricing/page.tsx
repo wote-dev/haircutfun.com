@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Star, Zap, Crown, X, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { SignInButton } from "@/components/auth/SignInButton";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -183,8 +182,9 @@ export default function PricingPage() {
   };
 
   const handleGetStarted = () => {
+    // Allow direct access to try-on page for free generation without requiring sign up
     if (!user) {
-      router.push('/auth/signin');
+      router.push('/try-on');
       return;
     }
 
@@ -248,13 +248,13 @@ export default function PricingPage() {
           <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             
             {/* Free Trial */}
-            <Card className="relative border-2 border-gray-200 hover:border-purple-300 transition-all duration-300">
+            <Card className="relative border-2 border-border hover:border-primary/50 transition-all duration-300">
               <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl font-bold text-gray-900">Free Trial</CardTitle>
+                <CardTitle className="text-2xl font-bold text-foreground">Free Trial</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">$0</span>
+                  <span className="text-4xl font-bold text-foreground">$0</span>
                 </div>
-                <CardDescription className="text-gray-600 mt-2">
+                <CardDescription className="text-muted-foreground mt-2">
                   Perfect for trying out our technology
                 </CardDescription>
               </CardHeader>
@@ -280,8 +280,8 @@ export default function PricingPage() {
                 </div>
                 
                 {user && userProfile && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
+                  <div className="mt-4 p-3 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">
                       Free tries used: {userProfile.free_tries_used}/1
                     </p>
                   </div>
@@ -290,11 +290,12 @@ export default function PricingPage() {
               
               <CardFooter>
                 <Button 
-                   onClick={handleGetStarted}
-                   className="w-full border border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white transition-colors"
-                   disabled={user && userProfile && userProfile.free_tries_used >= 1 && userProfile.has_pro_access === false}
-                 >
-                   {!user ? 'Sign Up Free' : 
+                  onClick={handleGetStarted}
+                  className="w-full"
+                  variant="outline"
+                  disabled={Boolean(user && userProfile && userProfile.free_tries_used >= 1 && !userProfile.has_pro_access)}
+                >
+                   {!user ? 'Try It Free' : 
                     userProfile?.has_pro_access ? 'Start Creating' :
                     (userProfile?.free_tries_used ?? 0) >= 1 ? 'Free Try Used' : 'Start Free Trial'}
                 </Button>
@@ -302,21 +303,21 @@ export default function PricingPage() {
             </Card>
 
             {/* Pro Access */}
-            <Card className="relative border-2 border-purple-500 hover:border-purple-600 transition-all duration-300 shadow-lg">
+            <Card className="relative border-2 border-primary hover:border-primary/80 transition-all duration-300 shadow-lg">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1">
+                <Badge className="bg-primary text-primary-foreground px-4 py-1">
                   <Star className="w-4 h-4 mr-1" />
                   Most Popular
                 </Badge>
               </div>
               
               <CardHeader className="text-center pb-8 pt-8">
-                <CardTitle className="text-2xl font-bold text-gray-900">Pro Access</CardTitle>
+                <CardTitle className="text-2xl font-bold text-foreground">Pro Access</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-purple-600">$4.99</span>
-                  <span className="text-gray-600 ml-2">one-time</span>
+                  <span className="text-4xl font-bold text-primary">$4.99</span>
+                  <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
-                <CardDescription className="text-gray-600 mt-2">
+                <CardDescription className="text-muted-foreground mt-2">
                   Unlimited access forever
                 </CardDescription>
               </CardHeader>
@@ -324,23 +325,23 @@ export default function PricingPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-purple-500" />
+                    <Check className="w-5 h-5 text-primary" />
                     <span className="font-medium">Unlimited virtual haircut tries</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-purple-500" />
+                    <Check className="w-5 h-5 text-primary" />
                     <span>Access to ALL premium hairstyles</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-purple-500" />
+                    <Check className="w-5 h-5 text-primary" />
                     <span>Priority processing speed</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-purple-500" />
+                    <Check className="w-5 h-5 text-primary" />
                     <span>Save & download results</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-purple-500" />
+                    <Check className="w-5 h-5 text-primary" />
                     <span>No monthly fees ever</span>
                   </div>
                 </div>
@@ -350,7 +351,7 @@ export default function PricingPage() {
                 {user && userProfile?.has_pro_access ? (
                   <Button 
                     onClick={() => router.push('/try-on')}
-                    className="w-full gradient-primary text-white"
+                    className="w-full"
                   >
                     <Crown className="w-4 h-4 mr-2" />
                     Start Creating
@@ -358,7 +359,7 @@ export default function PricingPage() {
                 ) : (
                   <Button 
                     onClick={() => user ? setShowPaymentForm(true) : router.push('/auth/signin')}
-                    className="w-full gradient-primary text-white"
+                    className="w-full"
                   >
                     <Zap className="w-4 h-4 mr-2" />
                     {user ? 'Unlock Pro Access' : 'Sign Up & Unlock'}
@@ -373,20 +374,20 @@ export default function PricingPage() {
       {/* Payment Modal */}
       {showPaymentForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-card rounded-lg p-6 max-w-md w-full border">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Unlock Pro Access</h3>
+              <h3 className="text-lg font-semibold text-foreground">Unlock Pro Access</h3>
               <button 
                 onClick={() => setShowPaymentForm(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <div className="mb-6">
-              <p className="text-gray-600 mb-2">One-time payment of $4.99 for:</p>
-              <ul className="space-y-1 text-sm text-gray-700">
+              <p className="text-muted-foreground mb-2">One-time payment of $4.99 for:</p>
+              <ul className="space-y-1 text-sm text-foreground">
                 <li>✓ Unlimited virtual haircut tries</li>
                 <li>✓ Access to all premium hairstyles</li>
                 <li>✓ No monthly fees ever</li>
@@ -404,38 +405,38 @@ export default function PricingPage() {
       )}
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-3xl">
-          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-foreground">Frequently Asked Questions</h2>
           
           <div className="space-y-6">
-            <div className="border-b pb-6">
-              <h3 className="font-semibold text-lg mb-2">How does the free trial work?</h3>
-              <p className="text-gray-600">
+            <div className="border-b border-border pb-6">
+              <h3 className="font-semibold text-lg mb-2 text-foreground">How does the free trial work?</h3>
+              <p className="text-muted-foreground">
                 You get 1 completely free virtual haircut try with no credit card required. 
                 After using your free generation, you can unlock unlimited access for just $4.99.
               </p>
             </div>
             
-            <div className="border-b pb-6">
-              <h3 className="font-semibold text-lg mb-2">Is this really a one-time payment?</h3>
-              <p className="text-gray-600">
+            <div className="border-b border-border pb-6">
+              <h3 className="font-semibold text-lg mb-2 text-foreground">Is this really a one-time payment?</h3>
+              <p className="text-muted-foreground">
                 Yes! Unlike subscription services, you pay once and get unlimited access forever. 
                 No monthly fees, no recurring charges.
               </p>
             </div>
             
-            <div className="border-b pb-6">
-              <h3 className="font-semibold text-lg mb-2">What hairstyles are available?</h3>
-              <p className="text-gray-600">
+            <div className="border-b border-border pb-6">
+              <h3 className="font-semibold text-lg mb-2 text-foreground">What hairstyles are available?</h3>
+              <p className="text-muted-foreground">
                 We have a comprehensive collection of modern and classic hairstyles for all genders, 
                 including trendy cuts, professional styles, and creative looks.
               </p>
             </div>
             
             <div>
-              <h3 className="font-semibold text-lg mb-2">Do you offer refunds?</h3>
-              <p className="text-gray-600">
+              <h3 className="font-semibold text-lg mb-2 text-foreground">Do you offer refunds?</h3>
+              <p className="text-muted-foreground">
                 We offer a 7-day money-back guarantee. If you're not satisfied with the results, 
                 contact us for a full refund.
               </p>
@@ -445,25 +446,21 @@ export default function PricingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+      <section className="py-16 px-4 bg-primary text-primary-foreground">
         <div className="container mx-auto text-center max-w-2xl">
           <h2 className="text-3xl font-bold mb-4">Ready to Find Your Perfect Hairstyle?</h2>
-          <p className="text-xl mb-8 text-purple-100">
+          <p className="text-xl mb-8 opacity-90">
             Join thousands of users who've discovered their ideal look with our AI technology.
           </p>
           
-          {!user ? (
-            <SignInButton className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold text-lg">
-              Get Started Free
-            </SignInButton>
-          ) : (
-            <Button 
-              onClick={handleGetStarted}
-              className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold text-lg"
-            >
-              {userProfile?.has_pro_access ? 'Start Creating' : 'Try It Free'}
-            </Button>
-          )}
+          <Button 
+            onClick={handleGetStarted}
+            variant="secondary"
+            className="px-8 py-3 rounded-full font-semibold text-lg"
+          >
+            {!user ? 'Try It Free' : 
+             userProfile?.has_pro_access ? 'Start Creating' : 'Try It Free'}
+          </Button>
         </div>
       </section>
     </div>

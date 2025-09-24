@@ -64,9 +64,58 @@ No additional database setup is required as migrations handle the schema.
 
 ## Stripe Products Setup
 
+### For One-Time Payments (Current Implementation)
+
 The application uses dynamic pricing for one-time payments. No pre-configured products are needed in Stripe dashboard as the checkout session creates the product dynamically:
 
 - **Pro Access**: $4.99 one-time payment for unlimited generations
+
+### For Subscription Model (Future Implementation)
+
+If you want to switch to a subscription model, you'll need to create products in your Stripe Dashboard:
+
+#### Step 1: Create Products in Stripe Dashboard
+
+1. Go to your Stripe Dashboard: https://dashboard.stripe.com
+2. Navigate to **Products** in the left sidebar
+3. Click **"Add product"**
+
+#### Recommended Product Structure:
+
+**Product 1: HaircutFun Pro Monthly**
+- Product name: `HaircutFun Pro Monthly`
+- Description: `Monthly subscription for unlimited AI haircut generations`
+- Pricing model: `Recurring`
+- Price: `$9.99`
+- Billing period: `Monthly`
+- Product ID will be generated (e.g., `prod_xxxxx`)
+- Price ID will be generated (e.g., `price_xxxxx`)
+
+**Product 2: HaircutFun Pro Yearly**
+- Product name: `HaircutFun Pro Yearly`
+- Description: `Yearly subscription for unlimited AI haircut generations (2 months free)`
+- Pricing model: `Recurring`
+- Price: `$99.99`
+- Billing period: `Yearly`
+- Product ID will be generated (e.g., `prod_yyyyy`)
+- Price ID will be generated (e.g., `price_yyyyy`)
+
+#### Step 2: Update Environment Variables
+
+Add the price IDs to your `.env.local` file:
+
+```env
+STRIPE_PRO_MONTHLY_PRICE_ID=price_xxxxx
+STRIPE_PRO_YEARLY_PRICE_ID=price_yyyyy
+```
+
+#### Step 3: Update Code for Subscriptions
+
+You'll need to modify the following files:
+- `src/lib/stripe/client.ts` - Update price ID functions
+- `src/lib/stripe/service.ts` - Change from payment to subscription mode
+- `src/app/api/checkout/route.ts` - Handle subscription creation
+- `src/app/api/webhooks/stripe/route.ts` - Handle subscription events
 
 ## Testing
 
