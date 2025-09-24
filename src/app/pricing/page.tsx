@@ -478,39 +478,39 @@ export default function PricingPage() {
 
       {/* Pro Access Unlocked Modal */}
       {showProAccessUnlocked && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full border-2 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 shadow-2xl">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full border-2 border-primary/50 bg-card shadow-2xl animate-in zoom-in-95 duration-300">
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-                <Crown className="w-8 h-8 text-white" />
+              <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-lg">
+                <Crown className="w-8 h-8 text-primary-foreground" />
               </div>
-              <CardTitle className="text-2xl font-bold text-green-800 dark:text-green-200">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 🎉 Congratulations!
               </CardTitle>
-              <CardDescription className="text-green-700 dark:text-green-300 text-base">
+              <CardDescription className="text-muted-foreground text-base">
                 You have now unlocked Pro Access
               </CardDescription>
             </CardHeader>
             
             <CardContent className="space-y-4 text-center">
               <div className="space-y-3">
-                <div className="flex items-center justify-center gap-3 text-green-800 dark:text-green-200">
-                  <Check className="w-5 h-5 text-green-600" />
+                <div className="flex items-center justify-center gap-3 text-foreground">
+                  <Check className="w-5 h-5 text-primary" />
                   <span className="font-medium">Unlimited virtual haircut tries</span>
                 </div>
-                <div className="flex items-center justify-center gap-3 text-green-800 dark:text-green-200">
-                  <Check className="w-5 h-5 text-green-600" />
+                <div className="flex items-center justify-center gap-3 text-foreground">
+                  <Check className="w-5 h-5 text-primary" />
                   <span className="font-medium">Access to ALL premium hairstyles</span>
                 </div>
-                <div className="flex items-center justify-center gap-3 text-green-800 dark:text-green-200">
-                  <Check className="w-5 h-5 text-green-600" />
+                <div className="flex items-center justify-center gap-3 text-foreground">
+                  <Check className="w-5 h-5 text-primary" />
                   <span className="font-medium">Priority processing speed</span>
                 </div>
               </div>
               
-              <div className="mt-6 p-4 bg-white/50 dark:bg-black/20 rounded-lg border border-green-200 dark:border-green-800">
-                <p className="text-sm text-green-700 dark:text-green-300 font-medium">
-                  Redirecting to Try-On page in a few seconds...
+              <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
+                <p className="text-sm text-muted-foreground font-medium">
+                  Redirecting you back to the homepage...
                 </p>
               </div>
               
@@ -519,7 +519,7 @@ export default function PricingPage() {
                   setShowProAccessUnlocked(false);
                   router.push('/try-on');
                 }}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Start Creating Now
