@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user profile with all necessary fields
+    // Get user profile with pro access status
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('id, user_id, full_name, avatar_url, email, has_pro_access, created_at, updated_at')
+      .select('has_pro_access')
       .eq('user_id', user.id)
       .single();
 
@@ -35,27 +35,13 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching user usage:', usageError);
       // If no usage record exists, assume 0 free tries used
       return NextResponse.json({
-        id: profile.id,
-        user_id: profile.user_id,
-        full_name: profile.full_name,
-        avatar_url: profile.avatar_url,
-        email: profile.email,
         has_pro_access: profile.has_pro_access || false,
-        created_at: profile.created_at,
-        updated_at: profile.updated_at,
         free_tries_used: 0
       });
     }
 
     return NextResponse.json({
-      id: profile.id,
-      user_id: profile.user_id,
-      full_name: profile.full_name,
-      avatar_url: profile.avatar_url,
-      email: profile.email,
       has_pro_access: profile.has_pro_access || false,
-      created_at: profile.created_at,
-      updated_at: profile.updated_at,
       free_tries_used: usage.free_tries_used || 0
     });
 

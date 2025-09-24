@@ -147,7 +147,6 @@ export type Database = {
           full_name: string | null
           avatar_url: string | null
           email: string | null
-          has_pro_access: boolean
           created_at: string
           updated_at: string
         }
@@ -157,7 +156,6 @@ export type Database = {
           full_name?: string | null
           avatar_url?: string | null
           email?: string | null
-          has_pro_access?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -167,7 +165,6 @@ export type Database = {
           full_name?: string | null
           avatar_url?: string | null
           email?: string | null
-          has_pro_access?: boolean
           created_at?: string
           updated_at?: string
         }
