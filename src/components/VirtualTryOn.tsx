@@ -180,7 +180,7 @@ const haircutData: Record<string, { name: string; category: string; gender: 'mal
 };
 
 export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onReset, onBack }: VirtualTryOnProps) {
-  const [isProcessing, setIsProcessing] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -215,13 +215,6 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
 
   const haircutKey = mapHaircutNameToKey(selectedHaircut);
   const selectedStyle = haircutData[haircutKey];
-
-  useEffect(() => {
-    // Generate if freemium data is loaded
-    if (!freemiumLoading) {
-      generateHaircutImage();
-    }
-  }, [userPhoto, selectedHaircut, freemiumLoading]);
 
   const generateHaircutImage = async () => {
     setIsProcessing(true);
@@ -652,14 +645,36 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
                           </svg>
                         </div>
                         <p className="text-lg font-semibold text-foreground mb-3">
-                          Your New {selectedStyle?.name}
+                          Ready to Try {selectedStyle?.name}?
                         </p>
-                        <p className="text-muted-foreground mb-3">
-                          AI-Generated Preview
+                        <p className="text-muted-foreground mb-6">
+                          Click the button below to generate your AI-powered haircut preview
                         </p>
-                        <div className="text-xs text-muted-foreground bg-background/60 rounded px-3 py-2">
-                          ✨ AI-powered haircut preview generated
-                        </div>
+                        <Button
+                          onClick={generateHaircutImage}
+                          disabled={isProcessing || freemiumLoading || (!canGenerate && !hasProAccess)}
+                          size="lg"
+                          className="px-8 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isProcessing ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                              Generate Haircut
+                            </>
+                          )}
+                        </Button>
+                        {!canGenerate && !hasProAccess && (
+                          <p className="text-xs text-orange-500 mt-3">
+                            Free try used. Upgrade to generate more hairstyles.
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
