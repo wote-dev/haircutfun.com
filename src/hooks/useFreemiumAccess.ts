@@ -29,51 +29,16 @@ function getLocalStorageUsage(): { freeTriesUsed: number } {
 }
 
 export function useFreemiumAccess(): FreemiumData {
-  const { user } = useAuth();
-  const [hasProAccess, setHasProAccess] = useState(false);
-  const [freeTriesUsed, setFreeTriesUsed] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, profile, usage, loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
-  // Load user data on mount and when user changes
-  useEffect(() => {
-    async function loadUserData() {
-      if (!user) {
-        // For non-authenticated users, check localStorage
-        const localData = getLocalStorageUsage();
-        setFreeTriesUsed(localData.freeTriesUsed);
-        setHasProAccess(false);
-        setIsLoading(false);
-        return;
-      }
+  // For non-authenticated users, use localStorage
+  const localData = !user ? getLocalStorageUsage() : { freeTriesUsed: 0 };
 
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Fetch user profile data
-        const response = await fetch('/api/user/profile');
-        if (!response.ok) {
-          throw new Error('Failed to fetch user profile');
-        }
-        
-        const data = await response.json();
-        setHasProAccess(data.has_pro_access || false);
-        setFreeTriesUsed(data.free_tries_used || 0);
-      } catch (err) {
-        console.error('Error loading user data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load user data');
-        // Fallback to non-authenticated behavior
-        const localData = getLocalStorageUsage();
-        setFreeTriesUsed(localData.freeTriesUsed);
-        setHasProAccess(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadUserData();
-  }, [user]);
+  // Use data from AuthProvider context
+  const hasProAccess = profile?.has_pro_access || false;
+  const freeTriesUsed = user ? (usage?.generations_used || 0) : localData.freeTriesUsed;
+  const isLoading = loading;
 
   // Determine if user can generate
   const canGenerate = hasProAccess || freeTriesUsed === 0;

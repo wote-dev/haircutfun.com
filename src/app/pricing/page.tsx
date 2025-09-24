@@ -221,41 +221,23 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
 }
 
 export default function PricingPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const router = useRouter();
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'warning' | 'success' } | null>(null);
-  const [userProfile, setUserProfile] = useState<{ has_pro_access: boolean; free_tries_used: number } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showProAccessUnlocked, setShowProAccessUnlocked] = useState(false);
 
-  // Fetch user profile and usage
-  useEffect(() => {
-    if (user) {
-      fetchUserProfile();
-    } else {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  const fetchUserProfile = async () => {
-    try {
-      const response = await fetch('/api/user/profile');
-      if (response.ok) {
-        const data = await response.json();
-        setUserProfile(data);
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Use profile data from AuthProvider context
+  const userProfile = profile ? {
+    has_pro_access: profile.has_pro_access,
+    free_tries_used: 0 // This will be handled by usage data
+  } : null;
 
   const handlePaymentSuccess = () => {
     setShowPaymentForm(false);
     setShowProAccessUnlocked(true);
-    fetchUserProfile(); // Refresh profile
+    // Profile will be automatically updated by AuthProvider
     
     // Auto-hide the Pro Access message after 8 seconds and redirect
     setTimeout(() => {
