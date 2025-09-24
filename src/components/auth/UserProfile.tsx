@@ -195,31 +195,6 @@ export function UserProfile() {
               </div>
             </div>
 
-            {/* Image Gallery Section */}
-            <div className="px-4 py-3 border-b border-gray-100/50">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Your Creations</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {/* Mock images for now */}
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div
-                    key={i}
-                    className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-200"
-                    onClick={() => setShowGallery(true)}
-                  >
-                    <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={() => setShowGallery(true)}
-                className="w-full mt-3 px-3 py-2 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-              >
-                View All Images →
-              </button>
-            </div>
-
             {/* Menu Items */}
             <div className="py-2">
               <button
