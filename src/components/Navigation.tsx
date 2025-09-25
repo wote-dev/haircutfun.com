@@ -157,57 +157,63 @@ export function Navigation() {
               </div>
             </div>
 
-            {/* Mobile menu button - Safari optimized */}
+            {/* Mobile menu button - Ultra-optimized for Safari */}
             <div className="lg:hidden">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 hover:bg-accent/50 transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  setIsOpen(!isOpen);
+                }}
+                className="p-2 hover:bg-accent/50 focus:ring-2 focus:ring-primary focus:ring-offset-2 hamburger-btn"
                 aria-label={isOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isOpen}
                 aria-controls="mobile-menu"
                 style={{
-                  willChange: 'transform',
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent',
+                  WebkitTouchCallout: 'none',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
                   transform: 'translateZ(0)',
                   WebkitTransform: 'translateZ(0)',
                   WebkitBackfaceVisibility: 'hidden'
                 }}
               >
-                <motion.div
-                  animate={{ rotate: isOpen ? 90 : 0 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
+                <div 
+                  className={`hamburger-icon ${isOpen ? 'rotated' : ''}`}
                   style={{
-                    willChange: 'transform',
-                    transform: 'translateZ(0)',
-                    WebkitTransform: 'translateZ(0)',
-                    WebkitBackfaceVisibility: 'hidden'
+                    touchAction: 'manipulation',
+                    pointerEvents: 'none'
                   }}
                 >
                   {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </motion.div>
+                </div>
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Navigation Menu - Optimized for Safari */}
+      {/* Mobile Navigation Menu - Zero-delay optimized for Safari */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.1, ease: "easeOut" }}
-            className="fixed inset-0 z-40 bg-black/20 lg:hidden"
+            transition={{ duration: 0.05, ease: "linear" }}
+            className="fixed inset-0 z-40 bg-black/20 lg:hidden mobile-overlay"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
             style={{
               willChange: 'opacity',
               transform: 'translateZ(0)',
               WebkitTransform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden'
+              WebkitBackfaceVisibility: 'hidden',
+              touchAction: 'manipulation'
             }}
           />
         )}
@@ -217,14 +223,14 @@ export function Navigation() {
         {isOpen && (
           <motion.div
             id="mobile-menu"
-            className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border lg:hidden"
+            className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border lg:hidden mobile-menu"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ 
               type: "tween",
-              duration: 0.15,
-              ease: "easeOut"
+              duration: 0.08,
+              ease: "linear"
             }}
             role="dialog"
             aria-modal="true"
@@ -233,7 +239,8 @@ export function Navigation() {
               willChange: 'transform',
               transform: 'translateZ(0)',
               WebkitTransform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden'
+              WebkitBackfaceVisibility: 'hidden',
+              touchAction: 'manipulation'
             }}
           >
             <div className="flex items-center justify-between p-4 border-b bg-muted/30"

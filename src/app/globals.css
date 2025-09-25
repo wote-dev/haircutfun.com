@@ -404,6 +404,24 @@ body {
     background-color: hsl(var(--background) / 0.98) !important;
   }
 
+  /* Ultra-fast hamburger button - no animations on mobile */
+  .hamburger-btn {
+    transition: none !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hamburger-icon {
+    transition: none !important;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+  }
+
+  .hamburger-icon.rotated {
+    transform: rotate(90deg) translateZ(0);
+    -webkit-transform: rotate(90deg) translateZ(0);
+  }
+
   /* Simplify hover effects on mobile */
   .smooth-scale:hover,
   .smooth-scale-lg:hover {
