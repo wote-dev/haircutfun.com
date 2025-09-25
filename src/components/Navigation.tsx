@@ -187,116 +187,120 @@ export function Navigation() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="fixed inset-0 z-40 bg-black/20 lg:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
         )}
       </AnimatePresence>
 
-      <motion.div
-        id="mobile-menu"
-        className={`
-          fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border
-          transform transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
-          lg:hidden
-        `}
-        initial={false}
-        animate={{ x: isOpen ? 0 : "100%" }}
-        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="mobile-menu-title"
-      >
-        <div className="flex items-center justify-between p-4 border-b bg-muted/30">
-          <h2 id="mobile-menu-title" className="text-lg font-semibold flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Menu
-          </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="p-2 focus:ring-2 focus:ring-primary focus:ring-offset-2"
-            aria-label="Close menu"
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            id="mobile-menu"
+            className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border lg:hidden"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ 
+              type: "tween",
+              duration: 0.25,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-menu-title"
           >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-        
-        <div className="p-4 h-full overflow-y-auto">
-          <div className="flex flex-col space-y-2" role="menu">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.name}
+            <div className="flex items-center justify-between p-4 border-b bg-muted/30">
+              <h2 id="mobile-menu-title" className="text-lg font-semibold flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Menu
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+                className="p-2 focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            <div className="p-4 h-full overflow-y-auto">
+              <div className="flex flex-col space-y-2" role="menu">
+                {navigation.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setIsOpen(false);
+                        navigateWithLoading(item.href);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setIsOpen(false);
+                          navigateWithLoading(item.href);
+                        }
+                      }}
+                      className={`
+                        flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-base font-medium 
+                        transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                        ${isActive 
+                          ? 'text-primary bg-primary/10 border border-primary/20' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        }
+                      `}
+                      role="menuitem"
+                      aria-current={isActive ? 'page' : undefined}
+                      tabIndex={0}
+                    >
+                      <Icon className="h-5 w-5" />
+                      {item.name}
+                      {isActive && (
+                        <Badge variant="secondary" className="ml-auto text-xs">
+                          Current
+                        </Badge>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <div className="pt-6 border-t mt-6 space-y-4">
+                <UserProfile />
+                {!user && (
+                  <SignInButton 
+                    variant="outline"
+                    className="w-full focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    size="lg"
+                  >
+                    Login
+                  </SignInButton>
+                )}
+                <Button 
                   onClick={() => {
                     setIsOpen(false);
-                    navigateWithLoading(item.href);
+                    navigateWithLoading("/try-on", "Preparing your virtual try-on...");
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setIsOpen(false);
-                      navigateWithLoading(item.href);
-                    }
-                  }}
-                  className={`
-                    flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-base font-medium 
-                    transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-                    ${isActive 
-                      ? 'text-primary bg-primary/10 border border-primary/20' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                    }
-                  `}
-                  role="menuitem"
-                  aria-current={isActive ? 'page' : undefined}
-                  tabIndex={0}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-lg"
+                  size="lg"
                 >
-                  <Icon className="h-5 w-5" />
-                  {item.name}
-                  {isActive && (
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      Current
-                    </Badge>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          
-          <div className="pt-6 border-t mt-6 space-y-4">
-            <UserProfile />
-            {!user && (
-              <SignInButton 
-                variant="outline"
-                className="w-full focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                size="lg"
-              >
-                Login
-              </SignInButton>
-            )}
-            <Button 
-              onClick={() => {
-                setIsOpen(false);
-                navigateWithLoading("/try-on", "Preparing your virtual try-on...");
-              }}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-lg"
-              size="lg"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Get Started
-              <Badge variant="secondary" className="ml-2 text-xs">
-                Free
-              </Badge>
-            </Button>
-          </div>
-        </div>
-      </motion.div>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Get Started
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    Free
+                  </Badge>
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -137,12 +137,49 @@ const allHaircuts: {
       popularity: 86, 
       trend: "🔥", 
       description: "Modern textured styling", 
-      image: "/FILLER-IMAGES-MALE/texturedcrop.png",
+      image: "/textered-top.png",
       variations: {
-        'example-1': '/FILLER-IMAGES-MALE/texturedcrop.png',
-        'example-2': '/textered-top.png',
-        'example-3': '/textured-top2.jpg',
-        'example-4': '/textured-top2.jpg'
+        'example-1': '/textered-top.png',    // Daniel
+        'example-2': '/textered-top2.jpg',   // Sarah
+        'example-3': '/textered-top3.jpg',   // Emma
+        'example-4': '/textured-top2.jpg'    // Mike
+      }
+    },
+    { 
+      name: "Modern Mullet", 
+      category: "Medium", 
+      popularity: 93, 
+      trend: "🔥", 
+      description: "Contemporary mullet revival", 
+      isPremium: true, 
+      image: "/modern-mullet1.png",
+      variations: {
+        'example-1': '/modern-mullet1.png',
+        'example-4': '/modern-mullet2.png'
+      }
+    },
+    { 
+      name: "Textured Quiff", 
+      category: "Medium", 
+      popularity: 91, 
+      trend: "✨", 
+      description: "Bold volume with texture", 
+      image: "/quiff.png",
+      variations: {
+        'example-1': '/quiff.png',
+        'example-4': '/quiff2.jpg'
+      }
+    },
+    { 
+      name: "Edgar Cut", 
+      category: "Short", 
+      popularity: 88, 
+      trend: "💫", 
+      description: "Sharp edges with straight fringe", 
+      image: "/edgar-cut2.png",
+      variations: {
+        'example-1': '/edgar-cut2.png',
+        'example-4': '/edgar-cut.png'
       }
     },
     { 
@@ -151,55 +188,12 @@ const allHaircuts: {
       popularity: 91, 
       trend: "✨", 
       description: "Professional classic", 
-      image: "/FILLER-IMAGES-MALE/sidepart.png",
+      image: "/side-part.png",
       variations: {
-        'example-1': '/FILLER-IMAGES-MALE/sidepart.png',
-        'example-2': '/side-part.png',
-        'example-3': '/side-part2.jpg',
-        'example-4': '/side-part2.jpg'
-      }
-    },
-    { 
-      name: "Pompadour", 
-      category: "Medium", 
-      popularity: 89, 
-      trend: "💫", 
-      description: "Classic volume and style", 
-      image: "/FILLER-IMAGES-MALE/Pompadour.png",
-      variations: {
-        'example-1': '/FILLER-IMAGES-MALE/Pompadour.png',
-        'example-2': '/quiff.png',
-        'example-3': '/quiff2.jpg',
-        'example-4': '/quiff2.jpg'
-      }
-    },
-    { 
-      name: "Buzz Cut", 
-      category: "Short", 
-      popularity: 85, 
-      trend: "🔥", 
-      description: "Clean minimalist cut", 
-      isPremium: true, 
-      image: "/FILLER-IMAGES-MALE/buzzcut.png",
-      variations: {
-        'example-1': '/FILLER-IMAGES-MALE/buzzcut.png',
-        'example-2': '/buzzcut.png',
-        'example-3': '/buzzcut2.jpg',
-        'example-4': '/buzzcut2.jpg'
-      }
-    },
-    { 
-      name: "Crew Cut", 
-      category: "Short", 
-      popularity: 83, 
-      trend: "✨", 
-      description: "Military-inspired precision", 
-      image: "/FILLER-IMAGES-MALE/crewcut.jpg",
-      variations: {
-        'example-1': '/FILLER-IMAGES-MALE/crewcut.jpg',
-        'example-2': '/buzzcut.png',
-        'example-3': '/buzzcut2.jpg',
-        'example-4': '/buzzcut2.jpg'
+        'example-1': '/side-part.png',       // Daniel
+        'example-2': '/side-part2.jpg',      // Sarah
+        'example-3': '/side-part3.jpg',      // Emma
+        'example-4': '/side-part2.jpg'       // Mike
       }
     },
     { 
@@ -210,24 +204,63 @@ const allHaircuts: {
       description: "Textured volume style", 
       image: "/quiff.png",
       variations: {
-        'example-1': '/quiff.png',
-        'example-2': '/quiff2.jpg',
-        'example-3': '/quiff2.jpg',
-        'example-4': '/quiff2.jpg'
+        'example-1': '/quiff.png',           // Daniel
+        'example-2': '/quiff2.jpg',          // Sarah
+        'example-3': '/quiff3.jpg',          // Emma
+        'example-4': '/quiff2.jpg'           // Mike
       }
     },
     { 
-      name: "Undercut Fade", 
+      name: "Broccoli Cut", 
       category: "Short", 
-      popularity: 82, 
-      trend: "💫", 
-      description: "Bold and edgy fade", 
-      image: "/undercut-fade.png",
+      popularity: 86, 
+      trend: "🔥", 
+      description: "Layered curls with tapered sides", 
+      image: "/broccoli1.png",
       variations: {
-        'example-1': '/buzzcut.png',
-        'example-2': '/FILLER-IMAGES-MALE/buzzcut.png',
-        'example-3': '/buzzcut2.jpg',
-        'example-4': '/buzzcut2.jpg'
+        'example-1': '/broccoli1.png',
+        'example-4': '/broccoli2.png'
+      }
+    },
+    { 
+      name: "90s Heartthrob", 
+      category: "Medium", 
+      popularity: 89, 
+      trend: "✨", 
+      description: "Old money aesthetic", 
+      isPremium: true, 
+      image: "/90s1.png",
+      variations: {
+        'example-1': '/90s1.png',
+        'example-4': '/90s2.png'
+      }
+    },
+    { 
+      name: "Buzz Cut", 
+      category: "Short", 
+      popularity: 85, 
+      trend: "🔥", 
+      description: "Clean minimalist cut", 
+      isPremium: true, 
+      image: "/buzzcut.png",
+      variations: {
+        'example-1': '/buzzcut.png',         // Daniel
+        'example-2': '/buzzcut2.jpg',        // Sarah
+        'example-3': '/buzzcut3.jpg',        // Emma
+        'example-4': '/buzzcut2.jpg'         // Mike
+      }
+    },
+    { 
+      name: "Man Bun", 
+      category: "Long", 
+      popularity: 76, 
+      trend: "💫", 
+      description: "Long hair styled into a trendy top knot", 
+      isPremium: true, 
+      image: "/manbun2.png",
+      variations: {
+        'example-1': '/manbun2.png',         // Daniel
+        'example-4': '/manbun1.png'          // Mike
       }
     }
   ]

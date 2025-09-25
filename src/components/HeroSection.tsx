@@ -124,18 +124,18 @@ export function HeroSection() {
               <motion.div
                 className="flex gap-3 sm:gap-4"
                 animate={{
-                  x: [0, -1200]
+                  x: [0, `${-(mobileCarouselImages.length * (64 + 12))}px`] // Calculate based on image width (64px) + gap (12px)
                 }}
                 transition={{
-                  duration: 20,
+                  duration: mobileCarouselImages.length * 2, // Adjust speed based on number of images
                   repeat: Infinity,
                   ease: "linear",
                   repeatType: "loop"
                 }}
                 style={{ touchAction: 'pan-y' }} // Allow vertical scrolling while carousel moves
               >
-                {/* Duplicate images for seamless loop */}
-                {[...mobileCarouselImages, ...mobileCarouselImages].map((image, index) => (
+                {/* Triple duplicate images for truly seamless infinite loop */}
+                {[...mobileCarouselImages, ...mobileCarouselImages, ...mobileCarouselImages].map((image, index) => (
                   <motion.div
                     key={`mobile-${image}-${index}`}
                     className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl overflow-hidden shadow-lg ring-1 ring-border/20"
@@ -184,33 +184,29 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4 px-4 sm:px-0"
           >
-            <div className="w-full sm:w-auto">
-              <Button 
-                onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
-                size="lg" 
-                className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 active:scale-95 touch-manipulation"
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span>Start Virtual Try-On</span>
-                </div>
-              </Button>
-            </div>
+            <Button 
+              onClick={() => navigateWithLoading("/try-on", "Preparing your virtual try-on...")}
+              size="lg" 
+              className="w-auto max-w-xs sm:max-w-none h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 active:scale-95 touch-manipulation"
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>Start Virtual Try-On</span>
+              </div>
+            </Button>
             
-            <div className="w-full sm:w-auto">
-              <Button 
-                onClick={() => navigateWithLoading("/gallery", "Loading gallery...")}
-                variant="outline" 
-                size="lg" 
-                className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-200 active:scale-95 touch-manipulation"
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span>View Gallery</span>
-                  <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
-                </div>
-              </Button>
-            </div>
+            <Button 
+              onClick={() => navigateWithLoading("/gallery", "Loading gallery...")}
+              variant="outline" 
+              size="lg" 
+              className="w-auto max-w-xs sm:max-w-none h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-semibold border-2 border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all duration-200 active:scale-95 touch-manipulation"
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>View Gallery</span>
+                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+              </div>
+            </Button>
           </motion.div>
 
           {/* Social proof - Enhanced mobile layout */}
