@@ -57,7 +57,7 @@ export function Navigation() {
   return (
     <>
       <nav 
-        className={`fixed top-0 left-0 right-0 z-30 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-30 transition-all duration-300 mobile-nav-optimized ${
           scrolled 
             ? 'bg-background/95 border-b border-border/40'
             : 'bg-transparent'
@@ -157,7 +157,7 @@ export function Navigation() {
               </div>
             </div>
 
-            {/* Mobile menu button */}
+            {/* Mobile menu button - Safari optimized */}
             <div className="lg:hidden">
               <Button
                 variant="ghost"
@@ -167,10 +167,22 @@ export function Navigation() {
                 aria-label={isOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isOpen}
                 aria-controls="mobile-menu"
+                style={{
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  WebkitTransform: 'translateZ(0)',
+                  WebkitBackfaceVisibility: 'hidden'
+                }}
               >
                 <motion.div
                   animate={{ rotate: isOpen ? 90 : 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  style={{
+                    willChange: 'transform',
+                    transform: 'translateZ(0)',
+                    WebkitTransform: 'translateZ(0)',
+                    WebkitBackfaceVisibility: 'hidden'
+                  }}
                 >
                   {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </motion.div>
@@ -180,17 +192,23 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Navigation Menu - Optimized for Safari */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
+            transition={{ duration: 0.1, ease: "easeOut" }}
             className="fixed inset-0 z-40 bg-black/20 lg:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
+            style={{
+              willChange: 'opacity',
+              transform: 'translateZ(0)',
+              WebkitTransform: 'translateZ(0)',
+              WebkitBackfaceVisibility: 'hidden'
+            }}
           />
         )}
       </AnimatePresence>
@@ -205,14 +223,26 @@ export function Navigation() {
             exit={{ x: "100%" }}
             transition={{ 
               type: "tween",
-              duration: 0.25,
-              ease: [0.25, 0.46, 0.45, 0.94]
+              duration: 0.15,
+              ease: "easeOut"
             }}
             role="dialog"
             aria-modal="true"
             aria-labelledby="mobile-menu-title"
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              WebkitTransform: 'translateZ(0)',
+              WebkitBackfaceVisibility: 'hidden'
+            }}
           >
-            <div className="flex items-center justify-between p-4 border-b bg-muted/30">
+            <div className="flex items-center justify-between p-4 border-b bg-muted/30"
+                 style={{
+                   willChange: 'auto',
+                   transform: 'translateZ(0)',
+                   WebkitTransform: 'translateZ(0)',
+                   WebkitBackfaceVisibility: 'hidden'
+                 }}>
               <h2 id="mobile-menu-title" className="text-lg font-semibold flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
                 Menu
@@ -223,12 +253,25 @@ export function Navigation() {
                 onClick={() => setIsOpen(false)}
                 className="p-2 focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 aria-label="Close menu"
+                style={{
+                  willChange: 'transform',
+                  transform: 'translateZ(0)',
+                  WebkitTransform: 'translateZ(0)',
+                  WebkitBackfaceVisibility: 'hidden'
+                }}
               >
                 <X className="h-5 w-5" />
               </Button>
             </div>
             
-            <div className="p-4 h-full overflow-y-auto">
+            <div className="p-4 h-full overflow-y-auto"
+                 style={{
+                   WebkitOverflowScrolling: 'touch',
+                   willChange: 'scroll-position',
+                   transform: 'translateZ(0)',
+                   WebkitTransform: 'translateZ(0)',
+                   WebkitBackfaceVisibility: 'hidden'
+                 }}>
               <div className="flex flex-col space-y-2" role="menu">
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
@@ -258,6 +301,12 @@ export function Navigation() {
                       role="menuitem"
                       aria-current={isActive ? 'page' : undefined}
                       tabIndex={0}
+                      style={{
+                        willChange: 'transform',
+                        transform: 'translateZ(0)',
+                        WebkitTransform: 'translateZ(0)',
+                        WebkitBackfaceVisibility: 'hidden'
+                      }}
                     >
                       <Icon className="h-5 w-5" />
                       {item.name}
