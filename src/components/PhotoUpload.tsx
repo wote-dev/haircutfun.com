@@ -418,7 +418,7 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
             <CardContent className="p-0">
               <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden">
                 {/* Camera Preview */}
-                <div className="relative aspect-[4/3] md:aspect-video">
+                <div className="relative aspect-[3/4] md:aspect-video">
                   <video
                     ref={videoRef}
                     className="w-full h-full object-cover transform scale-x-[-1]"
