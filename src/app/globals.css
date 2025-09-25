@@ -414,6 +414,9 @@ body {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     visibility: hidden;
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+    overflow: hidden;
   }
 
   .mobile-menu-slide.open {

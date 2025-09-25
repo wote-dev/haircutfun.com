@@ -202,15 +202,15 @@ export function Navigation() {
       />
 
       <div
-        id="mobile-menu"
-        className={`fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border lg:hidden mobile-menu-slide ${
-          isOpen ? 'open' : ''
-        }`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="mobile-menu-title"
-      >
-            <div className="flex items-center justify-between p-4 border-b bg-muted/30"
+         id="mobile-menu"
+         className={`fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border lg:hidden mobile-menu-slide rounded-l-2xl ${
+           isOpen ? 'open' : ''
+         }`}
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="mobile-menu-title"
+       >
+            <div className="flex items-center justify-between p-4 border-b bg-muted/30 rounded-tl-2xl"
                  style={{
                    willChange: 'auto',
                    transform: 'translateZ(0)',
