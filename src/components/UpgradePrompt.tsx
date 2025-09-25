@@ -190,7 +190,7 @@ export function UpgradePrompt({
                 disabled={isLoading}
                 className="w-full"
               >
-                Unlock Pro Access - $4.99 One-Time
+                Unlock Pro Access - $3.99 One-Time
               </Button>
             </>
           )}

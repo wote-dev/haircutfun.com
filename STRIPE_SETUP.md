@@ -68,7 +68,7 @@ No additional database setup is required as migrations handle the schema.
 
 The application uses dynamic pricing for one-time payments. No pre-configured products are needed in Stripe dashboard as the checkout session creates the product dynamically:
 
-- **Pro Access**: $4.99 one-time payment for unlimited generations
+- **Pro Access**: $3.99 one-time payment for unlimited generations
 
 ### For Subscription Model (Future Implementation)
 

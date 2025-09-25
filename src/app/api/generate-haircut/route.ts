@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         if (!canGenerate) {
           return NextResponse.json({ 
             error: 'Free trial used',
-            details: 'You\'ve used your free try! Upgrade to Pro for unlimited generations with a one-time payment of $4.99.' 
+            details: 'You\'ve used your free try! Upgrade to Pro for unlimited generations with a one-time payment of $3.99.' 
           }, { status: 402 });
         }
       } catch (error) {
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         console.log('API: Non-authenticated user has already used their free try');
         return NextResponse.json({ 
           error: 'Free trial used', 
-          details: 'You\'ve used your free try! Upgrade to Pro for unlimited generations with a one-time payment of $4.99.' 
+          details: 'You\'ve used your free try! Upgrade to Pro for unlimited generations with a one-time payment of $3.99.' 
         }, { status: 402 });
       }
       

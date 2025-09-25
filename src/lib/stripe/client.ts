@@ -62,7 +62,7 @@ export const PLAN_CONFIGS = {
   },
   pro: {
     name: 'Pro',
-    price: 4.99,
+    price: 3.99,
     generationsLimit: Infinity,
     features: [
       'Unlimited virtual haircut generations',

@@ -246,7 +246,7 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            Complete Payment • $4.99
+            Complete Payment • $3.99
           </>
         )}
       </Button>
@@ -465,7 +465,7 @@ export default function PricingPage() {
               <CardHeader className="text-center pb-8 pt-8">
                 <CardTitle className="text-2xl font-bold text-foreground">Pro Access</CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-primary">$4.99</span>
+                  <span className="text-4xl font-bold text-primary">$3.99</span>
                   <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
                 <CardDescription className="text-muted-foreground mt-2">
@@ -599,7 +599,7 @@ export default function PricingPage() {
             </div>
             
             <div className="mb-6">
-              <p className="text-muted-foreground mb-2">One-time payment of $4.99 for:</p>
+              <p className="text-muted-foreground mb-2">One-time payment of $3.99 for:</p>
               <ul className="space-y-1 text-sm text-foreground">
                 <li>✓ Unlimited virtual haircut tries</li>
                 <li>✓ Access to all premium hairstyles</li>
@@ -627,7 +627,7 @@ export default function PricingPage() {
               <h3 className="font-semibold text-lg mb-2 text-foreground">How does the free trial work?</h3>
               <p className="text-muted-foreground">
                 You get 2 completely free virtual haircut tries with no credit card required. 
-                After using your free generations, you can unlock unlimited access for just $4.99.
+                After using your free generations, you can unlock unlimited access for just $3.99.
               </p>
             </div>
             

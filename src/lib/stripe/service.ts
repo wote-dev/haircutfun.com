@@ -93,7 +93,7 @@ export async function createCheckoutSession({
             name: 'HaircutFun Pro Access',
             description: 'Unlimited AI haircut generations with one-time payment',
           },
-          unit_amount: 499, // $4.99 in cents
+          unit_amount: 399, // $3.99 in cents
         },
         quantity: 1,
       },

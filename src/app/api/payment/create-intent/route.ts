@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create payment intent for $4.99
+    // Create payment intent for $3.99
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 499, // $4.99 in cents
+      amount: 399, // $3.99 in cents
       currency: 'usd',
       metadata: {
         user_id: user.id,

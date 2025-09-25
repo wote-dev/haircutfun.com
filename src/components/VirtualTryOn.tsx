@@ -515,7 +515,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
               Unlock Pro Access
             </h3>
             <p className="text-lg text-muted-foreground mb-6">
-              You've used your free try! Get unlimited haircut generations with Pro Access for just $4.99 one-time.
+              You've used your free try! Get unlimited haircut generations with Pro Access for just $3.99 one-time.
             </p>
             <div className="bg-muted/50 rounded-lg p-4 mb-6">
               <p className="text-sm text-muted-foreground mb-2">✨ With Pro Access you get:</p>
@@ -529,7 +529,7 @@ export function VirtualTryOn({ userPhoto, selectedHaircut, selectedGender, onRes
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="px-8 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
                 <Link href="/pricing">
-                  Get Pro Access - $4.99
+                  Get Pro Access - $3.99
                 </Link>
               </Button>
               <Button
