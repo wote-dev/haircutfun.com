@@ -76,7 +76,8 @@ export function useFreemiumAccess(): FreemiumData {
   }, [user]);
 
   // Determine if user can generate
-  const canGenerate = hasProAccess || freeTriesUsed === 0;
+  // Pro users have unlimited access, free users get limited tries
+  const canGenerate = hasProAccess || freeTriesUsed < 2;
 
   return {
     hasProAccess,
