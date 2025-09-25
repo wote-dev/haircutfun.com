@@ -122,17 +122,44 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
     }
   };
 
+  // Helper function to detect mobile devices
+  const isMobileDevice = useCallback(() => {
+    if (typeof window === 'undefined') return false;
+    
+    // Check for mobile user agents
+    const userAgent = navigator.userAgent.toLowerCase();
+    const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone', 'mobile'];
+    const isMobileUA = mobileKeywords.some(keyword => userAgent.includes(keyword));
+    
+    // Check for touch capability and screen size
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isSmallScreen = window.innerWidth <= 768;
+    
+    return isMobileUA || (isTouchDevice && isSmallScreen);
+  }, []);
+
   const startCamera = useCallback(async () => {
     setIsCameraLoading(true);
     setError(null);
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'user'
-        }
-      });
+      const isMobile = isMobileDevice();
+      
+      // Use simpler constraints for mobile devices
+      const constraints = isMobile 
+        ? {
+            video: {
+              facingMode: 'user' // Just use front camera, let the device handle the rest
+            }
+          }
+        : {
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: 'user'
+            }
+          };
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(mediaStream);
       if (videoRef.current) {
         const video = videoRef.current;
@@ -157,11 +184,44 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
       setCameraMode(true);
     } catch (error) {
       console.error('Error accessing camera:', error);
-      showError('Unable to access camera. Please check your permissions and try again.');
+      
+      // Try with even simpler constraints as fallback
+      if (!(error instanceof Error) || !error.message.includes('fallback')) {
+        try {
+          console.log('Trying fallback camera constraints...');
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({
+            video: true // Most basic constraint possible
+          });
+          setStream(fallbackStream);
+          if (videoRef.current) {
+            const video = videoRef.current;
+            video.srcObject = fallbackStream;
+            
+            const handleLoadedMetadata = () => {
+              video.play().catch(playError => {
+                console.error('Error playing video:', playError);
+                showError('Error starting video preview. Please try again.');
+              });
+            };
+            
+            if (video.readyState >= 1) {
+              handleLoadedMetadata();
+            } else {
+              video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+            }
+          }
+          setCameraMode(true);
+        } catch (fallbackError) {
+          console.error('Fallback camera access failed:', fallbackError);
+          showError('Unable to access camera. Please check your permissions and try again.');
+        }
+      } else {
+        showError('Unable to access camera. Please check your permissions and try again.');
+      }
     } finally {
       setIsCameraLoading(false);
     }
-  }, []);
+  }, [isMobileDevice]);
 
   const stopCamera = useCallback(() => {
     if (stream) {
@@ -180,7 +240,12 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
       if (context) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0);
+        
+        // Mirror the image horizontally to match the preview
+        context.save();
+        context.scale(-1, 1);
+        context.drawImage(video, -canvas.width, 0);
+        context.restore();
         
         canvas.toBlob((blob) => {
           if (blob) {
@@ -349,55 +414,110 @@ export function PhotoUpload({ onPhotoUpload }: PhotoUploadProps) {
           aria-labelledby="camera-tab"
           className="space-y-6"
         >
-          <Card>
-            <CardContent className="p-6">
-              <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  playsInline
-                  muted
-                  aria-label="Camera preview for photo capture"
-                />
-                <canvas ref={canvasRef} className="hidden" />
+          <Card className="overflow-hidden border-2 border-gray-200 shadow-xl">
+            <CardContent className="p-0">
+              <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden">
+                {/* Camera Preview */}
+                <div className="relative aspect-[4/3] md:aspect-video">
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover transform scale-x-[-1]"
+                    playsInline
+                    muted
+                    aria-label="Camera preview for photo capture"
+                  />
+                  <canvas ref={canvasRef} className="hidden" />
+                  
+                  {/* Camera Frame Overlay */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Corner guides */}
+                    <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-white/60 rounded-tl-lg"></div>
+                    <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-white/60 rounded-tr-lg"></div>
+                    <div className="absolute bottom-32 left-4 w-8 h-8 border-l-2 border-b-2 border-white/60 rounded-bl-lg"></div>
+                    <div className="absolute bottom-32 right-4 w-8 h-8 border-r-2 border-b-2 border-white/60 rounded-br-lg"></div>
+                    
+                    {/* Center focus guide */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-32 h-32 border-2 border-white/40 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 
-                {/* Camera Controls Overlay */}
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
-                  <Button
-                    onClick={capturePhoto}
-                    size="lg"
-                    className="bg-white text-black hover:bg-gray-100 rounded-full w-16 h-16 p-0"
-                    aria-label="Capture photo"
-                  >
-                    <div className="w-8 h-8 bg-black rounded-full"></div>
-                  </Button>
-                  <Button
-                    onClick={stopCamera}
-                    variant="outline"
-                    size="lg"
-                    className="bg-black/50 text-white border-white/20 hover:bg-black/70 rounded-full"
-                    aria-label="Stop camera and return to upload"
-                  >
-                    <X className="h-6 w-6" />
-                  </Button>
+                {/* Modern Camera Controls Bar - Moved Lower */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-8 pb-6 px-6">
+                  {/* Camera controls hint - Moved to top */}
+                  <div className="mb-6 text-center">
+                    <p className="text-white/60 text-sm">
+                      Position your face in the center circle and tap the capture button
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    {/* Left side - Camera info */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-white/80 text-sm font-medium">REC</span>
+                    </div>
+                    
+                    {/* Center - Main capture button - Smaller size for optimal UX */}
+                    <div className="flex items-center gap-6">
+                      <Button
+                        onClick={capturePhoto}
+                        className="relative w-12 h-12 rounded-full bg-white hover:bg-gray-100 transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-xl border border-white/40 p-0 group"
+                        aria-label="Capture photo"
+                      >
+                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-inner">
+                          <div className="w-6 h-6 bg-gray-900 rounded-full transition-all duration-200 group-hover:bg-gray-800"></div>
+                        </div>
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-t from-gray-200/20 to-transparent"></div>
+                      </Button>
+                    </div>
+                    
+                    {/* Right side - Close button */}
+                    <Button
+                      onClick={stopCamera}
+                      variant="ghost"
+                      size="lg"
+                      className="text-white/80 hover:text-white hover:bg-white/10 rounded-full w-12 h-12 p-0 transition-all duration-200"
+                      aria-label="Stop camera and return to upload"
+                    >
+                      <X className="h-6 w-6" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          {/* Camera Instructions */}
-          <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-blue-900 mb-1">Camera Tips</h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Position your face in the center of the frame</li>
-                    <li>• Ensure good lighting on your face</li>
-                    <li>• Look directly at the camera</li>
-                    <li>• Remove any hats or accessories covering your hair</li>
-                  </ul>
+          {/* Enhanced Camera Tips */}
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200/50 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Info className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-blue-900 mb-3 text-lg">Perfect Photo Tips</h4>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Center your face in the circle</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Ensure bright, even lighting</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Look directly at the camera</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>Remove hats or hair accessories</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
