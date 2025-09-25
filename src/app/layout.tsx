@@ -3,6 +3,7 @@ import "./globals.css";
 import { Navigation } from "@/components/Navigation";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { PageTransitionProvider } from "@/components/providers/PageTransitionProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://haircutfun.com'),
@@ -54,6 +55,7 @@ export default function RootLayout({
               {children}
             </main>
           </PageTransitionProvider>
+          <Toaster />
         </AuthProvider>
         <footer className="border-t bg-background">
           <div className="container mx-auto px-6 py-12">

@@ -1,4 +1,12 @@
+"use client";
+
 import { Metadata } from 'next'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { FileText, Calendar, Shield, Users, Zap, Mail, ArrowLeft, CheckCircle, AlertTriangle } from 'lucide-react'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Terms of Use - HaircutFun',
@@ -7,15 +15,53 @@ export const metadata: Metadata = {
 
 export default function TermsOfUse() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-12 pt-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Terms of Use</h1>
-          
-          <div className="prose prose-lg max-w-none">
-            <p className="text-gray-600 mb-6">
-              <strong>Last updated:</strong> {new Date().toLocaleDateString()}
-            </p>
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <FileText className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-foreground mb-4">Terms of Use</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Please read these terms carefully before using HaircutFun's AI-powered virtual haircut service.
+          </p>
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              Last updated: {new Date().toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="mb-8">
+          <Link href="/">
+            <Button variant="outline" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+
+        {/* Main Content */}
+        <Card className="shadow-xl border-0 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="pb-6">
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="gap-1">
+                <Shield className="h-3 w-3" />
+                Legal Document
+              </Badge>
+              <Badge variant="outline" className="gap-1">
+                <Zap className="h-3 w-3" />
+                AI-Powered Service
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-[600px] overflow-y-auto pr-4 space-y-8">
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Acceptance of Terms</h2>
@@ -131,13 +177,32 @@ export default function TermsOfUse() {
               <p className="text-gray-700 mb-4">
                 If you have any questions about these Terms of Use, please contact us at:
               </p>
-              <p className="text-gray-700">
-                Email: admin@blackcubesolutions.com
-              </p>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                <span>admin@blackcubesolutions.com</span>
+              </div>
             </section>
+
+            {/* Footer */}
+            <div className="mt-12 pt-8 border-t border-border">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-sm text-muted-foreground">
+                    By using our service, you agree to these terms
+                  </span>
+                </div>
+                <Link href="/privacy">
+                  <Button variant="ghost" size="sm">
+                    Privacy Policy
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
+  </div>
   )
 }

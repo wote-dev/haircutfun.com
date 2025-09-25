@@ -71,75 +71,135 @@ const ModernGallery: React.FC<ModernGalleryProps> = ({ styles, selectedGender })
   return (
     <div className="space-y-8">
       {/* Search and Filters */}
-      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <input
-            type="text"
-            placeholder="Search hairstyles..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-background/50 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
-          style={{
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)'
-          }}
-          />
+      <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search hairstyles..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-background/50 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+              style={{
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)'
+              }}
+              aria-label="Search hairstyles by name or description"
+              aria-describedby="search-help"
+            />
+            <div id="search-help" className="sr-only">
+              Type to search through {styles.length} available hairstyles
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* View Mode Toggle */}
+            <div 
+              className="flex items-center gap-1 bg-background/50 rounded-xl p-1 border border-border/50"
+              style={{
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)'
+              }}
+              role="radiogroup"
+              aria-label="Gallery view mode"
+            >
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                  viewMode === 'grid' 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                }`}
+                aria-label="Grid view"
+                role="radio"
+                aria-checked={viewMode === 'grid'}
+                tabIndex={0}
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('masonry')}
+                className={`p-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                  viewMode === 'masonry' 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                }`}
+                aria-label="Masonry view"
+                role="radio"
+                aria-checked={viewMode === 'masonry'}
+                tabIndex={0}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Category Filter */}
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm font-medium text-muted-foreground self-center mr-2">
+            Categories:
+          </span>
           <div 
-          className="flex items-center gap-2 bg-background/50 rounded-xl p-1 border border-border/50"
-          style={{
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)'
-          }}
-        >
+            className="flex flex-wrap items-center gap-2 bg-background/50 rounded-xl p-2 border border-border/50"
+            style={{
+              backdropFilter: 'blur(4px)',
+              WebkitBackdropFilter: 'blur(4px)'
+            }}
+            role="radiogroup"
+            aria-label="Filter hairstyles by category"
+          >
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                   selectedCategory === category
                     ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                 }`}
+                role="radio"
+                aria-checked={selectedCategory === category}
+                aria-label={`Filter by ${category} hairstyles`}
+                tabIndex={0}
               >
                 {category}
+                {category !== 'All' && (
+                  <span className="ml-2 text-xs opacity-75">
+                    ({styles.filter(s => s.category === category).length})
+                  </span>
+                )}
               </button>
             ))}
           </div>
+        </div>
 
-          {/* View Mode Toggle */}
-          <div 
-          className="flex items-center gap-1 bg-background/50 rounded-xl p-1 border border-border/50"
-          style={{
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)'
-          }}
-        >
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${
-                viewMode === 'grid'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }`}
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('masonry')}
-              className={`p-2 rounded-lg transition-all ${
-                viewMode === 'masonry'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }`}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
+        {/* Results Summary */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div aria-live="polite" aria-atomic="true">
+            Showing {sortedStyles.length} of {styles.length} hairstyles
+            {searchTerm && (
+              <span> for "{searchTerm}"</span>
+            )}
+            {selectedCategory !== 'All' && (
+              <span> in {selectedCategory}</span>
+            )}
           </div>
+          {(searchTerm || selectedCategory !== 'All') && (
+            <Button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('All');
+              }}
+              variant="ghost"
+              size="sm"
+              className="text-xs focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              aria-label="Clear all filters and search"
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
       </div>
 

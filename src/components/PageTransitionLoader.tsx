@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { ThreeDotLoader } from "@/components/ui/three-dot-loader";
 
 interface PageTransitionLoaderProps {
   isLoading: boolean;
@@ -34,21 +34,9 @@ export function PageTransitionLoader({ isLoading, message = "Loading..." }: Page
             className="text-center max-w-sm mx-auto px-6"
             style={{ willChange: 'transform, opacity' }}
           >
-            {/* Animated Logo/Icon */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-xl animate-pulse" />
-              <motion.div
-                animate={{ 
-                  rotate: 360
-                }}
-                transition={{ 
-                  rotate: { duration: 2, repeat: Infinity, ease: "linear" }
-                }}
-                className="relative w-16 h-16 mx-auto bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg"
-                style={{ willChange: 'transform' }}
-              >
-                <Sparkles className="w-8 h-8 text-primary-foreground" />
-              </motion.div>
+            {/* Three Dot Loading Animation */}
+            <div className="mb-6">
+              <ThreeDotLoader size="lg" className="mb-4" />
             </div>
 
             {/* Loading Text */}
@@ -56,54 +44,10 @@ export function PageTransitionLoader({ isLoading, message = "Loading..." }: Page
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.3 }}
-              className="text-lg font-semibold text-foreground mb-2"
+              className="text-lg font-semibold text-foreground"
             >
               {message}
             </motion.h3>
-
-            {/* Animated Progress Bar */}
-            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-              <motion.div
-                initial={{ x: "-100%" }}
-                animate={{ x: "100%" }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="h-full bg-gradient-to-r from-primary via-accent to-primary rounded-full"
-                style={{ width: "50%" }}
-              />
-            </div>
-
-            {/* Floating Particles - Simplified for mobile */}
-            <div className="absolute inset-0 pointer-events-none">
-              {[...Array(3)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ 
-                    opacity: 0,
-                    scale: 0,
-                    x: Math.random() * 100 - 50,
-                    y: Math.random() * 100 - 50
-                  }}
-                  animate={{ 
-                    opacity: [0, 1, 0],
-                    scale: [0, 1, 0],
-                    x: Math.random() * 200 - 100,
-                    y: Math.random() * 200 - 100
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: i * 0.7,
-                    ease: "easeInOut"
-                  }}
-                  className="absolute w-2 h-2 bg-primary/30 rounded-full"
-                  style={{ willChange: 'transform, opacity' }}
-                />
-              ))}
-            </div>
           </motion.div>
         </motion.div>
       )}

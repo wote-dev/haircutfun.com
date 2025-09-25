@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '../providers/AuthProvider';
 import { buttonVariants } from '../ui/button';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import type { VariantProps } from 'class-variance-authority';
 
 interface SignInButtonProps extends VariantProps<typeof buttonVariants> {
@@ -21,6 +22,7 @@ export function SignInButton({
 }: SignInButtonProps) {
   const { signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSignIn = async () => {
     try {
@@ -28,7 +30,11 @@ export function SignInButton({
       await signInWithGoogle(redirectTo);
     } catch (error) {
       console.error('Sign in failed:', error);
-      // You could add toast notification here
+      toast({
+        variant: "destructive",
+        title: "Sign in failed",
+        description: "There was a problem signing you in. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }

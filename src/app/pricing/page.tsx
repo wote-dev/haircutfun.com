@@ -12,6 +12,8 @@ import { SignInButton } from "@/components/auth/SignInButton";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { CardGridSkeleton } from "@/components/skeletons/CardSkeleton";
+import { useToast } from "@/hooks/use-toast";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -46,16 +48,27 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardComplete, setCardComplete] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
+      toast({
+        title: "Payment System Error",
+        description: "Payment system is not ready. Please refresh the page and try again.",
+        variant: "destructive",
+      });
       return;
     }
 
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
+      toast({
+        title: "Card Information Required",
+        description: "Please enter your card information to continue.",
+        variant: "destructive",
+      });
       onError('Card information is required');
       return;
     }
@@ -75,6 +88,11 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
       const { client_secret, payment_intent_id, error } = await response.json();
 
       if (error) {
+        toast({
+          title: "Payment Error",
+          description: error,
+          variant: "destructive",
+        });
         onError(error);
         return;
       }
@@ -87,7 +105,13 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
       });
 
       if (stripeError) {
-        onError(stripeError.message || 'Payment failed');
+        const errorMessage = stripeError.message || 'Payment failed';
+        toast({
+          title: "Payment Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        onError(errorMessage);
         return;
       }
 
@@ -103,14 +127,29 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
       const confirmResult = await confirmResponse.json();
 
       if (confirmResult.error) {
+        toast({
+          title: "Payment Confirmation Error",
+          description: confirmResult.error,
+          variant: "destructive",
+        });
         onError(confirmResult.error);
         return;
       }
 
+      toast({
+        title: "Payment Successful!",
+        description: "Your Pro Access has been activated.",
+      });
       onSuccess();
 
     } catch (error) {
-      onError('Payment processing failed');
+      const errorMessage = 'Payment processing failed';
+      toast({
+        title: "Processing Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      onError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -119,6 +158,16 @@ function PaymentForm({ onSuccess, onError }: { onSuccess: () => void; onError: (
   const handleCardChange = (event: any) => {
     setCardComplete(event.complete);
     setCardError(event.error ? event.error.message : null);
+    
+    // Clear previous error state when user starts typing
+    if (event.error && cardError !== event.error.message) {
+      // Show toast for card validation errors
+      toast({
+        title: "Card Validation",
+        description: event.error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -328,75 +377,84 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="pt-0 pb-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-            
-            {/* Free Trial */}
-            <Card className="relative border-2 border-border hover:border-primary/50 transition-all duration-300">
-              <CardHeader className="text-center pb-8">
-                <CardTitle className="text-2xl font-bold text-foreground">Free Trial</CardTitle>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">$0</span>
-                </div>
-                <CardDescription className="text-muted-foreground mt-2">
-                  Perfect for trying out our technology
-                </CardDescription>
-              </CardHeader>
+          {isLoading ? (
+            <CardGridSkeleton 
+              count={2} 
+              columns={2} 
+              showHeader={true} 
+              showFooter={true} 
+              contentLines={4} 
+            />
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
               
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>2 free virtual haircut tries</span>
+              {/* Free Trial */}
+              <Card className="relative border-2 border-border hover:border-primary/50 transition-all duration-300">
+                <CardHeader className="text-center pb-8">
+                  <CardTitle className="text-2xl font-bold text-foreground">Free Trial</CardTitle>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold text-foreground">$0</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Access to some hairstyles</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>High-quality AI processing</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>No credit card required</span>
-                  </div>
-                </div>
+                  <CardDescription className="text-muted-foreground mt-2">
+                    Perfect for trying out our technology
+                  </CardDescription>
+                </CardHeader>
                 
-                {user && userProfile && (
-                  <div className="mt-4 p-3 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      Free tries used: {userProfile.free_tries_used}/2
-                    </p>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-green-500" />
+                      <span>2 free virtual haircut tries</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-green-500" />
+                      <span>Access to some hairstyles</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-green-500" />
+                      <span>High-quality AI processing</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-green-500" />
+                      <span>No credit card required</span>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-              
-              <CardFooter>
-                <Button 
-                  onClick={handleGetStarted}
-                  className="w-full"
-                  variant="outline"
-                  disabled={Boolean(user && userProfile && userProfile.free_tries_used >= 2 && !userProfile.has_pro_access)}
-                >
-                   {!user ? 'Try It Free' : 
-                    userProfile?.has_pro_access ? 'Start Creating' :
-                    (userProfile?.free_tries_used ?? 0) >= 2 ? 'Free Tries Used' : 'Start Free Trial'}
-                </Button>
-              </CardFooter>
-            </Card>
+                  
+                  {user && userProfile && (
+                    <div className="mt-4 p-3 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground">
+                        Free tries used: {userProfile.free_tries_used}/2
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+                
+                <CardFooter>
+                  <Button 
+                    onClick={handleGetStarted}
+                    className="w-full"
+                    variant="outline"
+                    disabled={Boolean(user && userProfile && userProfile.free_tries_used >= 2 && !userProfile.has_pro_access)}
+                  >
+                     {!user ? 'Try It Free' : 
+                      userProfile?.has_pro_access ? 'Start Creating' :
+                      (userProfile?.free_tries_used ?? 0) >= 2 ? 'Free Tries Used' : 'Start Free Trial'}
+                  </Button>
+                </CardFooter>
+              </Card>
 
-            {/* Pro Access */}
-            <div className="relative">
-              <GlowingEffect 
-                disabled={false}
-                blur={0}
-                spread={40}
-                proximity={150}
-                glow={true}
-                variant="purple"
-                className="rounded-lg"
-              />
-              <Card className="relative border-2 border-primary hover:border-primary/80 transition-all duration-300 shadow-lg">
+              {/* Pro Access */}
+              <div className="relative">
+                <GlowingEffect 
+                  disabled={false}
+                  blur={0}
+                  spread={40}
+                  proximity={150}
+                  glow={true}
+                  variant="purple"
+                  className="rounded-lg"
+                />
+                <Card className="relative border-2 border-primary hover:border-primary/80 transition-all duration-300 shadow-lg">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground px-4 py-1">
                     <Star className="w-4 h-4 mr-1" />
@@ -467,8 +525,9 @@ export default function PricingPage() {
                 )}
               </CardFooter>
             </Card>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -591,8 +650,8 @@ export default function PricingPage() {
             <div>
               <h3 className="font-semibold text-lg mb-2 text-foreground">Do you offer refunds?</h3>
               <p className="text-muted-foreground">
-                We offer a 7-day money-back guarantee. If you're not satisfied with the results, 
-                contact us for a full refund.
+                We do not offer refunds based on 'change of mind'. If you're not satisfied with the results, 
+                or are having technical difficulties, then a refund will be permitted.
               </p>
             </div>
           </div>
