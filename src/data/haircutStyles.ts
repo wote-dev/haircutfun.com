@@ -90,7 +90,7 @@ export const trendingHaircuts: {
       popularity: 86, 
       trend: "🔥", 
       description: "Modern textured styling", 
-      image: "/textered-top.png",
+      image: "/textured-top2.jpg",
       variations: {
         'example-1': '/textered-top.png',    // Daniel
         'example-2': '/textered-top2.jpg',   // Sarah
@@ -107,7 +107,7 @@ export const trendingHaircuts: {
       trend: "🔥", 
       description: "Contemporary mullet revival", 
       isPremium: true, 
-      image: "/modern-mullet1.png",
+      image: "/modern-mullet2.png",
       variations: {
         'example-1': '/modern-mullet1.png',
         'example-4': '/modern-mullet2.png'
@@ -121,7 +121,7 @@ export const trendingHaircuts: {
       popularity: 91, 
       trend: "✨", 
       description: "Bold volume with texture", 
-      image: "/quiff.png",
+      image: "/quiff2.jpg",
       variations: {
         'example-1': '/quiff.png',
         'example-4': '/quiff2.jpg'
@@ -135,7 +135,7 @@ export const trendingHaircuts: {
       popularity: 88, 
       trend: "💫", 
       description: "Sharp edges with straight fringe", 
-      image: "/edgar-cut2.png",
+      image: "/edgar-cut.png",
       variations: {
         'example-1': '/edgar-cut2.png',
         'example-4': '/edgar-cut.png'
@@ -149,7 +149,7 @@ export const trendingHaircuts: {
       popularity: 91, 
       trend: "✨", 
       description: "Professional classic", 
-      image: "/side-part.png",
+      image: "/side-part2.jpg",
       variations: {
         'example-1': '/side-part.png',       // Daniel
         'example-2': '/side-part2.jpg',      // Sarah
@@ -165,7 +165,7 @@ export const trendingHaircuts: {
       popularity: 88, 
       trend: "💫", 
       description: "Textured volume style", 
-      image: "/quiff.png",
+      image: "/quiff2.jpg",
       variations: {
         'example-1': '/quiff.png',           // Daniel
         'example-2': '/quiff2.jpg',          // Sarah
@@ -181,7 +181,7 @@ export const trendingHaircuts: {
       popularity: 86, 
       trend: "🔥", 
       description: "Layered curls with tapered sides", 
-      image: "/broccoli1.png",
+      image: "/broccoli2.png",
       variations: {
         'example-1': '/broccoli1.png',
         'example-4': '/broccoli2.png'
@@ -196,7 +196,7 @@ export const trendingHaircuts: {
       trend: "✨", 
       description: "Old money aesthetic", 
       isPremium: true, 
-      image: "/90s1.png",
+      image: "/90s2.png",
       variations: {
         'example-1': '/90s1.png',
         'example-4': '/90s2.png'
@@ -211,7 +211,7 @@ export const trendingHaircuts: {
       trend: "🔥", 
       description: "Clean minimalist cut", 
       isPremium: true, 
-      image: "/buzzcut.png",
+      image: "/buzzcut2.jpg",
       variations: {
         'example-1': '/buzzcut.png',         // Daniel
         'example-2': '/buzzcut2.jpg',        // Sarah
@@ -228,7 +228,7 @@ export const trendingHaircuts: {
       trend: "💫", 
       description: "Long hair styled into a trendy top knot", 
       isPremium: true, 
-      image: "/manbun2.png",
+      image: "/manbun1.png",
       variations: {
         'example-1': '/manbun2.png',         // Daniel
         'example-4': '/manbun1.png'          // Mike
