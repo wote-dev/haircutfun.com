@@ -74,12 +74,23 @@ export async function POST(request: NextRequest) {
       safetySettings 
     });
 
+    // Sanitize input strings to remove special characters that might cause pattern validation errors
+    const sanitizeText = (text: string): string => {
+      return text
+        .replace(/[^\w\s\-.,!?()]/g, '') // Remove special characters except basic punctuation
+        .replace(/\s+/g, ' ') // Normalize whitespace
+        .trim();
+    };
+
+    const sanitizedHaircutStyle = sanitizeText(haircutStyle);
+    const sanitizedHaircutDescription = haircutDescription ? sanitizeText(haircutDescription) : 'A standard version of the hairstyle.';
+
     // We keep the strong, structured prompt as it's the correct way to instruct the model.
     const prompt = `
       TASK: Perform an image-to-image transformation.
       INPUT_IMAGE: [The user's photo is provided]
-      INSTRUCTION: Modify the hair of the person in the INPUT_IMAGE to a "${haircutStyle}" hairstyle.
-      STYLE_DETAILS: "${haircutDescription || 'A standard version of the hairstyle.'}"
+      INSTRUCTION: Modify the hair of the person in the INPUT_IMAGE to a "${sanitizedHaircutStyle}" hairstyle.
+      STYLE_DETAILS: "${sanitizedHaircutDescription}"
       RULES:
       1.  **DO NOT** change the person's facial features, expression, or identity.
       2.  **DO NOT** alter the background, lighting, or photo quality.
@@ -164,10 +175,26 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Critical Error in generate-haircut API route:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown internal error occurred.';
+    
+    // Handle specific pattern matching errors from Gemini API
+    if (errorMessage.includes('string did not match') || errorMessage.includes('pattern')) {
+      return NextResponse.json({ 
+        details: 'There was an issue processing your hairstyle request. Please try selecting a different style or uploading a different photo.' 
+      }, { status: 400 });
+    }
+    
     // Provide a more user-friendly message for common API errors
     if (errorMessage.includes('500') || errorMessage.includes('Internal error')) {
       return NextResponse.json({ details: 'The AI service is currently experiencing issues. Please try again in a few moments.' }, { status: 503 });
     }
+    
+    // Handle safety filter errors
+    if (errorMessage.includes('SAFETY') || errorMessage.includes('blocked')) {
+      return NextResponse.json({ 
+        details: 'Your image could not be processed due to content guidelines. Please try with a different photo.' 
+      }, { status: 400 });
+    }
+    
     return NextResponse.json({ details: errorMessage }, { status: 500 });
   }
 }
