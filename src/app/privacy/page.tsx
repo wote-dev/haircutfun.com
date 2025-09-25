@@ -3,6 +3,28 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Privacy Policy - HaircutFun',
   description: 'Privacy policy for HaircutFun virtual haircut try-on service',
+  openGraph: {
+    title: 'Privacy Policy - HaircutFun',
+    description: 'Privacy policy for HaircutFun virtual haircut try-on service',
+    url: 'https://haircutfun.com/privacy',
+    siteName: 'HaircutFun',
+    images: [
+      {
+        url: '/haircuttr.png',
+        width: 1200,
+        height: 630,
+        alt: 'HaircutFun Logo',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy - HaircutFun',
+    description: 'Privacy policy for HaircutFun virtual haircut try-on service',
+    images: ['/haircuttr.png'],
+  },
 }
 
 export default function PrivacyPolicy() {

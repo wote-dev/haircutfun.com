@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "HaircutFun",
     images: [
       {
-        url: "/package.png",
+        url: "/haircuttr.png",
         width: 1200,
         height: 630,
         alt: "HaircutFun Logo",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: "HaircutFun - AI-Powered Virtual Haircut Try-On",
     description: "Upload a photo and see yourself in any hairstyle. Your next great haircut is just a click away. #AI #VirtualHairstyle",
     creator: "@wote_dev",
-    images: ["/new-logo.png"],
+    images: ["/haircuttr.png"],
   },
 };
 

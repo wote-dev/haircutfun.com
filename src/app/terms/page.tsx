@@ -9,6 +9,28 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Terms of Use - HaircutFun',
   description: 'Terms of use for HaircutFun virtual haircut try-on service',
+  openGraph: {
+    title: 'Terms of Use - HaircutFun',
+    description: 'Terms of use for HaircutFun virtual haircut try-on service',
+    url: 'https://haircutfun.com/terms',
+    siteName: 'HaircutFun',
+    images: [
+      {
+        url: '/haircuttr.png',
+        width: 1200,
+        height: 630,
+        alt: 'HaircutFun Logo',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Terms of Use - HaircutFun',
+    description: 'Terms of use for HaircutFun virtual haircut try-on service',
+    images: ['/haircuttr.png'],
+  },
 }
 
 export default function TermsOfUse() {
