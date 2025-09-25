@@ -237,7 +237,7 @@ export function TrendingHaircuts() {
                             src={getHaircutImageForPerson(style.name, previewStates[style.name].personId, previewStates[style.name].baseImageSrc)}
                             alt={`${style.name} on selected person`}
                             fill
-                            className="object-cover"
+                            className={`object-cover ${selectedGender === 'male' ? 'object-top' : ''}`}
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           />
                           
@@ -269,7 +269,7 @@ export function TrendingHaircuts() {
                                   src={image}
                                   alt={`${style.name}${personId ? ` on ${baseImages.find(p => p.id === personId)?.name || 'person'}` : ''}`}
                                   fill
-                                  className="object-cover"
+                                  className={`object-cover ${selectedGender === 'male' ? 'object-top' : ''}`}
                                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 />
                               </motion.div>

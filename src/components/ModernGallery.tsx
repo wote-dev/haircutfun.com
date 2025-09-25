@@ -356,7 +356,7 @@ const HaircutCard: React.FC<HaircutCardProps> = ({
               src={style.image || '/placeholder-haircut.jpg'}
               alt={style.name}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className={`object-cover transition-transform duration-700 group-hover:scale-110 ${selectedGender === 'male' ? 'object-top' : ''}`}
               onLoad={() => setImageLoaded(true)}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />

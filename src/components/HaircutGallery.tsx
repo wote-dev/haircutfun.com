@@ -134,7 +134,7 @@ export function HaircutGallery({ userPhoto, selectedGender, onHaircutSelect, onB
                     src={style.image}
                     alt={style.name}
                     fill
-                    className="object-cover"
+                    className={`object-cover ${selectedGender === 'male' ? 'object-top' : ''}`}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                   />
                 ) : (
