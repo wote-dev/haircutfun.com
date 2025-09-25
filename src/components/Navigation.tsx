@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles, Home, Image as ImageIcon, DollarSign, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -120,10 +119,8 @@ export function Navigation() {
                         {item.name}
                       </div>
                       {isActive && (
-                        <motion.div 
+                        <div 
                           className="absolute inset-0 bg-primary/5 rounded-lg border border-primary/30"
-                          layoutId="activeTab"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                         />
                       )}
                     </button>
@@ -197,52 +194,22 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Mobile Navigation Menu - Zero-delay optimized for Safari */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.05, ease: "linear" }}
-            className="fixed inset-0 z-40 bg-black/20 lg:hidden mobile-overlay"
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-            style={{
-              willChange: 'opacity',
-              transform: 'translateZ(0)',
-              WebkitTransform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden',
-              touchAction: 'manipulation'
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Mobile Navigation Menu - Pure CSS, smooth as butter */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/20 lg:hidden mobile-overlay ${isOpen ? 'show' : ''}`}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      />
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            id="mobile-menu"
-            className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border lg:hidden mobile-menu"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ 
-              type: "tween",
-              duration: 0.08,
-              ease: "linear"
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="mobile-menu-title"
-            style={{
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-              WebkitTransform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden',
-              touchAction: 'manipulation'
-            }}
-          >
+      <div
+        id="mobile-menu"
+        className={`fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-background shadow-2xl border-l border-border lg:hidden mobile-menu-slide ${
+          isOpen ? 'open' : ''
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mobile-menu-title"
+      >
             <div className="flex items-center justify-between p-4 border-b bg-muted/30"
                  style={{
                    willChange: 'auto',
@@ -354,9 +321,7 @@ export function Navigation() {
                 </Button>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
     </>
   );
 }
